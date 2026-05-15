@@ -1,0 +1,14 @@
+{
+  "n_train": 7654,
+  "n_holdout": 3546,
+  "n_holdout_pos": 2200,
+  "n_holdout_neg": 1346,
+  "holdout_f1_raw": 0.9537,
+  "holdout_precision_raw": 0.9561,
+  "holdout_recall_raw": 0.9514,
+  "holdout_auc": 0.9739,
+  "holdout_ap": 0.9808,
+  "classifier": "LogisticRegression(C=1.0, class_weight=balanced, max_iter=2000, random_state=42)",
+  "embedding": "AlphaEarth Satellite Embedding V1, 2017, 64-dim, 300 m",
+  "split": "event-disjoint (whole GFD typhoon events held out)"
+}

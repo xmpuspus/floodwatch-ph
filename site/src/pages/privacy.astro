@@ -1,0 +1,74 @@
+---
+import Base from "../layouts/Base.astro";
+---
+<Base title="Privacy &amp; Responsible Use · FloodWatch.PH" pathname="/privacy" description="How FloodWatch.PH handles province-level flood data, the Philippines Data Privacy Act (RA 10173) posture, and takedown channel.">
+  <section class="max-w-prose mx-auto px-6 pt-10 pb-12">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">privacy &amp; responsible use</p>
+    <h1 class="text-3xl mb-5 leading-tight text-ink-900 tracking-tight">What FloodWatch.PH publishes, and what it doesn't.</h1>
+    <p class="text-base text-ink-700 leading-relaxed mb-6">
+      FloodWatch.PH is a civic-tech research artifact. All published data is derived from publicly licensed satellite and environmental sources, aggregated to province counts only (FAO GAUL level-2, ~82 Philippine provinces; city and barangay resolution is a v1.1 refinement). This page describes the publication boundary, the legal posture under RA 10173 (Data Privacy Act of 2012), and how to request takedown.
+    </p>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">What we publish</h2>
+    <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1">
+      <li>Province flood exposure aggregates: population (WorldPop, rounded to nearest 10), built-up area in km&sup2; (Microsoft GlobalML footprints), observed historical events (Global Flood Database count), and peak flood share (max fraction of unit area flooded across the demo event dates). The on-official-hazard-map field is null in v1.0 (that overlay is a v1.1 refinement).</li>
+      <li>Flood polygon GeoJSONs at the observed open-water extent level. These are environmental polygons, not dwelling-level geometry.</li>
+      <li>Hazard-gap classification per province: under_observed_prone / charted / monitored / low.</li>
+      <li>Track B recurrence-prone sample-grid points. Points are on a 10-30 m grid, not building centroids. No dwelling identifiers.</li>
+      <li>The trained classifier, the committed embeddings cache, and the full reproducibility chain.</li>
+    </ul>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">What we don't publish</h2>
+    <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1">
+      <li>Per-household flood status geometry. No geometry that would let a third party determine whether a specific dwelling was flooded.</li>
+      <li>Owner names, resident names, phone numbers, tax-declaration data, or anything coupling a location to a natural person.</li>
+      <li>Any PII property key in any published GeoJSON. The CI gate <code>scripts/check_no_pii.py</code> asserts this on every release.</li>
+    </ul>
+    <p class="text-base text-ink-700 leading-relaxed mt-3">
+      Population counts in <code>barangay_exposure.json</code> (filename kept for compatibility; v1.0 units are provinces) are rounded to the nearest 10. At province scale individual household data cannot be reverse-engineered.
+    </p>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">Data Privacy Act (RA 10173) posture</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      FloodWatch.PH publishes environmental data aggregated to province level (FAO GAUL level-2). Under §3(g) of RA 10173, personal information is "any information from which the identity of an individual is apparent or can be reasonably and directly ascertained." A satellite-derived flood polygon at province scale, or a built-up-area figure for a province, does not identify a natural person. We mitigate the "put together with other information" clause by withholding all sub-province geometry and per-dwelling status.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Environmental data has lower RA 10173 exposure than personal data. Flood extent and hazard-gap classifications are institutional findings about geographic areas, not personal records. The Privacy Impact Assessment at <a href="https://github.com/xmpuspus/floodwatch-ph/blob/main/docs/privacy-impact-assessment.md" class="text-accent-steel no-underline">docs/privacy-impact-assessment.md</a> documents this posture in detail.
+    </p>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">Data Protection Officer</h2>
+    <p class="text-base text-ink-700 leading-relaxed">
+      Xavier Puspus is the self-designated DPO for FloodWatch.PH. Contact at <a href="mailto:xpuspus@gmail.com?subject=DPO%20inquiry" class="text-accent-steel no-underline">xpuspus@gmail.com</a> (subject: <em>DPO inquiry</em>).
+    </p>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">Takedown channel</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      If you believe a published feature is incorrect, misleading, or presents a privacy concern, request takedown via:
+    </p>
+    <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1">
+      <li>Open a <a href="https://github.com/xmpuspus/floodwatch-ph/issues/new?labels=takedown&amp;template=takedown.md" class="text-accent-steel no-underline">GitHub issue with the <code class="text-sm">takedown</code> label</a> (preferred, public audit trail).</li>
+      <li>Email <a href="mailto:xpuspus@gmail.com?subject=Takedown%20request" class="text-accent-steel no-underline">xpuspus@gmail.com</a> with subject <em>Takedown request</em> and the province id or coordinates.</li>
+      <li>For an active doxxing concern, use the GitHub Security advisory form: <a href="https://github.com/xmpuspus/floodwatch-ph/security/advisories/new" class="text-accent-steel no-underline">private advisory</a>.</li>
+    </ul>
+    <p class="text-base text-ink-700 leading-relaxed mt-3">
+      Acknowledgement within 5 working days. Feature removed within 14 working days, with a public note in the next release log unless removal requires confidentiality.
+    </p>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">Public-records framing</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      All data inputs derive from public records and public licensing: Copernicus Sentinel-1 (ESA/EC, open), Google AlphaEarth (CC-BY-4.0), Global Flood Database (Cloud to Street, CC-BY-4.0), MERIT Hydro (open), JRC Global Surface Water (open), WorldPop (CC-BY-4.0), Microsoft GlobalML Building Footprints (ODbL-equivalent), FAO GAUL level-2 province boundaries (public), OpenStreetMap (ODbL). Official hazard maps (Philippine government public records) are a v1.1 input, not used in v1.0.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed">
+      FloodWatch.PH computes statistical indicators derived from these public sources. Patterns shown may have legitimate explanations. The dataset does not constitute an official hazard map, an engineering assessment, or a code-compliance record, and should not be cited as such.
+    </p>
+
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">Telemetry, cookies, analytics</h2>
+    <p class="text-base text-ink-700 leading-relaxed">
+      No first-party cookies. No analytics scripts. No user accounts. No advertising. Vercel sets standard CDN cookies for cache routing; we do not read or use them. The site is a static build. The <code>vercel.json</code> Content-Security-Policy explicitly enumerates which endpoints the browser can reach: <code>'self'</code>, OSM tile servers for the basemap, and OSM attribution endpoints. No geocoders, no analytics endpoints, no third-party tracking.
+    </p>
+
+    <p class="text-[11px] text-ink-500 mt-12 pt-6 border-t border-ink-300/30">
+      Observed flood extent derived from public satellite data (Copernicus Sentinel-1, AlphaEarth, GFD, MERIT Hydro, JRC GSW, WorldPop, Microsoft GlobalML Footprints, FAO GAUL). FloodWatch.PH computes statistical indicators only. Patterns may have legitimate explanations; figures warrant independent verification. Last reviewed 2026-05.
+    </p>
+  </section>
+</Base>

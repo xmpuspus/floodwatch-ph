@@ -1,0 +1,138 @@
+---
+import Base from "../layouts/Base.astro";
+import { METRICS } from "../data/metrics";
+const M = METRICS;
+---
+<Base title="methodology · FloodWatch.PH" pathname="/methodology" description="Two-track methodology: Track A SAR event flood detection (Otsu + permanent-water mask) and Track B recurrence classifier (AlphaEarth embeddings, event-disjoint holdout). Metrics reported separately.">
+  <article class="max-w-prose mx-auto px-6 pt-8 pb-12">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">methodology &middot; v1 &middot; 2026</p>
+    <h1 class="text-3xl mb-2">Two tracks, two jobs, two metrics.</h1>
+    <p class="text-base text-ink-700 mb-8 leading-relaxed">
+      Flood is an event, not a fixture. A single satellite snapshot cannot work: the flood is gone by the next clear optical pass, and optical sensors are cloud-blocked by the very typhoon that causes the flood. FloodWatch.PH answers with two tracks that have different jobs and report their metrics separately. The README never averages them.
+    </p>
+
+    <p class="text-[11px] text-ink-500 mb-8 leading-relaxed italic border-l-2 border-ink-300/40 pl-4">
+      Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Track A &mdash; event flood extent (the demo)</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      <strong>Sensor:</strong> Sentinel-1 C-band SAR (<code>COPERNICUS/S1_GRD</code>), VV and VH polarization, IW mode, Copernicus open license. SAR penetrates typhoon cloud cover. It is the only sensor that sees the ground during a Philippine flood. Sentinel-2 optical is cloud-blocked on purpose during typhoons; omitting it from Track A is an intentional honesty decision, not a gap.
+    </p>
+
+    <h3 class="text-lg mt-6 mb-2">Per-timestep pipeline</h3>
+    <ol class="list-decimal pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
+      <li><strong>Pre-event baseline.</strong> Median composite of S1 GRD scenes from the dry weeks before the event window. For Carina 2024: baseline dates 2024-06-16 and 2024-06-28.</li>
+      <li><strong>Event scenes.</strong> Per-date S1 acquisitions during and after the event. For Carina 2024: 2024-07-10, 2024-07-22, 2024-07-30, 2024-08-03.</li>
+      <li><strong>Speckle filtering.</strong> Refined-Lee focal median applied to reduce SAR speckle noise before thresholding.</li>
+      <li><strong>dB conversion and change image.</strong> VH (and VV cross-check) converted to dB. Change image = during/post minus baseline. Open water appears as a strong negative VH response (SAR backscatter drops over smooth water).</li>
+      <li><strong>Otsu threshold.</strong> Automatic optimal threshold applied to the VH change image. No fitted parameters: Otsu computes the threshold directly from the histogram. This makes Track A parameter-free and immune to train/test leakage.</li>
+      <li><strong>Permanent-water mask subtracted.</strong> MERIT Hydro HAND threshold (<code>MERIT/Hydro/v1_0_1</code>) + JRC Global Surface Water occurrence &ge;50% (<code>JRC/GSW1_4/GlobalSurfaceWater</code>) + OSM <code>natural=water</code> / <code>waterway</code>. The published output reports flood, not rivers, lakes, or coastline. This is the integrity decision: a CI gate asserts every published flood GeoJSON carries <code>_meta.permanent_water_masked == true</code> and &lt;5% of flood area intersects JRC permanent water.</li>
+      <li><strong>Per-timestep flood polygon GeoJSON.</strong> One <code>FeatureCollection</code> per event. Features have <code>date</code> and <code>event</code> properties. The map time-slider filters by the selected date.</li>
+    </ol>
+
+    <h3 class="text-lg mt-6 mb-2">Track A validation</h3>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The Global Flood Database ends 2017. Track A is IoU/F1-validated against the GFD <code>flooded</code> polygon for <strong>GFD event 4300, Tropical Storm Koppu (Lando), 2015-10-22, central Luzon</strong> (54 dead, severity 2), using the 2015-10-26 Sentinel-1 post-onset acquisition. The validated method is then applied without modification to the ungauged Carina 2024 demo event.
+    </p>
+    <div class="bg-paper-alt border border-ink-300/40 p-4 mb-4 font-mono text-sm">
+      <div class="grid grid-cols-2 gap-y-1 gap-x-6 text-xs">
+        <span class="text-ink-500">Validation event</span><span>GFD 4300, Koppu/Lando 2015</span>
+        <span class="text-ink-500">Validation date</span><span>2015-10-26 (S1 post-onset)</span>
+        <span class="text-ink-500">Track A IoU</span><span class="text-ink-900">{M.trackA_iou}</span>
+        <span class="text-ink-500">Track A precision</span><span class="text-ink-900">{M.trackA_precision}</span>
+        <span class="text-ink-500">Track A recall</span><span class="text-ink-900">{M.trackA_recall}</span>
+        <span class="text-ink-500">Track A F1</span><span class="text-ink-900">{M.trackA_f1}</span>
+        <span class="text-ink-500">Fitted parameters</span><span>None (Otsu is parameter-free)</span>
+        <span class="text-ink-500">Train/test leakage</span><span>None (event-disjoint by construction)</span>
+      </div>
+    </div>
+    <p class="text-xs text-ink-500 leading-relaxed italic mb-6">
+      Track A is parameter-free; Otsu has no fitted parameters. The event-disjoint holdout discipline (decision 1) governs Track B. Track A does not require a holdout split for the detection method itself.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Track B &mdash; recurrence-prone classifier</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Track B answers a different question: which places flood again and again, independent of any single event? This is the SolarMap analog: a trained classifier on a frozen embedding, reproducible and hash-verified.
+    </p>
+
+    <h3 class="text-lg mt-6 mb-2">Architecture</h3>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
+      <li><strong>Embedding:</strong> Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), 10 m resolution, 64-dim unit-norm vectors, annual 2017-2025, CC-BY-4.0. Fixed at the 2017 annual (contemporaneous with the GFD record end). Server-side Earth Engine reduction to a small client download; no bulk raw-imagery fetch.</li>
+      <li><strong>Head:</strong> <code>sklearn.linear_model.LogisticRegression</code> on the 64-dim embedding. Platt-sigmoid calibrated on the event-disjoint holdout. Bit-exact, approximately 30 seconds on any laptop, no GPU, deterministic, hash-verified.</li>
+      <li><strong>Labels:</strong> Positives = pixels inside GFD historical flood-event footprints (2002-2017, 57 Philippines events), permanent water removed. Negatives = land pixels never flooded across all GFD events.</li>
+      <li><strong>Committed cache:</strong> <code>model/embeddings/floodwatch_embeddings_v1.npz</code> (~10 MB). <code>make train</code> runs offline from this cache. No network required after the initial EE pull.</li>
+    </ul>
+
+    <h3 class="text-lg mt-6 mb-2">Event-disjoint holdout (decision 1)</h3>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The single most important honesty decision. Holdout splits are by entire typhoon events, not random pixels. Random-pixel splits leak: adjacent pixels are near-duplicates, inflating IoU/F1. Holdout events are named in <code>model/holdout_events.json</code> and the split file hash is pinned in the Makefile. A CI gate asserts no holdout event leaks into any training fold.
+    </p>
+
+    <h3 class="text-lg mt-6 mb-2">Track B metrics (event-disjoint holdout)</h3>
+    <div class="bg-paper-alt border border-ink-300/40 p-4 mb-4 font-mono text-sm">
+      <div class="grid grid-cols-2 gap-y-1 gap-x-6 text-xs">
+        <span class="text-ink-500">Holdout type</span><span>Event-disjoint (entire typhoon events held out)</span>
+        <span class="text-ink-500">Track B F1</span><span class="text-ink-900">{M.trackB_f1}</span>
+        <span class="text-ink-500">Track B precision</span><span class="text-ink-900">{M.trackB_precision}</span>
+        <span class="text-ink-500">Track B recall</span><span class="text-ink-900">{M.trackB_recall}</span>
+        <span class="text-ink-500">Calibration</span><span>Platt sigmoid on holdout</span>
+        <span class="text-ink-500">Classifier sha256</span><span>{M.clf_sha256}</span>
+      </div>
+    </div>
+
+    <h2 class="text-xl mt-10 mb-3">The civic layer: hazard gap (v1.0)</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Exposure and the modeled-vs-observed gap are aggregated to <strong>province (FAO GAUL level-2, ~82 Philippine provinces)</strong>; city and barangay resolution is a v1.1 refinement (sub-province polygons are not a clean public asset). The data files keep the name <code>barangay_exposure.json</code> for compatibility but contain province units under a top-level <code>units</code> key.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The v1.0 gap is the divergence between <em>modeled flood-proneness</em> (Track B mean recurrence score per province) and the <em>historical observed record</em> (Global Flood Database event footprints). Each province is classified <code>gap</code> = <code>under_observed_prone</code> | <code>charted</code> | <code>monitored</code> | <code>low</code>. The headline civic finding is the set of <code>under_observed_prone</code> units: modeled flood-prone but with few or no events in the historical observed record.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      v1.0 does <strong>not</strong> compare against the official UP NOAH / Project NOAH / PAGASA / MGB hazard maps. That cross-reference is an explicit <strong>v1.1</strong> refinement, deferred because those government layers are token-gated or served only through single-page apps and cannot currently be fetched as data. The <code>on_official_hazard_map</code> field is therefore null in v1.0.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Language stays conservative throughout. <code>under_observed_prone</code> means modeled-prone with a thin historical observed record given the data available; it is not an allegation of negligence. LGU disaster planners and researchers should verify with local records before acting on these figures.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Permanent-water masking (decision 2)</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The product reports flood, not rivers, lakes, or sea. Three mask layers are combined:
+    </p>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-1 mb-4">
+      <li>MERIT Hydro HAND (Height Above Nearest Drainage) at a calibrated threshold from <code>MERIT/Hydro/v1_0_1</code>.</li>
+      <li>JRC Global Surface Water occurrence &ge;50% (<code>JRC/GSW1_4/GlobalSurfaceWater</code>) for permanent open water.</li>
+      <li>OSM <code>natural=water</code> and <code>waterway</code> polygons for named water bodies.</li>
+    </ul>
+    <p class="text-base text-ink-700 leading-relaxed">
+      A CI gate asserts every published flood GeoJSON carries <code>_meta.permanent_water_masked == true</code> and that &lt;5% of the flood area intersects JRC permanent water.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Honest limitations</h2>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
+      <li>SAR at 10-20m resolution captures open water extents but underestimates flood depth in urban canyons and under dense vegetation.</li>
+      <li>The Otsu threshold is computed per-timestep on the change image. Heavy rain on the pre-event baseline or sensor orbit differences may shift the threshold slightly.</li>
+      <li>Track B is trained on GFD events 2002-2017. Events since 2017 (Odette 2021, Paeng 2022, Carina 2024) are not in the training labels.</li>
+      <li>AlphaEarth embeddings are annual 2017 composite. Rapid land-cover change after 2017 is not reflected in the embedding used for training.</li>
+      <li>Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces). City and barangay resolution is a v1.1 refinement; sub-province variation is not resolved in v1.0.</li>
+      <li>The v1.0 gap is against the historical observed record (GFD), not the official hazard maps. A thin observed record is not confirmed safety; it may reflect gaps in historical observation. The official-hazard-map cross-reference is v1.1.</li>
+    </ul>
+
+    <h2 class="text-xl mt-10 mb-3">Reproducibility</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      <code>make train</code> reproduces the Track B classifier bit-exact from the committed NPZ cache with no network access. <code>make hash-verify</code> asserts <code>recurrence_clf_v1.joblib</code> sha256 matches the canonical value pinned in the Makefile. Earth Engine pulls use server-side reduction to small client downloads only.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Data sources</h2>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-1">
+      <li>Sentinel-1 C-band SAR: <code>COPERNICUS/S1_GRD</code>, Copernicus open license.</li>
+      <li>AlphaEarth Foundations embedding: <code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>, CC-BY-4.0, produced by Google and Google DeepMind.</li>
+      <li>Global Flood Database: <code>GLOBAL_FLOOD_DB/MODIS_EVENTS/V1</code>, Cloud to Street / Nature 2021, CC-BY-4.0.</li>
+      <li>MERIT Hydro HAND: <code>MERIT/Hydro/v1_0_1</code>, open.</li>
+      <li>JRC Global Surface Water: <code>JRC/GSW1_4/GlobalSurfaceWater</code>, open.</li>
+      <li>WorldPop population: CC-BY-4.0.</li>
+      <li>Microsoft GlobalML Building Footprints: ODbL-equivalent (built-up area aggregate).</li>
+      <li>FAO GAUL level-2 province boundaries (~82 Philippine provinces): FAO, public. (City and barangay boundaries are a v1.1 input.)</li>
+    </ul>
+  </article>
+</Base>

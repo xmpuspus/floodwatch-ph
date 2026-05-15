@@ -1,0 +1,61 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  pathname?: string;
+  image?: string;
+}
+
+const SITE_URL = "https://floodwatch.ph";
+const DEFAULT_IMAGE = "/og-preview.png";
+
+const {
+  title,
+  description = "An open, reproducible measurement of observed flood extent during Philippine typhoons, and a recurrence-prone classifier flagging communities that are modeled flood-prone yet under-observed in the historical record.",
+  pathname = Astro.url.pathname,
+  image = DEFAULT_IMAGE,
+} = Astro.props;
+
+const canonical = `${SITE_URL}${pathname}`;
+const ogImage = image.startsWith("http") ? image : `${SITE_URL}${image}`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#1a6bb5" />
+
+    <meta property="og:site_name" content="FloodWatch.PH" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="FloodWatch.PH map of observed flood extent across Metro Manila, Bulacan, and Pampanga during Typhoon Carina 2024" />
+    <meta property="og:locale" content="en_PH" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="FloodWatch.PH map of observed flood extent across Metro Manila during Typhoon Carina 2024" />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <Header pathname={pathname} />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

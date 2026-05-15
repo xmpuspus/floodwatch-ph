@@ -1,0 +1,131 @@
+---
+import Base from "../layouts/Base.astro";
+import { METRICS } from "../data/metrics";
+const M = METRICS;
+---
+<Base title="FloodWatch.PH - observed flood extent from public satellite data" pathname="/">
+  <section class="max-w-5xl mx-auto px-6 pt-14 pb-8">
+    <div class="grid md:grid-cols-[1.4fr_1fr] gap-10 items-end">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-4 font-mono">FloodWatch.PH &middot; satellite-observed flood extent</p>
+        <h1 class="text-4xl md:text-5xl leading-[1.05] mb-5 text-ink-900 font-semibold tracking-tight">
+          Where the water actually went.
+        </h1>
+        <p class="text-lg text-ink-700 leading-relaxed mb-2">
+          Philippine communities flood repeatedly. Sentinel-1 SAR radar sees through typhoon clouds where optical satellites cannot. FloodWatch.PH maps observed flood extent from real acquisition dates and flags communities that are modeled flood-prone yet under-observed in the historical record.
+        </p>
+        <p class="text-sm text-ink-500 leading-relaxed">
+          Open-source. CC-BY-4.0 data. No paywalls. Inputs are 100% public-licensed. <a href="/methodology" class="no-underline text-accent-steel">How the method works &rarr;</a>
+        </p>
+      </div>
+      <aside class="border-l-2 border-ink-900 pl-5 text-sm text-ink-700 leading-relaxed">
+        <p class="mb-2 font-mono text-xs text-ink-500 uppercase tracking-wider">what you get</p>
+        <ul class="space-y-1.5 text-sm">
+          <li>SAR-derived flood extent: time-slider across the Typhoon Carina 2024 acquisition dates</li>
+          <li>Province exposure: population, built-up area, peak flood share</li>
+          <li>Hazard gap: modeled-prone communities under-observed in the historical record</li>
+          <li>Track B recurrence model: which land signatures predict repeat flooding</li>
+          <li>Permanent-water-masked: rivers and lakes removed, only flood reported</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Two-track explanation -->
+  <section class="max-w-5xl mx-auto px-6 pb-10 mt-4">
+    <div class="grid gap-px bg-ink-300/40 md:grid-cols-2 border border-ink-300/40">
+      <div class="bg-paper p-6 md:p-8">
+        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">Track A &middot; event track</p>
+        <h2 class="text-xl mb-2 text-ink-900">Observed flood extent from SAR</h2>
+        <p class="text-sm text-ink-500 mb-3 leading-relaxed">
+          Sentinel-1 C-band SAR penetrates typhoon cloud cover. Each slider frame is a real acquisition date. Otsu threshold on the VH change image, permanent-water mask applied. Validated against the Global Flood Database (GFD) for Tropical Storm Koppu / Lando 2015 (event 4300).
+        </p>
+        <p class="text-xs text-ink-500 font-mono">
+          Demo event: Super Typhoon Carina / Gaemi, Jul-Aug 2024, Metro Manila + Bulacan + Pampanga. 4 acquisition dates.
+        </p>
+        <p class="text-xs text-ink-500 font-mono mt-1">
+          Track A IoU vs GFD/CEMS (Koppu 2015): <span class="text-ink-900">{M.trackA_iou}</span> &middot; F1: <span class="text-ink-900">{M.trackA_f1}</span>
+        </p>
+      </div>
+      <div class="bg-paper p-6 md:p-8">
+        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">Track B &middot; recurrence model</p>
+        <h2 class="text-xl mb-2 text-ink-900">Which places flood repeatedly</h2>
+        <p class="text-sm text-ink-500 mb-3 leading-relaxed">
+          Google AlphaEarth satellite embeddings (64-dim, 2017 annual) plus a logistic regression head trained on 57 Philippines GFD events (2002-2017). Event-disjoint holdout: entire typhoon events held out, never random pixels. Bit-exact, hash-verified, no GPU.
+        </p>
+        <p class="text-xs text-ink-500 font-mono">
+          Track B holdout F1: <span class="text-ink-900">{M.trackB_f1}</span> &middot; Precision: <span class="text-ink-900">{M.trackB_precision}</span> &middot; Recall: <span class="text-ink-900">{M.trackB_recall}</span>
+        </p>
+      </div>
+    </div>
+    <p class="text-xs text-ink-500 mt-2 leading-relaxed italic">
+      Track A and Track B metrics are reported separately. They measure different things. The README never averages them.
+    </p>
+  </section>
+
+  <!-- Civic thesis -->
+  <section class="max-w-prose mx-auto px-6 py-12 border-t border-ink-300/30">
+    <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-3">why this exists</p>
+    <h2 class="text-2xl mb-4 leading-tight">Where the model says it floods, but the record barely shows it.</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-4">
+      Philippine communities flood repeatedly, yet the historical observed record is uneven. FloodWatch.PH measures the v1.0 gap: provinces the recurrence model flags as flood-prone (Track B) but that appear with few or no events in the historical observed record (the Global Flood Database). The cross-reference against the official UP NOAH / PAGASA / MGB hazard maps is a v1.1 refinement, deferred because those government layers are token-gated or served only through single-page apps that cannot be fetched as data.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-4">
+      Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces); city and barangay resolution is a v1.1 refinement.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-4">
+      Super Typhoon Carina (July 2024) had no promptly-public official flood-extent polygon. That absence is the civic vacuum this demo fills. The validated method (Koppu 2015, GFD event 4300) is applied to the ungauged Carina event so communities have a satellite-based reference even when official records lag.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed">
+      Language throughout stays conservative. "Observed flood extent" and "warrants verification," not accusations. Output informs LGU disaster planning. <a href="/safety" class="no-underline text-accent-steel">Responsible use guide &rarr;</a>
+    </p>
+  </section>
+
+  <!-- Headline numbers -->
+  <section class="max-w-5xl mx-auto px-6 pb-12 grid gap-px bg-ink-300/40 md:grid-cols-4 border border-ink-300/40">
+    <div class="bg-paper p-5">
+      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">peak observed extent</div>
+      <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.carina_peak_km2}</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">km&sup2; flooded, Carina peak date</div>
+    </div>
+    <div class="bg-paper p-5">
+      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">under-observed prone</div>
+      <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.uncharted_count}</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">provinces modeled-prone, under-observed</div>
+    </div>
+    <div class="bg-paper p-5">
+      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">population exposed</div>
+      <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.pop_exposed}</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">WorldPop province aggregate, Carina peak</div>
+    </div>
+    <div class="bg-paper p-5">
+      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">Track A IoU (Koppu 2015)</div>
+      <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.trackA_iou}</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">vs GFD event 4300 ground truth</div>
+    </div>
+  </section>
+
+  <!-- Navigation cards -->
+  <section class="max-w-5xl mx-auto px-6 pb-12 grid gap-px bg-ink-300/40 md:grid-cols-2 border border-ink-300/40">
+    <a href="/map" class="bg-paper p-6 md:p-8 no-underline group hover:bg-white transition-colors">
+      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">interactive demo</p>
+      <h2 class="text-xl mb-2 text-ink-900">The map</h2>
+      <p class="text-sm text-ink-500 mb-4 leading-relaxed">
+        Time-slider across the Sentinel-1 acquisition dates for Typhoon Carina 2024. Hazard-gap province layer. Click any province for population, built-up area, observed historical events, and peak flood share.
+      </p>
+      <span class="text-sm font-medium text-accent-steel group-hover:text-ink-900">Open the map &rarr;</span>
+    </a>
+    <a href="/methodology" class="bg-paper p-6 md:p-8 no-underline group hover:bg-white transition-colors">
+      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">how it works</p>
+      <h2 class="text-xl mb-2 text-ink-900">Methodology</h2>
+      <p class="text-sm text-ink-500 mb-4 leading-relaxed">
+        Two-track architecture: Track A SAR event detection (Otsu + permanent-water mask, parameter-free), Track B recurrence model (AlphaEarth embeddings + logistic regression, event-disjoint holdout). Metrics reported separately, never averaged.
+      </p>
+      <span class="text-sm font-medium text-accent-steel group-hover:text-ink-900">Read methodology &rarr;</span>
+    </a>
+  </section>
+
+  <p class="max-w-5xl mx-auto px-6 pb-8 text-xs text-ink-500 leading-relaxed italic">
+    Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
+  </p>
+</Base>

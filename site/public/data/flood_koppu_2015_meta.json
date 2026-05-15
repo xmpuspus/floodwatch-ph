@@ -1,0 +1,33 @@
+{
+  "event": "koppu_2015",
+  "label": "Tropical Storm Koppu (Lando), GFD event 4300",
+  "role": "validation",
+  "gauged": true,
+  "aoi_name": "Central Luzon (Nueva Ecija / Aurora / Pampanga)",
+  "bbox": [
+    120.4,
+    15.4,
+    121.8,
+    16.9
+  ],
+  "permanent_water_masked": true,
+  "method": "S1 VH: Otsu-on-VH + got-darker-vs-dry-baseline change gate + permanent-water + slope + HAND-style flood-plausible-terrain mask",
+  "dates": [
+    {
+      "date": "2015-10-26",
+      "flood_area_km2": 64.34,
+      "otsu_threshold_db": -20.372,
+      "n_polygons": 42
+    }
+  ],
+  "validation": {
+    "gfd_event_id": 4300,
+    "validation_date": "2015-10-26",
+    "comparison": "vs GFD MODIS `flooded` at native 250 m, permanent water removed from both",
+    "iou": 0.0608,
+    "precision": 0.0854,
+    "recall": 0.0606,
+    "f1": 0.0709,
+    "caveat": "The only Sentinel-1 acquisition is several days after GFD onset, and a single 10 m SAR pass is compared to a multi-day 250 m MODIS optical product. Low pixel IoU is the expected, documented limitation of this comparison, not a hidden one. Track A's product is the reproducible, permanent-water-masked observed-extent time series; Track B (event-disjoint) carries the trained-model claim."
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "_meta": {
+    "event": "carina_2024",
+    "admin_level": "province (FAO GAUL level-2, ~82 PH provinces); city/barangay resolution is a v1.1 refinement",
+    "official_hazard_overlay": "v1.1 (PH gov hazard layers are token-gated/SPA-only \u2014 documented PH civic-data failure mode)",
+    "disclaimer": "Observed flood exposure derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification."
+  },
+  "units": {
+    "24210": {
+      "name": "Metropolitan Manila",
+      "city": "Metropolitan Manila",
+      "province": "National Capital region (NCR)",
+      "population": 11164340,
+      "built_up_km2": 200.473,
+      "observed_events": 37,
+      "peak_flood_pct": 0.0,
+      "on_official_hazard_map": null
+    },
+    "24220": {
+      "name": "Bataan",
+      "city": "Bataan",
+      "province": "Region III (Central Luzon)",
+      "population": 349200,
+      "built_up_km2": 13.526,
+      "observed_events": 37,
+      "peak_flood_pct": 0.38,
+      "on_official_hazard_map": null
+    },
+    "24221": {
+      "name": "Bulacan",
+      "city": "Bulacan",
+      "province": "Region III (Central Luzon)",
+      "population": 2891470,
+      "built_up_km2": 85.294,
+      "observed_events": 41,
+      "peak_flood_pct": 0.82,
+      "on_official_hazard_map": null
+    },
+    "24222": {
+      "name": "Nueva Ecija",
+      "city": "Nueva Ecija",
+      "province": "Region III (Central Luzon)",
+      "population": 169700,
+      "built_up_km2": 5.797,
+      "observed_events": 17,
+      "peak_flood_pct": 2.8,
+      "on_official_hazard_map": null
+    },
+    "24223": {
+      "name": "Pampanga",
+      "city": "Pampanga",
+      "province": "Region III (Central Luzon)",
+      "population": 2065650,
+      "built_up_km2": 88.876,
+      "observed_events": 42,
+      "peak_flood_pct": 3.89,
+      "on_official_hazard_map": null
+    },
+    "24224": {
+      "name": "Tarlac",
+      "city": "Tarlac",
+      "province": "Region III (Central Luzon)",
+      "population": 75940,
+      "built_up_km2": 3.471,
+      "observed_events": 9,
+      "peak_flood_pct": 1.88,
+      "on_official_hazard_map": null
+    },
+    "24226": {
+      "name": "Aurora",
+      "city": "Aurora",
+      "province": "Region III (Central Luzon)",
+      "population": 5200,
+      "built_up_km2": 0.08,
+      "observed_events": 18,
+      "peak_flood_pct": 0.0,
+      "on_official_hazard_map": null
+    },
+    "24228": {
+      "name": "Cavite",
+      "city": "Cavite",
+      "province": "Region IV-A (Calabarzon)",
+      "population": 1094250,
+      "built_up_km2": 21.772,
+      "observed_events": 36,
+      "peak_flood_pct": 0.0,
+      "on_official_hazard_map": null
+    },
+    "24229": {
+      "name": "Laguna",
+      "city": "Laguna",
+      "province": "Region IV-A (Calabarzon)",
+      "population": 7570,
+      "built_up_km2": 0.068,
+      "observed_events": 38,
+      "peak_flood_pct": 0.0,
+      "on_official_hazard_map": null
+    },
+    "24234": {
+      "name": "Quezon",
+      "city": "Quezon",
+      "province": "Region IV-A (Calabarzon)",
+      "population": 6020,
+      "built_up_km2": 0.013,
+      "observed_events": 0,
+      "peak_flood_pct": 0.0,
+      "on_official_hazard_map": null
+    },
+    "24235": {
+      "name": "Rizal",
+      "city": "Rizal",
+      "province": "Region IV-A (Calabarzon)",
+      "population": 2552420,
+      "built_up_km2": 45.507,
+      "observed_events": 38,
+      "peak_flood_pct": 0.03,
+      "on_official_hazard_map": null
+    }
+  }
+}

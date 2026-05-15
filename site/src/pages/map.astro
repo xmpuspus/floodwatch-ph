@@ -1,0 +1,32 @@
+---
+import Base from "../layouts/Base.astro";
+import MapView from "../components/MapView.astro";
+import { METRICS } from "../data/metrics";
+const M = METRICS;
+---
+<Base title="flood extent map · FloodWatch.PH" pathname="/map" description="Interactive Sentinel-1 SAR flood extent time-slider for Super Typhoon Carina 2024. Province hazard gap layer and recurrence-prone overlay over Metro Manila, Bulacan, and Pampanga.">
+  <section class="max-w-6xl mx-auto px-6 pt-8 pb-4">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">Track A &middot; Sentinel-1 SAR &middot; Super Typhoon Carina (Gaemi) 2024</p>
+    <h1 class="text-3xl md:text-4xl mb-3 leading-tight">Observed flood extent, Metro Manila + Bulacan + Pampanga.</h1>
+    <p class="text-ink-700 max-w-prose leading-relaxed">
+      The slider steps through the Sentinel-1 acquisition dates bracketing Super Typhoon Carina (landfall ~Jul 24, 2024) - read at runtime from the flood file, not hardcoded. Each frame is a real SAR acquisition, not interpolation. Permanent rivers, lakes, and coastal water removed via MERIT Hydro HAND + JRC Global Surface Water mask. Click any province to see exposure figures. The hazard-gap layer (provinces colored by gap classification) shows where modeled flood-proneness diverges from the historical observed record. Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces); city and barangay resolution is a v1.1 refinement.
+    </p>
+    <p class="text-xs text-ink-500 mt-2">
+      Track A IoU vs GFD event 4300 (Koppu 2015 validation): <strong>{M.trackA_iou}</strong> &middot; F1: <strong>{M.trackA_f1}</strong>. The validated method is applied to the ungauged Carina 2024 demo event.
+    </p>
+  </section>
+
+  <MapView />
+
+  <section class="max-w-6xl mx-auto px-6 py-6 text-xs text-ink-500 leading-relaxed">
+    <p class="mb-2">
+      Observed flood extent derived from public satellite data (Copernicus Sentinel-1 C-band SAR). Permanent-water mask applied: figures represent flood, not rivers or lakes. Exposure figures are province aggregates (WorldPop population, Microsoft GlobalML built-up area). No household geometry, no per-dwelling flood status, no PII.
+    </p>
+    <p class="mb-2 italic">
+      Patterns may have legitimate explanations; figures warrant independent verification. Not an official hazard map. Not engineering advice. Intended for civic transparency and LGU planning research.
+    </p>
+    <p>
+      Cite as: FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph. CC-BY-4.0 on data. SAR data: Copernicus/Sentinel-1, open. Province boundaries: FAO GAUL level-2, public.
+    </p>
+  </section>
+</Base>

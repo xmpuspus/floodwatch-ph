@@ -1,0 +1,548 @@
+---
+// MapView -- Sentinel-1 flood extent time slider for Typhoon Carina 2024.
+// Loads flood polygons filtered by slider date, hazard-gap province
+// layer, recurrence-prone overlay, and a province exposure card.
+//
+// The slider is server-rendered from events.json as a fallback, but the client
+// rebuilds it from the distinct sorted dates in flood_carina_2024.geojson
+// _meta.dates at runtime. Dates are never hardcoded in the client.
+import events from "../data/events.json";
+
+const carina = (events as any).carina_2024;
+const sliderDates: string[] = carina.event_dates;
+---
+
+<section class="max-w-6xl mx-auto px-6 mb-3">
+  <details class="border-l-2 border-accent-flood bg-paper-alt">
+    <summary class="cursor-pointer px-4 py-2.5 text-sm font-medium text-ink-900">How to read this map</summary>
+    <div class="px-4 pb-4 pt-1 text-sm text-ink-700 leading-relaxed space-y-2 max-w-prose">
+      <p>
+        The time slider steps through the Sentinel-1 SAR acquisition dates bracketing Super Typhoon Carina (Gaemi) in July-August 2024 over Metro Manila, Bulacan, and Pampanga. Each frame shows the observed open-water extent at that date, after permanent rivers and lakes are subtracted. The flood polygons grow from the pre-event date through peak inundation and into recession.
+      </p>
+      <p>
+        <strong>Color encoding (province, FAO GAUL level-2):</strong>
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#c0392b"></span> red = modeled-prone but under-observed in the historical record;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#3a6ea5"></span> blue = charted in the historical record;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#7a92b0"></span> steel = monitored;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#9ca3af"></span> gray = low.
+        Click any province to see exposed population, built-up area, observed historical events, and peak flood share.
+      </p>
+      <p>Full methodology: <a href="/methodology" class="text-accent-steel no-underline">how the flood extents were computed</a>.</p>
+    </div>
+  </details>
+</section>
+
+<!-- Time slider controls -->
+<section class="max-w-6xl mx-auto px-6 mb-3">
+  <div class="bg-paper border border-ink-300/30 p-4">
+    <div class="flex flex-wrap items-center gap-4 mb-3">
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">acquisition date</p>
+        <p id="slider-date-display" class="font-mono tabular-nums text-xl text-ink-900">--</p>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <input
+          id="date-slider"
+          type="range"
+          min="0"
+          max={sliderDates.length - 1}
+          value="0"
+          step="1"
+          class="w-full accent-accent-flood"
+          aria-label="Select flood observation date"
+        />
+        <div id="slider-ticks" class="flex justify-between text-[10px] text-ink-500 font-mono mt-1">
+          {sliderDates.map((d) => <span>{d}</span>)}
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button id="play-btn" class="inline-flex items-center px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white">
+          play
+        </button>
+      </div>
+    </div>
+
+    <!-- Layer toggles -->
+    <div class="flex flex-wrap gap-4 text-xs border-t border-ink-300/20 pt-3">
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input id="toggle-flood" type="checkbox" checked class="accent-accent-flood" />
+        <span class="text-ink-700">Flood extent</span>
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input id="toggle-gap" type="checkbox" checked class="accent-accent-gap" />
+        <span class="text-ink-700">Hazard gap layer</span>
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input id="toggle-recurrence" type="checkbox" class="accent-ink-500" />
+        <span class="text-ink-700">Recurrence-prone overlay</span>
+      </label>
+    </div>
+  </div>
+</section>
+
+<div id="map-root" class="grid md:grid-cols-[1fr_360px] gap-4 px-6 max-w-6xl mx-auto">
+  <div class="relative">
+    <div id="map" class="w-full h-[640px] rounded-md border border-ink-300/30 bg-ink-300/10">
+      <div id="map-loading" class="absolute inset-0 flex items-center justify-center text-sm text-ink-500">
+        Loading map data...
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="absolute bottom-3 left-3 bg-white/95 border border-ink-300/40 rounded p-3 text-xs shadow-sm">
+      <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1.5 font-mono">flood extent</div>
+      <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700 mb-2">
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#1a6bb5"></span><span>observed open water (SAR)</span>
+      </div>
+      <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">hazard gap (province)</div>
+      <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700">
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#c0392b"></span><span>modeled-prone, under-observed</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#3a6ea5"></span><span>charted in historical record</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#7a92b0"></span><span>monitored</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#9ca3af"></span><span>low</span>
+      </div>
+      <div id="legend-source" class="text-[10px] text-ink-500 mt-1.5 font-mono">FloodWatch.PH &middot; Sentinel-1 SAR</div>
+    </div>
+
+    <div class="absolute bottom-1 right-2 bg-white/85 px-1.5 py-0.5 text-[9px] text-ink-500 rounded-sm border border-ink-300/30 leading-tight">
+      &copy; OpenStreetMap contributors. SAR: Copernicus/Sentinel-1.
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside id="side-panel" class="border border-ink-300/40 bg-white text-sm overflow-hidden">
+    <div id="empty-state" class="p-5">
+      <p class="text-xs uppercase tracking-wider text-ink-500 mb-2 font-mono">click any province</p>
+      <p class="text-ink-700 leading-relaxed">
+        Select a province on the map to see exposed population, built-up area, observed historical flood events, and peak flood share.
+      </p>
+      <div class="mt-5 pt-5 border-t border-ink-300/30">
+        <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-2">about this map</p>
+        <p class="text-xs text-ink-700 leading-relaxed">
+          Observed flood extent from Sentinel-1 C-band SAR for Super Typhoon Carina (Gaemi), July-August 2024. Permanent rivers and lakes removed via MERIT Hydro HAND + JRC Global Surface Water mask. Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces); city and barangay resolution is a v1.1 refinement.
+        </p>
+        <p class="text-[10px] text-ink-500 mt-3 leading-relaxed italic">
+          Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
+        </p>
+      </div>
+    </div>
+
+    <div id="city-detail" class="hidden">
+      <div class="px-5 pt-5 pb-4">
+        <button id="brgy-back" class="text-[10px] uppercase tracking-wider text-ink-500 hover:text-ink-900 font-mono mb-2">&larr; back</button>
+        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono" id="brgy-location"></p>
+        <h3 id="brgy-name" class="text-2xl font-semibold tracking-tight text-ink-900 leading-none mt-1 mb-4"></h3>
+      </div>
+
+      <div class="px-5 pb-4">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="border border-ink-300/30 p-3">
+            <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">population exposed</div>
+            <div id="brgy-pop" class="font-mono tabular-nums text-3xl text-ink-900 mt-0.5">--</div>
+            <div class="text-[10px] text-ink-500">WorldPop estimate</div>
+          </div>
+          <div class="border border-ink-300/30 p-3">
+            <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">built-up area</div>
+            <div id="brgy-builtup" class="font-mono tabular-nums text-3xl text-ink-900 mt-0.5">--</div>
+            <div class="text-[10px] text-ink-500">km&sup2; (Microsoft GlobalML)</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="border border-ink-300/30 p-3">
+            <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">observed events</div>
+            <div id="brgy-events" class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">--</div>
+            <div class="text-[10px] text-ink-500">historical GFD record (2002-2017)</div>
+          </div>
+          <div class="border border-ink-300/30 p-3">
+            <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">peak flood share</div>
+            <div id="brgy-flood-pct" class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">--</div>
+            <div class="text-[10px] text-ink-500 mt-0.5">max area share (Carina 2024)</div>
+          </div>
+        </div>
+
+        <div id="brgy-hazard-row" class="border border-ink-300/30 p-3">
+          <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">official hazard map overlay</div>
+          <div id="brgy-hazard-status" class="text-sm font-medium"></div>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 border-t border-ink-300/30">
+        <p class="text-[10px] text-ink-500 leading-relaxed italic">
+          Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
+        </p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script define:vars={{ sliderDates }} is:inline>
+  window.__FLOODWATCH_DATES = sliderDates;
+</script>
+
+<script>
+  import maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+
+  // Server-rendered fallback dates. The real slider dates are read from the
+  // flood GeoJSON _meta.dates at runtime in init(); this is only the
+  // pre-hydration placeholder so the slider DOM is not empty.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let DATES: string[] = ((window as any).__FLOODWATCH_DATES as string[]) ?? [];
+  const DATA_BASE = "/data";
+
+  // ---- helpers --------------------------------------------------------
+
+  function fmtInt(n: number): string {
+    return n.toLocaleString();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function safeFetch(url: string): Promise<any> {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch {
+      return null;
+    }
+  }
+
+  // Read distinct sorted acquisition dates. Prefer _meta.dates (the real
+  // schema: list of {date, flood_area_km2, otsu_threshold_db, n_polygons}),
+  // fall back to distinct feature.properties.date values. Never hardcoded.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function datesFromFlood(floodData: any): string[] {
+    if (!floodData) return [];
+    const out = new Set<string>();
+    const metaDates = floodData?._meta?.dates;
+    if (Array.isArray(metaDates)) {
+      for (const d of metaDates) {
+        const v = typeof d === "string" ? d : d?.date;
+        if (typeof v === "string" && v) out.add(v);
+      }
+    }
+    if (out.size === 0 && Array.isArray(floodData.features)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const f of floodData.features as any[]) {
+        const v = f?.properties?.date;
+        if (typeof v === "string" && v) out.add(v);
+      }
+    }
+    return Array.from(out).sort();
+  }
+
+  // Rebuild the slider DOM (range max + tick labels) for the real dates.
+  function applyDatesToSlider(dates: string[]): void {
+    const slider = document.getElementById("date-slider") as HTMLInputElement | null;
+    if (slider) {
+      slider.max = String(Math.max(0, dates.length - 1));
+      slider.value = "0";
+      slider.disabled = dates.length === 0;
+    }
+    const ticks = document.getElementById("slider-ticks");
+    if (ticks) {
+      ticks.innerHTML = "";
+      for (const d of dates) {
+        const s = document.createElement("span");
+        s.textContent = d;
+        ticks.appendChild(s);
+      }
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function showCity(props: Record<string, any>, exposureUnits: Record<string, any> | null): void {
+    const emptyState = document.getElementById("empty-state");
+    const detail = document.getElementById("city-detail");
+    emptyState?.classList.add("hidden");
+    detail?.classList.remove("hidden");
+
+    // The hazard_gap GeoJSON keeps a "city" key but its value is the province
+    // name (from ADM2_NAME / FAO GAUL level-2). The "province" key holds the
+    // region. Show the province name as the area name (not "City:") and the
+    // region as the sublabel.
+    const areaName =
+      (props["city"] as string) || (props["name"] as string) || "Province";
+    const region = (props["province"] as string) || "";
+
+    const nameEl = document.getElementById("brgy-name");
+    const locEl = document.getElementById("brgy-location");
+    if (nameEl) nameEl.textContent = areaName;
+    if (locEl) locEl.textContent = region ? `${region} · Province (FAO GAUL level-2)` : "Province · FAO GAUL level-2";
+
+    const unitId = (props["id"] as string) || (props["city"] as string) || areaName;
+    const exp = (exposureUnits && exposureUnits[unitId]) || null;
+
+    const popEl = document.getElementById("brgy-pop");
+    const builtEl = document.getElementById("brgy-builtup");
+    const eventsEl = document.getElementById("brgy-events");
+    const floodPctEl = document.getElementById("brgy-flood-pct");
+    const hazardEl = document.getElementById("brgy-hazard-status");
+
+    // observed_events / recurrence_score may live on the gap feature itself
+    const observedEvents =
+      (exp && exp["observed_events"]) ?? props["observed_events"] ?? null;
+
+    if (popEl) {
+      popEl.textContent = exp && exp["population"] != null ? fmtInt(exp["population"] as number) : "--";
+    }
+    if (builtEl) {
+      builtEl.textContent =
+        exp && exp["built_up_km2"] != null ? (exp["built_up_km2"] as number).toFixed(1) : "--";
+    }
+    if (eventsEl) {
+      eventsEl.textContent = observedEvents != null ? fmtInt(observedEvents as number) : "--";
+    }
+    if (floodPctEl) {
+      const pf = exp ? exp["peak_flood_pct"] : null;
+      floodPctEl.textContent =
+        pf != null ? `${((pf as number) * 100).toFixed(1)}%` : "--";
+    }
+    if (hazardEl) {
+      // v1.0 ships no official-hazard-map comparison (on_official_hazard_map
+      // is null). The official UP NOAH/PAGASA/MGB overlay is a v1.1 refinement.
+      const onMap = exp ? exp["on_official_hazard_map"] : null;
+      if (onMap === true || onMap === false) {
+        hazardEl.textContent = onMap ? "On official hazard map" : "Not on official hazard map";
+        hazardEl.className = `text-sm font-medium ${onMap ? "text-accent-steel" : "text-accent-coral-dark"}`;
+      } else {
+        hazardEl.textContent = "Not compared in v1.0 - official hazard overlay is a v1.1 refinement";
+        hazardEl.className = "text-sm text-ink-500";
+      }
+    }
+  }
+
+  // ---- init -----------------------------------------------------------
+
+  async function init(): Promise<void> {
+    const loadingEl = document.getElementById("map-loading");
+
+    const map = new maplibregl.Map({
+      container: "map",
+      style: {
+        version: 8,
+        sources: {
+          osm: {
+            type: "raster",
+            tiles: [
+              "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            ],
+            tileSize: 256,
+            attribution: "&copy; OpenStreetMap contributors",
+          },
+        },
+        layers: [{ id: "osm", type: "raster", source: "osm" }],
+      },
+      center: [120.95, 14.85] as [number, number],
+      zoom: 9,
+    });
+
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    // Load all data in parallel, degrade gracefully on missing files
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [floodData, hazardData, recurrenceData, exposureData]: [any, any, any, any] = await Promise.all([
+      safeFetch(`${DATA_BASE}/flood_carina_2024.geojson`),
+      safeFetch(`${DATA_BASE}/hazard_gap.geojson`),
+      safeFetch(`${DATA_BASE}/recurrence_prone.geojson`),
+      safeFetch(`${DATA_BASE}/barangay_exposure.json`),
+    ]);
+
+    if (loadingEl) loadingEl.style.display = "none";
+
+    // Read the real acquisition dates from the flood file at runtime.
+    const fileDates = datesFromFlood(floodData);
+    if (fileDates.length > 0) {
+      DATES = fileDates;
+      applyDatesToSlider(DATES);
+    } else if (DATES.length > 0) {
+      applyDatesToSlider(DATES);
+    }
+
+    // Exposure file is { _meta, units: { <id>: {...} } }
+    const exposureUnits: Record<string, unknown> | null =
+      exposureData && typeof exposureData === "object" ? (exposureData.units ?? null) : null;
+
+    let currentDate: string = DATES[0] ?? "";
+    let playInterval: ReturnType<typeof setInterval> | null = null;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function floodForDate(date: string): any {
+      if (!floodData || !floodData.features) {
+        return { type: "FeatureCollection", features: [] };
+      }
+      return {
+        type: "FeatureCollection",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        features: (floodData.features as any[]).filter((f: any) => f.properties && f.properties.date === date),
+      };
+    }
+
+    map.on("load", () => {
+      map.addSource("flood", {
+        type: "geojson",
+        data: floodForDate(currentDate),
+      });
+      map.addLayer({
+        id: "flood-fill",
+        type: "fill",
+        source: "flood",
+        paint: { "fill-color": "#1a6bb5", "fill-opacity": 0.55 },
+      });
+      map.addLayer({
+        id: "flood-line",
+        type: "line",
+        source: "flood",
+        paint: { "line-color": "#0d4a80", "line-width": 1.2, "line-opacity": 0.8 },
+      });
+
+      if (hazardData && hazardData.features && (hazardData.features as unknown[]).length > 0) {
+        map.addSource("hazard-gap", { type: "geojson", data: hazardData });
+        map.addLayer({
+          id: "hazard-gap-fill",
+          type: "fill",
+          source: "hazard-gap",
+          paint: {
+            "fill-color": [
+              "match", ["get", "gap"],
+              "under_observed_prone", "#c0392b",
+              "charted", "#3a6ea5",
+              "monitored", "#7a92b0",
+              "#9ca3af",
+            ],
+            "fill-opacity": 0.35,
+          },
+        });
+        map.addLayer({
+          id: "hazard-gap-line",
+          type: "line",
+          source: "hazard-gap",
+          paint: { "line-color": "#22324a", "line-width": 0.6, "line-opacity": 0.5 },
+        });
+
+        map.on("click", "hazard-gap-fill", (e) => {
+          const f = e.features?.[0];
+          if (!f) return;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          showCity(f.properties as Record<string, any>, exposureUnits as Record<string, any> | null);
+        });
+        map.on("mouseenter", "hazard-gap-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", "hazard-gap-fill", () => { map.getCanvas().style.cursor = ""; });
+      }
+
+      if (recurrenceData && recurrenceData.features && (recurrenceData.features as unknown[]).length > 0) {
+        map.addSource("recurrence", { type: "geojson", data: recurrenceData });
+        map.addLayer({
+          id: "recurrence-dots",
+          type: "circle",
+          source: "recurrence",
+          layout: { visibility: "none" },
+          filter: ["==", ["get", "prone"], true],
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 4, 16, 6],
+            "circle-color": "#d97757",
+            "circle-opacity": 0.7,
+            "circle-stroke-color": "#ffffff",
+            "circle-stroke-width": 0.8,
+          },
+        });
+      }
+
+      map.fitBounds([[120.5, 14.4], [121.4, 15.3]], { padding: 30, animate: false, maxZoom: 11 });
+    });
+
+    // ---- slider logic --------------------------------------------------
+
+    const slider = document.getElementById("date-slider") as HTMLInputElement | null;
+    const dateDisplay = document.getElementById("slider-date-display");
+
+    function setDate(idx: number): void {
+      currentDate = DATES[idx] ?? "";
+      if (dateDisplay) dateDisplay.textContent = currentDate;
+      const src = map.getSource("flood");
+      if (src) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (src as any).setData(floodForDate(currentDate));
+      }
+    }
+
+    setDate(0);
+
+    slider?.addEventListener("input", (e) => {
+      setDate(Number((e.target as HTMLInputElement).value));
+    });
+
+    const playBtn = document.getElementById("play-btn") as HTMLButtonElement | null;
+    playBtn?.addEventListener("click", () => {
+      if (playInterval) {
+        clearInterval(playInterval);
+        playInterval = null;
+        if (playBtn) playBtn.textContent = "play";
+        return;
+      }
+      if (playBtn) playBtn.textContent = "pause";
+      let idx = Number(slider?.value ?? 0);
+      playInterval = setInterval(() => {
+        idx = (idx + 1) % DATES.length;
+        if (slider) slider.value = String(idx);
+        setDate(idx);
+        if (idx === DATES.length - 1) {
+          clearInterval(playInterval!);
+          playInterval = null;
+          if (playBtn) playBtn.textContent = "play";
+        }
+      }, 1200);
+    });
+
+    // ---- layer toggles --------------------------------------------------
+
+    document.getElementById("toggle-flood")?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      if (map.getLayer("flood-fill")) map.setLayoutProperty("flood-fill", "visibility", vis);
+      if (map.getLayer("flood-line")) map.setLayoutProperty("flood-line", "visibility", vis);
+    });
+
+    document.getElementById("toggle-gap")?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      if (map.getLayer("hazard-gap-fill")) map.setLayoutProperty("hazard-gap-fill", "visibility", vis);
+      if (map.getLayer("hazard-gap-line")) map.setLayoutProperty("hazard-gap-line", "visibility", vis);
+    });
+
+    document.getElementById("toggle-recurrence")?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      if (map.getLayer("recurrence-dots")) map.setLayoutProperty("recurrence-dots", "visibility", vis);
+    });
+
+    // ---- sidebar back button -------------------------------------------
+
+    const emptyState = document.getElementById("empty-state");
+    const cityDetail = document.getElementById("city-detail");
+
+    document.getElementById("brgy-back")?.addEventListener("click", () => {
+      cityDetail?.classList.add("hidden");
+      emptyState?.classList.remove("hidden");
+    });
+  }
+
+  init().catch((err: unknown) => {
+    console.error("FloodWatch map init error:", err);
+    const mapEl = document.getElementById("map");
+    if (mapEl) {
+      mapEl.innerHTML = '<div class="p-6 text-sm text-ink-500">Map data is loading. If this persists, check the browser console.</div>';
+    }
+  });
+</script>
+
+<style>
+  :global(.maplibregl-popup-content) {
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18) !important;
+  }
+  #date-slider {
+    cursor: pointer;
+  }
+</style>

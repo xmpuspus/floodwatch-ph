@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+title: "FloodWatch.PH: open-source observed flood extent and recurrence mapping from satellite data"
+message: "If you use FloodWatch.PH in research, please cite it using these metadata."
+type: software
+authors:
+  - given-names: Xavier
+    family-names: Puspus
+    orcid: "https://orcid.org/0009-0000-0000-0000"
+repository-code: "https://github.com/xmpuspus/floodwatch-ph"
+url: "https://floodwatch.ph"
+license: MIT
+version: "1.0.0"
+date-released: "2026-05-15"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.PENDING"
+    description: "Zenodo DOI for FloodWatch.PH v1.0.0."
+keywords:
+  - flood mapping
+  - Sentinel-1
+  - SAR
+  - AlphaEarth
+  - disaster risk
+  - Philippines
+  - reproducible research
+  - civic technology
+  - remote sensing
+  - logistic regression
+  - recurrence classification
+abstract: >
+  FloodWatch.PH is an open-source two-track system for measuring observed flood
+  extent and flood recurrence from public satellite data over the Philippines.
+  Track A applies classical Sentinel-1 SAR Otsu change detection to produce
+  per-timestep flood-extent GeoJSON for real typhoon events, validated against the
+  Global Flood Database. Track B trains a logistic-regression head on frozen Google
+  AlphaEarth Satellite Embedding V1 (64-dim, CC-BY-4.0) with Platt-sigmoid
+  calibration on an event-disjoint holdout to classify per-pixel flood recurrence
+  proneness. The build is bit-exact reproducible from a committed 10 MB embeddings
+  cache with no GPU required.
+preferred-citation:
+  type: software
+  title: "FloodWatch.PH: open-source observed flood extent and recurrence mapping from satellite data"
+  authors:
+    - given-names: Xavier
+      family-names: Puspus
+  year: 2026
+  url: "https://github.com/xmpuspus/floodwatch-ph"

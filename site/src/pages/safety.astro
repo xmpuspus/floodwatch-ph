@@ -1,0 +1,106 @@
+---
+import Base from "../layouts/Base.astro";
+---
+<Base title="Responsible use · FloodWatch.PH" pathname="/safety" description="Responsible use guide for FloodWatch.PH flood extent data. How to cite, what language is appropriate, and what the data cannot support.">
+  <article class="max-w-prose mx-auto px-6 pt-8 pb-12">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">responsible use &middot; v1 &middot; 2026</p>
+    <h1 class="text-3xl mb-3 text-ink-900">Using flood data responsibly.</h1>
+    <p class="text-base text-ink-700 mb-6 leading-relaxed">
+      Satellite-observed flood data is powerful and has limits. This page explains what FloodWatch.PH can and cannot support, what language is appropriate when citing or reporting from this data, and how LGU planners and journalists should frame findings.
+    </p>
+
+    <p class="text-[11px] text-ink-500 mb-8 leading-relaxed italic border-l-2 border-ink-300/40 pl-4">
+      Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
+    </p>
+
+    <h2 id="what-it-supports" class="text-xl mt-10 mb-2 text-ink-900">What the data supports</h2>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-6">
+      <li><strong>Civic transparency and research.</strong> Comparing modeled flood-proneness against the historical observed record to identify under-observed-prone communities. Informing LGU disaster preparedness planning. Supporting academic research on flood risk in the Philippines. (The official-hazard-map comparison is a v1.1 refinement.)</li>
+      <li><strong>Pattern identification at province scale.</strong> Which provinces have satellite-observed recurrent flood signatures. Where the hazard gap layer shows divergence between modeled flood-proneness and the historical observed record. Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces); city and barangay resolution is a v1.1 refinement.</li>
+      <li><strong>Baseline for further investigation.</strong> Identifying provinces that warrant local verification: field surveys, local disaster-risk records, official hazard-study requests.</li>
+      <li><strong>Journalism with appropriate caveats.</strong> Reporting on the gap between modeled flood-proneness and the historical observed record, with the methodology caveats clearly stated. See the citing section below.</li>
+    </ul>
+
+    <h2 id="what-it-cannot-support" class="text-xl mt-10 mb-2 text-ink-900">What the data cannot support</h2>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-6">
+      <li><strong>Engineering or insurance decisions.</strong> This is not an engineering flood risk assessment. Flood depths are not in the data. Infrastructure vulnerability is not modeled. Do not use FloodWatch.PH outputs as a substitute for a formal hydrological risk study.</li>
+      <li><strong>Accusatory claims about government negligence.</strong> The hazard gap is a measurement of divergence between a model and the historical observed record, not a proof of misconduct. A thin historical observed record may reflect gaps in past observation, not safety, and v1.0 does not compare against the official hazard maps at all (that overlay is v1.1).</li>
+      <li><strong>Claims about specific households or individuals.</strong> All data is province-level aggregate. No household or dwelling identification is possible or published.</li>
+      <li><strong>Definitive flood predictions or early warning.</strong> This is historical and event-specific data. It is not a forecast system.</li>
+    </ul>
+
+    <h2 id="language" class="text-xl mt-10 mb-2 text-ink-900">Appropriate language</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">Use conservative, verifiable language:</p>
+    <div class="bg-paper-alt border border-ink-300/40 p-4 mb-4 text-sm">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-2">appropriate</p>
+          <ul class="space-y-1.5 text-ink-700">
+            <li>"Observed flood extent, derived from Sentinel-1 SAR"</li>
+            <li>"Satellite-observed open water during Typhoon Carina"</li>
+            <li>"Warrants independent verification"</li>
+            <li>"Modeled flood-prone but under-observed in the historical record"</li>
+            <li>"Province-level aggregate exposure estimate"</li>
+            <li>"The data suggests recurrent flooding; local verification is recommended"</li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-2">inappropriate</p>
+          <ul class="space-y-1.5 text-ink-700">
+            <li>"Confirmed flooded" (without field verification)</li>
+            <li>"The government hid the hazard map"</li>
+            <li>"Definitely at risk of flooding"</li>
+            <li>"[Specific household] was flooded"</li>
+            <li>"Proven negligence"</li>
+            <li>"Official data is wrong"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="citing" class="text-xl mt-10 mb-2 text-ink-900">How to cite</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      For research and journalism:
+    </p>
+    <pre class="bg-paper-alt border border-ink-300/40 p-4 text-xs font-mono overflow-x-auto mb-3">FloodWatch.PH (2026). Observed flood extent: Super Typhoon Carina (Gaemi),
+July-August 2024, Metro Manila + Bulacan + Pampanga. Derived from
+Copernicus Sentinel-1 SAR (permanent-water-masked). CC-BY-4.0.
+https://github.com/xmpuspus/floodwatch-ph</pre>
+    <p class="text-sm text-ink-500 leading-relaxed mb-3">
+      Include the disclaimer: "Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification."
+    </p>
+
+    <h2 id="lgu" class="text-xl mt-10 mb-2 text-ink-900">For LGU disaster planners</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      FloodWatch.PH data is most useful as a starting point for local verification, not a final answer. Suggested workflow:
+    </p>
+    <ol class="list-decimal pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
+      <li>Identify provinces classified as <code>under_observed_prone</code> in the hazard gap layer (high modeled recurrence score, thin historical observed record).</li>
+      <li>Cross-reference with local disaster-response records: Which areas received evacuation orders or emergency funds during Carina 2024?</li>
+      <li>Request the official hazard study for flagged provinces from MGB / UP NOAH / PAGASA if not already on file (this is the comparison FloodWatch.PH plans to automate in v1.1).</li>
+      <li>Commission a local field verification for the highest-priority under-observed-prone areas.</li>
+      <li>Use the satellite extent as a discussion starting point in the hazard assessment, not as a replacement for the assessment.</li>
+    </ol>
+
+    <h2 id="journalists" class="text-xl mt-10 mb-2 text-ink-900">For journalists</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Key facts to verify before publishing:
+    </p>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
+      <li>In v1.0 the hazard gap layer shows divergence between modeled flood-proneness (Track B) and the historical observed record (Global Flood Database), NOT against the official hazard maps. The official-hazard-map comparison is a documented v1.1 refinement, deferred because those government layers are token-gated or served only through single-page apps. A thin observed record does not automatically mean an area is safe or that official data is wrong.</li>
+      <li>Track A IoU vs GFD (Koppu 2015) is the validation metric. Carina 2024 is ungauged. The demo event lacks a ground-truth polygon to validate against.</li>
+      <li>Population figures are WorldPop estimates at province aggregate level, not census counts. They may differ from the latest PSA estimates.</li>
+      <li>The methodology page at <a href="/methodology" class="text-accent-steel no-underline">/methodology</a> has technical detail suitable for a methodology sidebar.</li>
+    </ul>
+
+    <h2 class="text-xl mt-10 mb-2 text-ink-900">Sources and methodology references</h2>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-1">
+      <li>Sentinel-1 SAR flood mapping: <a href="https://www.mdpi.com/2072-4292/11/3/357" class="text-accent-steel no-underline">Twele et al., Remote Sensing 2016</a>; ESA Sentinel Application Platform.</li>
+      <li>Global Flood Database (GFD): Tellman et al., Nature 2021. <a href="https://www.nature.com/articles/s41586-021-03695-w" class="text-accent-steel no-underline">link</a></li>
+      <li>MERIT Hydro: Yamazaki et al. 2019. <a href="https://doi.org/10.1029/2019WR024873" class="text-accent-steel no-underline">link</a></li>
+      <li>JRC Global Surface Water: Pekel et al., Nature 2016. <a href="https://www.nature.com/articles/nature20584" class="text-accent-steel no-underline">link</a></li>
+      <li>WorldPop Philippines: <a href="https://www.worldpop.org" class="text-accent-steel no-underline">worldpop.org</a>, CC-BY-4.0.</li>
+      <li>AlphaEarth Foundations: Google / Google DeepMind, CC-BY-4.0.</li>
+    </ul>
+  </article>
+</Base>

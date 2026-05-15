@@ -1,0 +1,44 @@
+# credentials — never commit
+.ee-key.json
+*.pem
+.env
+.env.*
+!.env.example
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# node / astro
+site/node_modules/
+site/dist/
+site/.astro/
+site/.vercel/
+node_modules/
+
+# large intermediates + run scratch (regenerable; not committed)
+event/_s1_cache/
+pipeline/_exposure_cache/
+**/_*.log
+**/_*.jsonl
+**/_chain.log
+**/_hg2.log
+docs/screenshots/_vid/
+*.output
+.claude/
+*.tif
+*.tiff
+
+# OS
+.DS_Store
+
+# committed on purpose (negate ignores):
+!model/embeddings/floodwatch_embeddings_v1.npz
+!site/public/data/*.geojson
+!site/public/data/*.json

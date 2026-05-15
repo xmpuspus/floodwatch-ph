@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "model": "recurrence_clf_v1",
+    "embedding": "AlphaEarth Satellite Embedding V1 (2017, 64-dim, 300 m)",
+    "calibrator": "Platt sigmoid A=1.1177 B=0.5613",
+    "threshold": 0.5,
+    "trackB_f1": 0.9551,
+    "trackB_precision": 0.9485,
+    "trackB_recall": 0.9618,
+    "trackB_brier": 0.046,
+    "n_holdout_pos": 2200,
+    "n_holdout_neg": 1346,
+    "clf_sha256_16": "b7c702532f92c43f",
+    "split": "event-disjoint (whole GFD typhoon events held out)",
+    "prone_threshold": 0.6,
+    "modeled_prone_unrecorded": 337,
+    "n_never_flooded_sampled": 4500
+  },
+  "platt_A": 1.1176541893586123,
+  "platt_B": 0.5612794114842582
+}

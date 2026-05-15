@@ -1,0 +1,83 @@
+---
+import Base from "../layouts/Base.astro";
+import { METRICS } from "../data/metrics";
+const M = METRICS;
+---
+<Base title="recurrence model · FloodWatch.PH" pathname="/recurrence" description="Track B: flood-recurrence-prone classifier using Google AlphaEarth satellite embeddings and a logistic regression head trained on 57 Philippines GFD events with event-disjoint holdout.">
+  <article class="max-w-prose mx-auto px-6 pt-8 pb-12">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">Track B &middot; recurrence model &middot; v1</p>
+    <h1 class="text-3xl mb-2">Which places flood again and again.</h1>
+    <p class="text-base text-ink-700 mb-6 leading-relaxed">
+      Track A answers "where did the water go during this event." Track B answers a different question: which locations have land signatures that predict recurrent flooding across many typhoon seasons? These are separate jobs. Track B is the SolarMap analog: a reproducible classifier trained on frozen embeddings, bit-exact, hash-verified.
+    </p>
+
+    <p class="text-[11px] text-ink-500 mb-8 leading-relaxed italic border-l-2 border-ink-300/40 pl-4">
+      Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">The embedding: Google AlphaEarth</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The frozen substrate is Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), 10 m resolution, 64-dimensional unit-norm vectors, annual cadence 2017-2025, CC-BY-4.0 (produced by Google and Google DeepMind). The embedding year is fixed at <strong>2017</strong>: the earliest AlphaEarth annual, contemporaneous with the Global Flood Database record end.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The annual cadence is too coarse for a single event (Track A's job) but is well-suited to "does this place's land-embedding signature predict it floods repeatedly." The embeddings are sampled server-side on Earth Engine and downloaded as a small NPZ cache; no bulk raw-imagery fetch.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">The classifier head</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      A <code>sklearn.linear_model.LogisticRegression</code> on the 64-dim embedding, Platt-sigmoid calibrated on the event-disjoint holdout. Approximately 30 seconds to train on any laptop. No GPU. Deterministic: the same committed <code>model/embeddings/floodwatch_embeddings_v1.npz</code> always produces the same <code>recurrence_clf_v1.joblib</code>, verified by <code>make hash-verify</code>.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Training labels</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Positives: points inside Global Flood Database historical flood-event footprints for 57 Philippines events (2002-2017), permanent water removed via the same MERIT Hydro HAND + JRC GSW mask as Track A. Negatives: land points that appear in none of the 57 GFD events.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The GFD coverage is 2002-2017. Events since 2017 (Odette 2021, Paeng 2022, Carina 2024) are not in the training labels. The model captures recurrence patterns from the historical record; generalization to more recent flooding is an open question surfaced in the methodology, not hidden.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Event-disjoint holdout</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      Holdout splits are by <em>entire typhoon events</em>, never random pixels. Random-pixel splits leak: adjacent pixels are near-duplicates and their embeddings are highly correlated, inflating IoU and F1 into false confidence. The holdout events are named in <code>model/holdout_events.json</code>; the split file hash is pinned in the Makefile. A CI gate asserts no holdout event leaks into any training fold.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      This is the single most important honesty decision in the project. A user reading the Track B metrics should know they reflect performance on events the model never trained on.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">Track B metrics (event-disjoint holdout)</h2>
+    <div class="bg-paper-alt border border-ink-300/40 p-4 mb-4 font-mono text-sm">
+      <div class="grid grid-cols-2 gap-y-1 gap-x-6 text-xs">
+        <span class="text-ink-500">Holdout type</span><span>Event-disjoint (entire GFD typhoon events)</span>
+        <span class="text-ink-500">Track B F1</span><span class="text-ink-900">{M.trackB_f1}</span>
+        <span class="text-ink-500">Track B precision</span><span class="text-ink-900">{M.trackB_precision}</span>
+        <span class="text-ink-500">Track B recall</span><span class="text-ink-900">{M.trackB_recall}</span>
+        <span class="text-ink-500">Calibration</span><span>Platt sigmoid, event-disjoint holdout</span>
+        <span class="text-ink-500">Classifier sha256</span><span>{M.clf_sha256}</span>
+        <span class="text-ink-500">Threshold (deployed)</span><span>{M.trackB_threshold}</span>
+      </div>
+    </div>
+    <p class="text-xs text-ink-500 leading-relaxed italic">
+      A reliability diagram (calibration curve) is published at <code>docs/figures/reliability_diagram.png</code>. The precision/recall/F1 above are at the deployed threshold; the full PR curve is at <code>docs/figures/pr_curve.png</code>.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">What the output looks like</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The Track B output is <code>site/public/data/recurrence_prone.geojson</code>: a FeatureCollection of Point features on a 10-30 m sample grid over the AOI. Each point has a calibrated <code>score</code> (0-1) and a boolean <code>prone</code> flag (score >= deployed threshold). No dwelling identifiers. Points are a sample grid, not building centroids.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      The hazard-gap pipeline aggregates Track B scores to province level (FAO GAUL level-2, ~82 Philippine provinces; mean score over the unit) and compares against the historical observed record (Global Flood Database) to produce the <code>gap</code> classification (<code>under_observed_prone</code> / <code>charted</code> / <code>monitored</code> / <code>low</code>). The v1.0 pipeline does not compare against the official hazard maps; that overlay is a v1.1 refinement, deferred because those government layers are token-gated or SPA-only. City and barangay resolution is likewise a v1.1 refinement.
+    </p>
+
+    <h2 class="text-xl mt-10 mb-3">What Track B does not claim</h2>
+    <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
+      <li>Track B scores a location's flood-recurrence likelihood based on its 2017 satellite embedding signature. It is not a hydraulic model and does not account for drainage improvements, new levees, or land-cover changes after 2017.</li>
+      <li>A high recurrence score does not mean a specific building will flood; it means the land at that location has historically been associated with flooding. Province-level aggregation is appropriate; individual-pixel claims are not.</li>
+      <li>Track B and Track A measure different things and are not comparable. Do not average or combine their metrics.</li>
+    </ul>
+
+    <h2 class="text-xl mt-10 mb-3">Reproducibility</h2>
+    <p class="text-base text-ink-700 leading-relaxed">
+      <code>make train</code> runs offline from the committed NPZ cache. <code>make hash-verify</code> asserts sha256 matches the canonical value. <code>make calibrate</code> fits the Platt sigmoid. All three are deterministic. Anyone with the repository can reproduce the classifier without network access after the initial <code>make embeddings</code> pull.
+    </p>
+  </article>
+</Base>

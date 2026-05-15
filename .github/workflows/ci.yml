@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  site:
+    name: site (astro)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Type-check
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+
+  model:
+    name: model (deterministic hash)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Verify committed embeddings cache is present
+        run: |
+          test -f model/embeddings/floodwatch_embeddings_v1.npz
+          ls -la model/embeddings/floodwatch_embeddings_v1.npz
+      - name: Train + assert deterministic classifier hash
+        run: |
+          make train
+          make hash-verify
+      - name: Smoke-test package import surface
+        run: python -c "import floodwatch_ph; print('floodwatch_ph', floodwatch_ph.__version__)"
+
+  gates:
+    name: integrity gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Permanent-water masking gate (decision 2)
+        run: python scripts/check_permanent_water.py
+      - name: Event-disjoint holdout gate (decision 1)
+        run: python scripts/check_event_disjoint.py
+      - name: No-PII / barangay-aggregate gate (decision 5)
+        run: python scripts/check_no_pii.py
+      - name: site/data mirror gate (decision 4)
+        run: python scripts/verify_release.py --gates-only
+
+  tests:
+    name: model (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run unit tests
+        run: pytest tests/ -q

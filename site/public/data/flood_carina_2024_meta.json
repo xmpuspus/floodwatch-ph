@@ -1,0 +1,41 @@
+{
+  "event": "carina_2024",
+  "label": "Super Typhoon Carina (Gaemi) + enhanced southwest monsoon",
+  "role": "demo",
+  "gauged": false,
+  "aoi_name": "Metro Manila + Bulacan + Pampanga",
+  "bbox": [
+    120.5,
+    14.4,
+    121.4,
+    15.3
+  ],
+  "permanent_water_masked": true,
+  "method": "S1 VH: Otsu-on-VH + got-darker-vs-dry-baseline change gate + permanent-water + slope + HAND-style flood-plausible-terrain mask",
+  "dates": [
+    {
+      "date": "2024-07-10",
+      "flood_area_km2": 101.81,
+      "otsu_threshold_db": -22.248,
+      "n_polygons": 52
+    },
+    {
+      "date": "2024-07-22",
+      "flood_area_km2": 167.95,
+      "otsu_threshold_db": -20.746,
+      "n_polygons": 91
+    },
+    {
+      "date": "2024-07-30",
+      "flood_area_km2": 206.73,
+      "otsu_threshold_db": -21.244,
+      "n_polygons": 113
+    },
+    {
+      "date": "2024-08-03",
+      "flood_area_km2": 137.05,
+      "otsu_threshold_db": -22.746,
+      "n_polygons": 70
+    }
+  ]
+}

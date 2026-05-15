@@ -1,0 +1,80 @@
+---
+import Base from "../layouts/Base.astro";
+import { METRICS } from "../data/metrics";
+const M = METRICS;
+
+const sections = [
+  {
+    title: "What is FloodWatch.PH?",
+    body: "A civic-tech research artifact: an open, reproducible measurement of observed flood extent during Philippine typhoons, and a recurrence-prone classifier that flags communities that are modeled flood-prone yet under-observed in the historical record. Two tracks with two separate jobs, reported with separate metrics. Open-source (MIT for code, CC-BY-4.0 for data).",
+  },
+  {
+    title: "Why Sentinel-1 SAR and not optical satellite imagery?",
+    body: "Optical sensors (Sentinel-2, Landsat, Planet) are cloud-blocked by the typhoon itself. Sentinel-1 C-band SAR radar penetrates cloud cover and sees the ground during the flood event. Using optical imagery for flood detection during a Philippine typhoon would produce mostly cloud-covered tiles. SAR is the only viable sensor for this application; saying so is part of the methodology honesty.",
+  },
+  {
+    title: "How accurate is the flood extent detection?",
+    body: `Track A is validated against the Global Flood Database ground-truth polygon for GFD event 4300 (Tropical Storm Koppu / Lando, 2015, central Luzon). IoU: <strong>${M.trackA_iou}</strong>, F1: <strong>${M.trackA_f1}</strong>. Track A uses Otsu thresholding, which has no fitted parameters, so there is no train/test leakage. The validated method is applied without modification to the ungauged Carina 2024 demo event.`,
+  },
+  {
+    title: "How accurate is the recurrence model?",
+    body: `Track B uses an event-disjoint holdout: entire GFD typhoon events are held out, never random pixels (random-pixel splits inflate metrics because adjacent pixels are near-duplicates). On the event-disjoint holdout: F1: <strong>${M.trackB_f1}</strong>, Precision: <strong>${M.trackB_precision}</strong>, Recall: <strong>${M.trackB_recall}</strong>. A Platt sigmoid calibration curve is published at docs/figures/reliability_diagram.png.`,
+  },
+  {
+    title: "What is the hazard gap layer?",
+    body: "In v1.0 the hazard gap compares Track B modeled flood-proneness (mean recurrence score per province, FAO GAUL level-2, ~82 Philippine provinces) against the historical observed record (the Global Flood Database), NOT against the official hazard maps. Each province is classified gap = under_observed_prone, charted, monitored, or low. 'under_observed_prone' means modeled-prone but with few or no events in the historical observed record; it is not an allegation. The cross-reference against the official UP NOAH / PAGASA / MGB hazard maps is an explicit v1.1 refinement, deferred because those government layers are token-gated or served only through single-page apps and cannot be fetched as data. City and barangay resolution is also a v1.1 refinement. Language stays conservative throughout.",
+  },
+  {
+    title: "Does this dataset expose personal information?",
+    body: "No. All exposure figures are province-level aggregates (FAO GAUL level-2, ~82 Philippine provinces; city and barangay resolution is a v1.1 refinement). Population counts are from WorldPop (rounded to the nearest 10). Built-up area is from Microsoft GlobalML footprints. No household geometry, no per-dwelling flood status, no PII property keys. The CI gate scripts/check_no_pii.py asserts this on every release. See <a class='text-accent-steel no-underline' href='/privacy'>/privacy</a> and the Privacy Impact Assessment.",
+  },
+  {
+    title: "Why is Carina 2024 used as the demo event if it has no official flood polygon?",
+    body: "That absence is the civic vacuum the demo fills. No promptly-public official flood-extent polygon was released for Carina 2024 (Super Typhoon Gaemi + enhanced southwest monsoon, July 2024, Metro Manila). The validated Track A method is applied to Carina so communities have a satellite-based reference even when official records lag. The validation event (Koppu 2015, GFD event 4300) has a GFD ground-truth polygon; the Carina application is ungauged and disclosed as such.",
+  },
+  {
+    title: "What is the permanent-water mask and why does it matter?",
+    body: "SAR open-water detection picks up rivers, lakes, coastal water, and flood equally. The permanent-water mask (MERIT Hydro HAND + JRC Global Surface Water occurrence ≥50% + OSM water polygons) subtracts persistent water bodies before publishing flood polygons. The product reports flood, not background water. A CI gate asserts every published GeoJSON has had the mask applied and that less than 5% of flood area intersects JRC permanent water.",
+  },
+  {
+    title: "Can I use this data for journalism or research?",
+    body: "Yes, under CC-BY-4.0. Cite as: <code class='text-sm'>FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph</code>. Language in any citation or report should reflect the methodology: 'observed flood extent derived from Sentinel-1 SAR, permanent-water-masked' rather than 'confirmed flooded areas.' The methodology page has a summary suitable for a press piece.",
+  },
+  {
+    title: "Is this an official flood hazard map?",
+    body: "No. FloodWatch.PH produces satellite-derived observed flood extent and a statistical recurrence model. It is not an official hazard map and should not replace formal engineering risk assessments. The v1.0 civic value is the gap between modeled flood-proneness and the historical observed record; the official-hazard-map overlay is v1.1. LGU planners and disaster coordinators should verify with local records before acting on these figures.",
+  },
+  {
+    title: "Is FloodWatch.PH affiliated with PAGASA, NDRRMC, UP NOAH, or MGB?",
+    body: "No. FloodWatch.PH is an independent open-source project authored by Xavier Puspus. The official agencies are named only as the intended source for the v1.1 official-hazard-map overlay; that is the only relationship and that overlay is not in v1.0.",
+  },
+  {
+    title: "How do I request takedown of a published feature?",
+    body: "Open a <a class='text-accent-steel no-underline' href='https://github.com/xmpuspus/floodwatch-ph/issues/new?labels=takedown&template=takedown.md'>GitHub issue with the takedown label</a>, or email <a class='text-accent-steel no-underline' href='mailto:xpuspus@gmail.com?subject=Takedown%20request'>xpuspus@gmail.com</a>. Acknowledged within 5 working days; removed within 14 working days. For active doxxing concerns use the GitHub Security advisory form.",
+  },
+  {
+    title: "I found a bug or have a contribution.",
+    body: "Open an issue or PR on <a class='text-accent-steel no-underline' href='https://github.com/xmpuspus/floodwatch-ph'>github.com/xmpuspus/floodwatch-ph</a>. Highest-value contributions: verified flood extents not captured in our data, province boundary corrections, official hazard-map sources for the v1.1 overlay, and false-positive / false-negative reports on the hazard gap layer. See CONTRIBUTING.md.",
+  },
+];
+---
+<Base title="FAQ · FloodWatch.PH" pathname="/faq" description="Frequently asked questions about FloodWatch.PH flood extent accuracy, privacy posture under RA 10173, the hazard gap layer, and the recurrence model.">
+  <section class="max-w-prose mx-auto px-6 pt-10 pb-12">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">frequently asked</p>
+    <h1 class="text-3xl mb-6 leading-tight text-ink-900 tracking-tight">Plain-language answers to the questions we hear most often.</h1>
+    <p class="text-base text-ink-700 leading-relaxed mb-8">
+      If your question isn't here, open a <a href="https://github.com/xmpuspus/floodwatch-ph/discussions" class="text-accent-steel no-underline">GitHub discussion</a> or email <a href="mailto:xpuspus@gmail.com" class="text-accent-steel no-underline">xpuspus@gmail.com</a>.
+    </p>
+
+    {sections.map((s, i) => (
+      <article class={`py-5 ${i < sections.length - 1 ? "border-b border-ink-300/30" : ""}`}>
+        <h2 class="text-lg text-ink-900 mb-2 leading-snug">{s.title}</h2>
+        <p class="text-base text-ink-700 leading-relaxed" set:html={s.body} />
+      </article>
+    ))}
+
+    <p class="text-[11px] text-ink-500 mt-10 pt-6 border-t border-ink-300/30">
+      Observed flood extent derived from public satellite data (Copernicus Sentinel-1, AlphaEarth, GFD, MERIT Hydro, JRC GSW, WorldPop, Microsoft GlobalML Footprints, PSA/OSM). FloodWatch.PH computes statistical indicators derived from public data. Patterns may have legitimate explanations; figures warrant independent verification.
+    </p>
+  </section>
+</Base>

@@ -1,0 +1,25 @@
+{
+  "carina_2024": {
+    "label": "Super Typhoon Carina (Gaemi) + enhanced southwest monsoon",
+    "role": "demo",
+    "gauged": false,
+    "note": "No promptly-public official flood-extent polygon. Demo event: the validated method applied to a recent ungauged flood.",
+    "bbox": [120.5, 14.4, 121.4, 15.3],
+    "aoi_name": "Metro Manila + Bulacan + Pampanga",
+    "baseline_window": ["2024-05-01", "2024-06-30"],
+    "event_dates": ["2024-07-10", "2024-07-22", "2024-07-30", "2024-08-03"],
+    "baseline_dates": ["2024-06-16", "2024-06-28"]
+  },
+  "koppu_2015": {
+    "label": "Tropical Storm Koppu (Lando), GFD event 4300",
+    "role": "validation",
+    "gauged": true,
+    "gfd_event_id": 4300,
+    "note": "GFD-gauged Luzon flood (54 dead, severity 2). Track A IoU/F1 is reported against the GFD `flooded` polygon for this event using the 2015-10-26 post-onset acquisition.",
+    "bbox": [120.4, 15.4, 121.8, 16.9],
+    "aoi_name": "Central Luzon (Nueva Ecija / Aurora / Pampanga)",
+    "baseline_window": ["2015-08-01", "2015-09-30"],
+    "event_dates": ["2015-10-26"],
+    "baseline_dates": ["2015-10-14"]
+  }
+}

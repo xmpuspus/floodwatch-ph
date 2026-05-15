@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-paper text-ink-900 antialiased;
+  }
+  a {
+    @apply underline decoration-ink-300 underline-offset-2 hover:decoration-ink-700;
+  }
+  h1, h2, h3, h4 {
+    @apply font-semibold tracking-tight;
+  }
+  code, pre {
+    @apply font-mono text-[0.92em];
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-ink-300/40 rounded-md p-5 shadow-sm;
+  }
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-ink-700/10 text-ink-700;
+  }
+  .btn {
+    @apply inline-flex items-center px-3 py-1.5 rounded-md bg-ink-900 text-white text-sm hover:bg-ink-700;
+  }
+}
+
+@layer utilities {
+  /* WCAG 1.4.1: inline anchors inside running text need a non-color visual
+     cue. Anchors with no-underline (used for compact lists, footers, hero copy)
+     get a dotted bottom-border when they appear inline in a text-block parent. */
+  p a.no-underline,
+  li a.no-underline,
+  dd a.no-underline,
+  td a.no-underline {
+    border-bottom: 1px dotted currentColor;
+  }
+}

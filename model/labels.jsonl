@@ -1,0 +1,57 @@
+{"id": 1981, "began": "2002-07-06", "main_cause": "Monsoonal rain", "dead": 61, "displaced": 25000, "severity": 1, "centroid": [120.562734, 15.340286], "group": "train"}
+{"id": 1998, "began": "2002-07-20", "main_cause": "Tropical cyclone", "dead": 18, "displaced": 7000, "severity": 1, "centroid": [121.062794, 14.669288], "group": "train"}
+{"id": 2264, "began": "2003-06-25", "main_cause": "Heavy rain", "dead": 2, "displaced": 10000, "severity": 1, "centroid": [124.376833, 7.043913], "group": "train"}
+{"id": 2284, "began": "2003-07-19", "main_cause": "Tropical Cyclone", "dead": 22, "displaced": 20000, "severity": 1, "centroid": [121.26678, 16.501894], "group": "holdout"}
+{"id": 2403, "began": "2003-12-10", "main_cause": "Heavy rain", "dead": 148, "displaced": 350000, "severity": 2, "centroid": [102.901561, -1.041628], "group": "train"}
+{"id": 2407, "began": "2003-12-19", "main_cause": "Heavy rain", "dead": 200, "displaced": 97500, "severity": 1, "centroid": [125.765745, 8.881978], "group": "train"}
+{"id": 2434, "began": "2004-02-11", "main_cause": "Heavy rain", "dead": 7, "displaced": 20000, "severity": 1, "centroid": [125.744039, 8.22929], "group": "train"}
+{"id": 2480, "began": "2004-05-07", "main_cause": "Heavy rain", "dead": 0, "displaced": 10000, "severity": 1, "centroid": [116.827676, -0.527894], "group": "train"}
+{"id": 2514, "began": "2004-06-28", "main_cause": "Heavy rain", "dead": 5, "displaced": 1200, "severity": 1, "centroid": [124.576171, 7.377152], "group": "train"}
+{"id": 2516, "began": "2004-06-29", "main_cause": "Tropical cyclone", "dead": 54, "displaced": 385000, "severity": 2, "centroid": [121.410242, 17.503304], "group": "holdout"}
+{"id": 2539, "began": "2004-07-31", "main_cause": "Heavy rain", "dead": 0, "displaced": 80000, "severity": 1, "centroid": [124.577333, 7.021074], "group": "train"}
+{"id": 2554, "began": "2004-08-24", "main_cause": "Tropical cyclone", "dead": 67, "displaced": 1058849, "severity": 2, "centroid": [120.754097, 15.547408], "group": "holdout"}
+{"id": 2587, "began": "2004-11-19", "main_cause": "Tropical cyclone", "dead": 61, "displaced": 35000, "severity": 1, "centroid": [123.386648, 13.431255], "group": "train"}
+{"id": 2589, "began": "2004-11-23", "main_cause": "Tropical cyclone", "dead": 26, "displaced": 8000, "severity": 1, "centroid": [121.706238, 16.388864], "group": "train"}
+{"id": 2592, "began": "2004-11-29", "main_cause": "Heavy rain", "dead": 939, "displaced": 432000, "severity": 1, "centroid": [121.242952, 15.17884], "group": "train"}
+{"id": 2699, "began": "2005-07-27", "main_cause": "Monsoonal rain", "dead": 3, "displaced": 32782, "severity": 1, "centroid": [122.905219, 10.409698], "group": "train"}
+{"id": 2730, "began": "2005-09-15", "main_cause": "Monsoonal rain", "dead": 16, "displaced": 8000, "severity": 1, "centroid": [120.982766, 15.300986], "group": "holdout"}
+{"id": 2785, "began": "2006-01-26", "main_cause": "Heavy rain", "dead": 4, "displaced": 256641, "severity": 1, "centroid": [121.817032, 17.01728], "group": "train"}
+{"id": 2890, "began": "2006-06-19", "main_cause": "Heavy rain", "dead": 291, "displaced": 7580, "severity": 1, "centroid": [120.107435, -5.166664], "group": "train"}
+{"id": 2921, "began": "2006-07-11", "main_cause": "Tropical Cyclone", "dead": 629, "displaced": 2450000, "severity": 2, "centroid": [112.108469, 24.003504], "group": "holdout"}
+{"id": 3002, "began": "2006-11-30", "main_cause": "Heavy rain", "dead": 526, "displaced": 82915, "severity": 1, "centroid": [106.735524, 10.329669], "group": "holdout"}
+{"id": 3014, "began": "2007-01-10", "main_cause": "Heavy rain", "dead": 6, "displaced": 24508, "severity": 1, "centroid": [125.216707, 7.711826], "group": "train"}
+{"id": 3081, "began": "2007-05-15", "main_cause": "Heavy rain", "dead": 4, "displaced": 60000, "severity": 1, "centroid": [116.91957, -0.1883], "group": "train"}
+{"id": 3094, "began": "2007-06-06", "main_cause": "Heavy rain", "dead": 600, "displaced": 3170000, "severity": 1.5, "centroid": [112.355385, 26.292801], "group": "holdout"}
+{"id": 3103, "began": "2007-06-16", "main_cause": "Heavy rain", "dead": 1, "displaced": 212, "severity": 1, "centroid": [123.095573, 0.617594], "group": "train"}
+{"id": 3141, "began": "2007-07-25", "main_cause": "Heavy rain", "dead": 15, "displaced": 2000, "severity": 1, "centroid": [120.198324, -3.279537], "group": "train"}
+{"id": 3216, "began": "2007-10-27", "main_cause": "Heavy rain", "dead": 20, "displaced": 0, "severity": 1, "centroid": [123.381184, 13.357486], "group": "train"}
+{"id": 3273, "began": "2008-02-12", "main_cause": "Heavy rain", "dead": 54, "displaced": 873000, "severity": 1, "centroid": [125.935234, 8.535518], "group": "train"}
+{"id": 3305, "began": "2008-05-10", "main_cause": "Tropical cyclone", "dead": 1, "displaced": 50000, "severity": 1, "centroid": [124.997828, 7.095196], "group": "train"}
+{"id": 3325, "began": "2008-06-24", "main_cause": "Tropical  Storm Fenshen", "dead": 0, "displaced": 0, "severity": 1.5, "centroid": [112.303824, 23.542432], "group": "train"}
+{"id": 3339, "began": "2008-07-28", "main_cause": "Tropical Storm \"Fung-wong\"", "dead": 4, "displaced": 76000, "severity": 2, "centroid": [120.975437, 23.346289], "group": "holdout"}
+{"id": 3427, "began": "2008-12-28", "main_cause": "Heavy Rain", "dead": 25, "displaced": 3500, "severity": 1, "centroid": [125.039978, 8.447826], "group": "holdout"}
+{"id": 3437, "began": "2009-01-20", "main_cause": "Heavy Rain", "dead": 11, "displaced": 0, "severity": 1, "centroid": [124.958334, 7.121116], "group": "train"}
+{"id": 3444, "began": "2009-02-02", "main_cause": "Heavy Rain", "dead": 0, "displaced": 2000, "severity": 1, "centroid": [122.968272, 9.897], "group": "holdout"}
+{"id": 3518, "began": "2009-07-25", "main_cause": "Torrential Rain", "dead": 10, "displaced": 200000, "severity": 1.5, "centroid": [125.366552, 7.651799], "group": "train"}
+{"id": 3552, "began": "2009-10-02", "main_cause": "Typhoon Parma", "dead": 438, "displaced": 40000, "severity": 2, "centroid": [121.422102, 17.57569], "group": "holdout"}
+{"id": 3656, "began": "2010-05-29", "main_cause": "Torrential Rain", "dead": 27, "displaced": 0, "severity": 1, "centroid": [125.300141, 6.778414], "group": "holdout"}
+{"id": 3688, "began": "2010-07-21", "main_cause": "Tropical Storm Chanthu", "dead": 1, "displaced": 15000, "severity": 1.5, "centroid": [114.010074, 22.673269], "group": "train"}
+{"id": 3765, "began": "2011-01-01", "main_cause": "Heavy Rain", "dead": 53, "displaced": 10000, "severity": 2, "centroid": [125.5658, 8.132642], "group": "train"}
+{"id": 3777, "began": "2011-02-01", "main_cause": "Torrential Rain", "dead": 11, "displaced": 2000, "severity": 1.5, "centroid": [124.865345, 7.095271], "group": "train"}
+{"id": 3820, "began": "2011-06-05", "main_cause": "Heavy Rain", "dead": 15, "displaced": 15000, "severity": 1.5, "centroid": [125.208244, 8.306337], "group": "train"}
+{"id": 3867, "began": "2011-09-28", "main_cause": "Tropical stroms Pendring and Nalgae", "dead": 1, "displaced": 180000, "severity": 2, "centroid": [121.54776, 17.342998], "group": "holdout"}
+{"id": 3884, "began": "2011-12-16", "main_cause": "Tropical Storm Washi", "dead": 957, "displaced": 1000, "severity": 2, "centroid": [124.875163, 8.526491], "group": "train"}
+{"id": 3900, "began": "2012-02-20", "main_cause": "Torrential Rain", "dead": 0, "displaced": 25000, "severity": 1, "centroid": [125.264627, 8.223924], "group": "train"}
+{"id": 3914, "began": "2012-03-26", "main_cause": "Torrential Rain", "dead": 4, "displaced": 0, "severity": 1, "centroid": [123.278367, 13.628836], "group": "train"}
+{"id": 4005, "began": "2012-12-04", "main_cause": "Tropical Storm Bopha", "dead": 74, "displaced": 60000, "severity": 2, "centroid": [124.468671, 7.987227], "group": "holdout"}
+{"id": 4013, "began": "2013-01-03", "main_cause": "Heavy Rain", "dead": 8, "displaced": 1000, "severity": 1, "centroid": [121.883077, -3.867021], "group": "train"}
+{"id": 4016, "began": "2013-01-04", "main_cause": "Heavy Rain", "dead": 0, "displaced": 3180, "severity": 1, "centroid": [125.30844, 7.256988], "group": "train"}
+{"id": 4146, "began": "2014-05-30", "main_cause": "Heavy Rain", "dead": 6, "displaced": 500, "severity": 1, "centroid": [113.34169, 23.265167], "group": "train"}
+{"id": 4153, "began": "2014-06-17", "main_cause": "Heavy Rain", "dead": 0, "displaced": 35000, "severity": 1, "centroid": [124.729885, 6.771897], "group": "train"}
+{"id": 4189, "began": "2014-09-19", "main_cause": "Tropical Storm Fung-Wong", "dead": 5, "displaced": 83000, "severity": 1.5, "centroid": [121.612204, 14.657501], "group": "train"}
+{"id": 4217, "began": "2014-12-10", "main_cause": "Tropical Storm Jangmai", "dead": 53, "displaced": 80186, "severity": 1.5, "centroid": [124.903089, 8.656083], "group": "holdout"}
+{"id": 4222, "began": "2015-02-05", "main_cause": "Heavy Rain", "dead": 0, "displaced": 300, "severity": 1, "centroid": [122.861751, 0.686073], "group": "holdout"}
+{"id": 4300, "began": "2015-10-22", "main_cause": "Tropical Storm Koppu", "dead": 54, "displaced": 60000, "severity": 2, "centroid": [121.241052, 16.691018], "group": "train"}
+{"id": 4318, "began": "2015-12-12", "main_cause": "Tropical storms Melor, Onyok", "dead": 40, "displaced": 20000, "severity": 1.5, "centroid": [121.22868, 12.835664], "group": "train"}
+{"id": 4485, "began": "2017-06-12", "main_cause": "Heavy Rain", "dead": 0, "displaced": 0, "severity": 1, "centroid": [125.249498, 7.76344], "group": "holdout"}
+{"id": 4515, "began": "2017-08-23", "main_cause": "Tropical Storm Hato", "dead": 16, "displaced": 0, "severity": 2, "centroid": [114.138854, 22.385119], "group": "train"}
