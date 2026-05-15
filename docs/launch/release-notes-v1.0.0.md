@@ -11,12 +11,12 @@ two tracks are reported with separate metrics, never averaged.
   "got darker than the dry baseline", with permanent water, slope and a
   HAND-style flood-plausible-terrain mask.
 - Demo: Super Typhoon Carina / 2024 SW monsoon over Metro Manila, Bulacan,
-  Pampanga; 4 real Sentinel-1 acquisition dates; detected flood 101.8 -> 168.0
-  -> 206.7 (peak, Jul 30) -> 137.1 km2; permanent water removed from every
+  Pampanga; 4 real Sentinel-1 acquisition dates; detected flood 80.0 -> 137.8
+  -> 184.1 (peak, Jul 30) -> 115.7 km2; permanent water removed from every
   frame.
 - Validation: vs the Global Flood Database `flooded` polygon for GFD event
-  4300 (Tropical Storm Koppu / Lando, 2015) at GFD's native 250 m: IoU 0.061,
-  F1 0.071. Reported plainly. A single 10 m SAR pass days after onset vs a
+  4300 (Tropical Storm Koppu / Lando, 2015) at GFD's native 250 m: IoU 0.054,
+  F1 0.065. Reported plainly. A single 10 m SAR pass days after onset vs a
   multi-day 250 m optical product see different water; this is the documented
   limitation of the comparison, not a hidden one. Track A's value is the
   reproducible permanent-water-masked observed-extent time series.

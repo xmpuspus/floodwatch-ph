@@ -23,7 +23,7 @@
       "population": 349200,
       "built_up_km2": 13.526,
       "observed_events": 37,
-      "peak_flood_pct": 0.38,
+      "peak_flood_pct": 0.77,
       "on_official_hazard_map": null
     },
     "24221": {
@@ -33,7 +33,7 @@
       "population": 2891470,
       "built_up_km2": 85.294,
       "observed_events": 41,
-      "peak_flood_pct": 0.82,
+      "peak_flood_pct": 1.21,
       "on_official_hazard_map": null
     },
     "24222": {
@@ -43,7 +43,7 @@
       "population": 169700,
       "built_up_km2": 5.797,
       "observed_events": 17,
-      "peak_flood_pct": 2.8,
+      "peak_flood_pct": 4.17,
       "on_official_hazard_map": null
     },
     "24223": {
@@ -53,7 +53,7 @@
       "population": 2065650,
       "built_up_km2": 88.876,
       "observed_events": 42,
-      "peak_flood_pct": 3.89,
+      "peak_flood_pct": 4.54,
       "on_official_hazard_map": null
     },
     "24224": {
@@ -63,7 +63,7 @@
       "population": 75940,
       "built_up_km2": 3.471,
       "observed_events": 9,
-      "peak_flood_pct": 1.88,
+      "peak_flood_pct": 2.06,
       "on_official_hazard_map": null
     },
     "24226": {
@@ -113,7 +113,7 @@
       "population": 2552420,
       "built_up_km2": 45.507,
       "observed_events": 38,
-      "peak_flood_pct": 0.03,
+      "peak_flood_pct": 0.04,
       "on_official_hazard_map": null
     }
   }

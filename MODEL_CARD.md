@@ -35,10 +35,10 @@ The Otsu threshold is computed fresh per image pair. There are no fitted paramet
 
 | Metric | Value |
 |---|---|
-| Track A IoU vs GFD event 4300 (Koppu 2015) | `0.061` |
-| Track A F1 vs GFD event 4300 (Koppu 2015) | `0.071` |
-| Track A precision vs GFD event 4300 (Koppu 2015) | `0.085` |
-| Track A recall vs GFD event 4300 (Koppu 2015) | `0.061` |
+| Track A IoU vs GFD event 4300 (Koppu 2015) | `0.054` |
+| Track A F1 vs GFD event 4300 (Koppu 2015) | `0.065` |
+| Track A precision vs GFD event 4300 (Koppu 2015) | `0.084` |
+| Track A recall vs GFD event 4300 (Koppu 2015) | `0.053` |
 | Otsu threshold (dB, Koppu validation date) | `-21.7` |
 
 The Carina 2024 demo event has no promptly-public official flood-extent polygon; it is the ungauged demo, not the validation event. The validated method is applied to Carina without a ground-truth comparison.

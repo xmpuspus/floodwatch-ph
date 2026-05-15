@@ -6,13 +6,13 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![Reproducible build](https://img.shields.io/badge/build-deterministic%20sha256%20b7c702532f92c43f-success.svg)](#track-b--recurrence-model-reproducible)
 [![Track B F1 0.955](https://img.shields.io/badge/Track%20B%20F1-0.955%20event--disjoint-success.svg)](MODEL_CARD.md)
-[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.PENDING-blue.svg)](https://doi.org/10.5281/zenodo.PENDING)
+[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.20218731-blue.svg)](https://doi.org/10.5281/zenodo.20218731)
 
 > FloodWatch.PH: open-source flood-extent measurement and flood-recurrence classification for the Philippines from public satellite data. Flooding is temporal where rooftop solar is static, so this is an honest **two-track** system, and the two tracks are reported with **separate** metrics, never averaged. **Track A** (the demo) is classical, training-free Sentinel-1 SAR change detection: SAR penetrates typhoon cloud cover, which is the only reason a flood is observable at all during a Philippine typhoon (optical is blind exactly when it matters). **Track B** (the model) is the SolarMap analog: a frozen Google AlphaEarth Foundations Satellite Embedding (2017, 64-dim, CC-BY-4.0), a scikit-learn logistic-regression head, Platt-sigmoid calibration on an **event-disjoint** holdout (whole typhoon events held out, never random pixels), and a bit-exact reproducible build.
 
 ![FloodWatch.PH Sentinel-1 flood-extent time slider sweeping Super Typhoon Carina over Metro Manila, Bulacan and Pampanga](docs/screenshots/hero.gif)
 
-<sub>Real recording of the `/map` page. The time slider steps through 4 real Sentinel-1 acquisition dates bracketing Super Typhoon Carina (Gaemi) and the enhanced southwest monsoon, 2024. Permanent water (rivers, lakes, sea) is removed from every frame so the layer is flood, not hydrography. Detected flood peaks at 207 km² across the Metro Manila + Bulacan + Pampanga area of interest. Click a province and the sidebar returns its WorldPop population, GHSL built-up area, the share of its area flooded at the event peak, and its historical Global Flood Database event count. Carina 2024 has no promptly-public official flood-extent polygon; that absence is the civic vacuum this fills.</sub>
+<sub>Real recording of the `/map` page. The time slider steps through 4 real Sentinel-1 acquisition dates bracketing Super Typhoon Carina (Gaemi) and the enhanced southwest monsoon, 2024. Permanent water (rivers, lakes, sea) is removed from every frame so the layer is flood, not hydrography. Detected flood peaks at 184 km² across the Metro Manila + Bulacan + Pampanga area of interest. Click a province and the sidebar returns its WorldPop population, GHSL built-up area, the share of its area flooded at the event peak, and its historical Global Flood Database event count. Carina 2024 has no promptly-public official flood-extent polygon; that absence is the civic vacuum this fills.</sub>
 
 ## What's in this repo
 
@@ -122,8 +122,8 @@ Flooding is an event; rooftop solar is a fixture. A single high-resolution snaps
 ### Track A - event flood extent (Sentinel-1 SAR, classical)
 
 - Validated against the Global Flood Database `flooded` polygon for **GFD event 4300, Tropical Storm Koppu / Lando, 2015-10-22, central Luzon** (54 dead, severity 2), at GFD's native 250 m, permanent water removed from both.
-- **IoU 0.061, precision 0.085, recall 0.061, F1 0.071.** This is reported plainly because it is honest, not because it is flattering: the only Sentinel-1 acquisition is several days after GFD onset, and a single 10 m SAR pass versus a multi-day 250 m optical product see different water. Low pixel agreement against a coarse, temporally-offset optical reference is the expected, documented limitation of this comparison, not a hidden one. Track A's value is the reproducible, permanent-water-masked observed-extent time series; the trained-model claim is carried by Track B's event-disjoint metrics, not by this number.
-- The Carina 2024 demo event peaks at **207 km²** of detected flood across 4 real Sentinel-1 acquisition dates, permanent water removed from every frame.
+- **IoU 0.054, precision 0.084, recall 0.053, F1 0.065.** This is reported plainly because it is honest, not because it is flattering: the only Sentinel-1 acquisition is several days after GFD onset, and a single 10 m SAR pass versus a multi-day 250 m optical product see different water. Low pixel agreement against a coarse, temporally-offset optical reference is the expected, documented limitation of this comparison, not a hidden one. Track A's value is the reproducible, permanent-water-masked observed-extent time series; the trained-model claim is carried by Track B's event-disjoint metrics, not by this number.
+- The Carina 2024 demo event peaks at **184 km²** of detected flood across 4 real Sentinel-1 acquisition dates, permanent water removed from every frame.
 
 ### Track B - recurrence-prone classifier (AlphaEarth + logistic regression)
 

@@ -13,7 +13,7 @@ version: "1.0.0"
 date-released: "2026-05-15"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.PENDING"
+    value: "10.5281/zenodo.20218731"
     description: "Zenodo DOI for FloodWatch.PH v1.0.0."
 keywords:
   - flood mapping

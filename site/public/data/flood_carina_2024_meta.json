@@ -15,27 +15,27 @@
   "dates": [
     {
       "date": "2024-07-10",
-      "flood_area_km2": 101.81,
+      "flood_area_km2": 80.02,
       "otsu_threshold_db": -22.248,
-      "n_polygons": 52
+      "n_polygons": 71
     },
     {
       "date": "2024-07-22",
-      "flood_area_km2": 167.95,
+      "flood_area_km2": 137.81,
       "otsu_threshold_db": -20.746,
-      "n_polygons": 91
+      "n_polygons": 119
     },
     {
       "date": "2024-07-30",
-      "flood_area_km2": 206.73,
+      "flood_area_km2": 184.15,
       "otsu_threshold_db": -21.244,
-      "n_polygons": 113
+      "n_polygons": 89
     },
     {
       "date": "2024-08-03",
-      "flood_area_km2": 137.05,
+      "flood_area_km2": 115.66,
       "otsu_threshold_db": -22.746,
-      "n_polygons": 70
+      "n_polygons": 72
     }
   ]
 }

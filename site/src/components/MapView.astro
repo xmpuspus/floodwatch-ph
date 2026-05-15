@@ -21,10 +21,10 @@ const sliderDates: string[] = carina.event_dates;
       </p>
       <p>
         <strong>Color encoding (province, FAO GAUL level-2):</strong>
-        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#c0392b"></span> red = modeled-prone but under-observed in the historical record;
-        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#3a6ea5"></span> blue = charted in the historical record;
-        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#7a92b0"></span> steel = monitored;
-        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#9ca3af"></span> gray = low.
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#d1495b"></span> red = modeled-prone but under-observed in the historical record;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#5b7fa6"></span> blue = charted in the historical record;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#8aa0bc"></span> steel = monitored;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#aab4c2"></span> gray = low.
         Click any province to see exposed population, built-up area, observed historical events, and peak flood share.
       </p>
       <p>Full methodology: <a href="/methodology" class="text-accent-steel no-underline">how the flood extents were computed</a>.</p>
@@ -92,14 +92,14 @@ const sliderDates: string[] = carina.event_dates;
     <div class="absolute bottom-3 left-3 bg-white/95 border border-ink-300/40 rounded p-3 text-xs shadow-sm">
       <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1.5 font-mono">flood extent</div>
       <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700 mb-2">
-        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#1a6bb5"></span><span>observed open water (SAR)</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-60" style="background:#1391d4"></span><span>observed open water (SAR)</span>
       </div>
       <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">hazard gap (province)</div>
       <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700">
-        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#c0392b"></span><span>modeled-prone, under-observed</span>
-        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#3a6ea5"></span><span>charted in historical record</span>
-        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#7a92b0"></span><span>monitored</span>
-        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#9ca3af"></span><span>low</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#d1495b"></span><span>modeled-prone, under-observed</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#5b7fa6"></span><span>charted in historical record</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#8aa0bc"></span><span>monitored</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#aab4c2"></span><span>low</span>
       </div>
       <div id="legend-source" class="text-[10px] text-ink-500 mt-1.5 font-mono">FloodWatch.PH &middot; Sentinel-1 SAR</div>
     </div>
@@ -271,8 +271,19 @@ const sliderDates: string[] = carina.event_dates;
     if (nameEl) nameEl.textContent = areaName;
     if (locEl) locEl.textContent = region ? `${region} · Province (FAO GAUL level-2)` : "Province · FAO GAUL level-2";
 
-    const unitId = (props["id"] as string) || (props["city"] as string) || areaName;
-    const exp = (exposureUnits && exposureUnits[unitId]) || null;
+    // hazard_gap features carry the province NAME (props.city = ADM2_NAME),
+    // but barangay_exposure.json units are keyed by ADM2_CODE. Join by name.
+    let exp: Record<string, any> | null = null;
+    if (exposureUnits) {
+      const target = String(areaName).trim().toLowerCase();
+      for (const u of Object.values(exposureUnits)) {
+        const un = (u as any) && ((u as any).name ?? (u as any).city);
+        if (un && String(un).trim().toLowerCase() === target) {
+          exp = u as Record<string, any>;
+          break;
+        }
+      }
+    }
 
     const popEl = document.getElementById("brgy-pop");
     const builtEl = document.getElementById("brgy-builtup");
@@ -295,9 +306,10 @@ const sliderDates: string[] = carina.event_dates;
       eventsEl.textContent = observedEvents != null ? fmtInt(observedEvents as number) : "--";
     }
     if (floodPctEl) {
+      // peak_flood_pct is already a percentage (exposure.py: round(frac*100,2))
       const pf = exp ? exp["peak_flood_pct"] : null;
       floodPctEl.textContent =
-        pf != null ? `${((pf as number) * 100).toFixed(1)}%` : "--";
+        pf != null ? `${(pf as number).toFixed(2)}%` : "--";
     }
     if (hazardEl) {
       // v1.0 ships no official-hazard-map comparison (on_official_hazard_map
@@ -369,36 +381,21 @@ const sliderDates: string[] = carina.event_dates;
     let currentDate: string = DATES[0] ?? "";
     let playInterval: ReturnType<typeof setInterval> | null = null;
 
+
+    // Opacity expressions keyed to the selected acquisition date. All dates
+    // live in ONE source; only the per-feature opacity changes, and each
+    // paint property has a transition, so stepping the slider cross-dissolves
+    // the water (GPU-tweened) instead of swapping geometry and popping.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function floodForDate(date: string): any {
-      if (!floodData || !floodData.features) {
-        return { type: "FeatureCollection", features: [] };
-      }
-      return {
-        type: "FeatureCollection",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        features: (floodData.features as any[]).filter((f: any) => f.properties && f.properties.date === date),
-      };
+    function op(date: string, active: number): any {
+      return ["case", ["==", ["get", "date"], date], active, 0];
     }
 
     map.on("load", () => {
-      map.addSource("flood", {
-        type: "geojson",
-        data: floodForDate(currentDate),
-      });
-      map.addLayer({
-        id: "flood-fill",
-        type: "fill",
-        source: "flood",
-        paint: { "fill-color": "#1a6bb5", "fill-opacity": 0.55 },
-      });
-      map.addLayer({
-        id: "flood-line",
-        type: "line",
-        source: "flood",
-        paint: { "line-color": "#0d4a80", "line-width": 1.2, "line-opacity": 0.8 },
-      });
-
+      // ---- CONTEXT layers first (bottom): they must never bury the flood ----
+      // Hazard gap is analytical context, not a blanket. Only the civically
+      // meaningful "under-observed prone" provinces get a visible fill; the
+      // rest are a faint tint + thin outline so the flood reads on top.
       if (hazardData && hazardData.features && (hazardData.features as unknown[]).length > 0) {
         map.addSource("hazard-gap", { type: "geojson", data: hazardData });
         map.addLayer({
@@ -408,21 +405,26 @@ const sliderDates: string[] = carina.event_dates;
           paint: {
             "fill-color": [
               "match", ["get", "gap"],
-              "under_observed_prone", "#c0392b",
-              "charted", "#3a6ea5",
-              "monitored", "#7a92b0",
-              "#9ca3af",
+              "under_observed_prone", "#d1495b",
+              "charted", "#5b7fa6",
+              "monitored", "#8aa0bc",
+              "#aab4c2",
             ],
-            "fill-opacity": 0.35,
+            "fill-opacity": [
+              "match", ["get", "gap"],
+              "under_observed_prone", 0.42,
+              "charted", 0.1,
+              "monitored", 0.14,
+              0.06,
+            ],
           },
         });
         map.addLayer({
           id: "hazard-gap-line",
           type: "line",
           source: "hazard-gap",
-          paint: { "line-color": "#22324a", "line-width": 0.6, "line-opacity": 0.5 },
+          paint: { "line-color": "#3a4a63", "line-width": 0.5, "line-opacity": 0.35 },
         });
-
         map.on("click", "hazard-gap-fill", (e) => {
           const f = e.features?.[0];
           if (!f) return;
@@ -451,7 +453,53 @@ const sliderDates: string[] = carina.event_dates;
         });
       }
 
+      // ---- FLOOD on TOP (the hero): vivid water, never buried ----
+      map.addSource("flood", { type: "geojson", data: floodData ?? { type: "FeatureCollection", features: [] } });
+      map.addLayer({
+        id: "flood-glow",
+        type: "fill",
+        source: "flood",
+        paint: {
+          "fill-color": "#5ec8f5",
+          "fill-opacity": op(currentDate, 0.35),
+          "fill-antialias": true,
+        },
+      });
+      map.addLayer({
+        id: "flood-fill",
+        type: "fill",
+        source: "flood",
+        paint: {
+          "fill-color": "#1391d4",
+          "fill-opacity": op(currentDate, 0.66),
+          "fill-antialias": true,
+        },
+      });
+      map.addLayer({
+        id: "flood-line",
+        type: "line",
+        source: "flood",
+        paint: {
+          "line-color": "#063a63",
+          "line-width": 1.1,
+          "line-blur": 2.2,
+          "line-opacity": op(currentDate, 0.6),
+        },
+      });
+      // Paint transitions (runtime-valid in MapLibre; not in its paint TS type)
+      map.setPaintProperty("flood-glow", "fill-opacity-transition", { duration: 700, delay: 0 });
+      map.setPaintProperty("flood-fill", "fill-opacity-transition", { duration: 650, delay: 0 });
+      map.setPaintProperty("flood-line", "line-opacity-transition", { duration: 650, delay: 0 });
+
       map.fitBounds([[120.5, 14.4], [121.4, 15.3]], { padding: 30, animate: false, maxZoom: 11 });
+      (window as unknown as Record<string, unknown>)["__fwMap"] = map;
+      const loading = document.getElementById("map-loading");
+      if (loading) loading.style.display = "none";
+      // Readiness flag: true once basemap tiles + overlays have painted.
+      // Used by the hero recorder / E2E checks to avoid capturing a blank map.
+      map.once("idle", () => {
+        (window as unknown as Record<string, unknown>)["__fwReady"] = true;
+      });
     });
 
     // ---- slider logic --------------------------------------------------
@@ -462,11 +510,14 @@ const sliderDates: string[] = carina.event_dates;
     function setDate(idx: number): void {
       currentDate = DATES[idx] ?? "";
       if (dateDisplay) dateDisplay.textContent = currentDate;
-      const src = map.getSource("flood");
-      if (src) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (src as any).setData(floodForDate(currentDate));
-      }
+      // Cross-fade: only the per-feature opacity changes; the paint
+      // transitions tween old date out / new date in on the GPU.
+      if (map.getLayer("flood-glow"))
+        map.setPaintProperty("flood-glow", "fill-opacity", op(currentDate, 0.28));
+      if (map.getLayer("flood-fill"))
+        map.setPaintProperty("flood-fill", "fill-opacity", op(currentDate, 0.52));
+      if (map.getLayer("flood-line"))
+        map.setPaintProperty("flood-line", "line-opacity", op(currentDate, 0.5));
     }
 
     setDate(0);
@@ -485,24 +536,22 @@ const sliderDates: string[] = carina.event_dates;
       }
       if (playBtn) playBtn.textContent = "pause";
       let idx = Number(slider?.value ?? 0);
+      // Continuous loop: watch the flood grow -> peak -> recede, then repeat.
+      // 1600 ms/step lets the 650 ms cross-fade finish and hold a beat.
       playInterval = setInterval(() => {
         idx = (idx + 1) % DATES.length;
         if (slider) slider.value = String(idx);
         setDate(idx);
-        if (idx === DATES.length - 1) {
-          clearInterval(playInterval!);
-          playInterval = null;
-          if (playBtn) playBtn.textContent = "play";
-        }
-      }, 1200);
+      }, 1600);
     });
 
     // ---- layer toggles --------------------------------------------------
 
     document.getElementById("toggle-flood")?.addEventListener("change", (e) => {
       const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
-      if (map.getLayer("flood-fill")) map.setLayoutProperty("flood-fill", "visibility", vis);
-      if (map.getLayer("flood-line")) map.setLayoutProperty("flood-line", "visibility", vis);
+      for (const id of ["flood-glow", "flood-fill", "flood-line"]) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+      }
     });
 
     document.getElementById("toggle-gap")?.addEventListener("change", (e) => {

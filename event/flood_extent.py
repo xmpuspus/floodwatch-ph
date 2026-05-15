@@ -36,10 +36,12 @@ HERE = Path(__file__).resolve().parent
 DATA = HERE.parent / "site" / "public" / "data"
 VV_WATER_DB = -17.0   # absolute VV cross-check; smooth open water is darker
 MIN_FLOOD_KM2 = 0.02   # drop speckle-scale components
-VEC_SCALE = 200        # vectorization scale (m): coarser -> fewer polygons,
-                       # web-light, and safely under EE's 5000-feature getInfo cap
-VEC_MIN_KM2 = 0.05     # drop polygons below this before download
-VEC_MAX_FEATS = 3000   # hard cap (< 5000 getInfo abort); keep largest by area
+VEC_SCALE = 120        # vectorization scale (m): moderate -> fast + few
+                       # vectors; the focal-mean smooth already merged the grid
+VEC_SIMPLIFY_M = 140   # Douglas-Peucker tolerance (m): organic water curves,
+                       # not 200 m axis-aligned staircase
+VEC_MIN_KM2 = 0.06     # drop polygons below this before download
+VEC_MAX_FEATS = 2600   # hard cap (< 5000 getInfo abort); keep largest by area
 
 
 def _otsu_client(ee, band_img, aoi):
@@ -88,34 +90,49 @@ def _flood_image(ee, aoi, base_vh, ev_img, perm, slope_ok, plausible):
     thr = _otsu_client(ee, vh, aoi)            # ~ water/land valley (dB)
     thr = max(min(thr, -14.0), -24.0)          # clamp to a physical water range
     got_darker = vh.subtract(base_vh).lt(-1.0)  # newly inundated vs dry baseline
-    flood = (
+    raw = (
         vh.lt(thr)
         .And(got_darker)
         .And(perm.Not())
         .And(slope_ok)
         .And(plausible)
+    ).unmask(0)
+    # Smoothing so the published extent reads as water sheets, not a 200 m
+    # pixel staircase. ONE cheap focal-mean pass (Gaussian-like) at ~150 m
+    # both despeckles, fills pinholes, and rounds the grid edges; the heavy
+    # 4-pass mode/max/min/mean chain timed out in EE over this AOI. The
+    # client-side soft-water styling (glow + translucent fill + blurred
+    # edge) feathers the rest. Re-apply the integrity masks so smoothing can
+    # never bleed back into permanent water / implausible terrain.
+    sm = (
+        raw.focal_mean(150, "circle", "meters")
+        .gt(0.42)
+        .focal_mode(45, "circle", "meters")
+        .And(perm.Not())
+        .And(plausible)
     )
-    flood = flood.updateMask(flood).rename("flood")
-    # Drop isolated speckle. connectedPixelCount caps at maxSize, so maxSize
-    # must exceed the keep threshold or the test is always false.
-    keep = flood.connectedPixelCount(128, True).gte(8)
+    flood = sm.updateMask(sm).rename("flood")
+    keep = flood.connectedPixelCount(128, True).gte(12)
     return flood.updateMask(keep), ee.Number(thr)
 
 
 def _vectorize(ee, flood, aoi):
-    """Vectorize at a coarse scale, drop sub-VEC_MIN_KM2 polygons, simplify,
-    and keep at most VEC_MAX_FEATS largest features so the getInfo stays well
-    under EE's 5000-element abort and the web payload stays small."""
+    """Vectorize the SMOOTHED mask at a fine scale then apply a real geometric
+    simplify so edges are organic curves, not 200 m axis-aligned steps. The
+    morphological close in _flood_image already merged the grid, so a fine
+    scale here yields fewer, rounder polygons (still under EE's 5000-feature
+    getInfo cap via the area filter + count cap)."""
     min_m2 = VEC_MIN_KM2 * 1e6
     fc = (
         flood.reduceToVectors(
             geometry=aoi, scale=VEC_SCALE, geometryType="polygon",
-            eightConnected=False, maxPixels=1e9, bestEffort=True,
+            eightConnected=True, maxPixels=1e9, bestEffort=True,
         )
         .map(lambda f: f.set("a", f.area(VEC_SCALE)))
         .filter(ee.Filter.gte("a", min_m2))
         .limit(VEC_MAX_FEATS, "a", False)
-        .map(lambda f: f.simplify(VEC_SCALE).select([]))
+        # geometric simplify (Douglas-Peucker, metres) -> smooth water edges
+        .map(lambda f: f.simplify(VEC_SIMPLIFY_M).select([]))
     )
     return ee.FeatureCollection(fc).filterBounds(aoi)
 
