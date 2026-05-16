@@ -140,6 +140,15 @@ def main() -> int:
         _check_realtime_data(BASE)
         _check_lookup_page(pg, BASE)
 
+        # The v1.0 Carina time-slider / play / layer toggles moved behind the
+        # "2024 Carina demo" tab in the v1.1 tabbed /map. Switch to it before
+        # the historical-demo behavioral checks (the Now view is the default).
+        carina_tab = pg.query_selector("#view-carina")
+        check("Carina demo tab present", carina_tab is not None)
+        carina_tab.click()
+        pg.wait_for_selector("#date-slider", state="visible", timeout=30000)
+        pg.wait_for_timeout(2500)
+
         # slider scrub
         slider = pg.query_selector("#date-slider")
         disp = pg.query_selector("#slider-date-display")
@@ -221,8 +230,10 @@ def main() -> int:
             check("back button returns to empty state",
                   es and "hidden" not in (es.get_attribute("class") or ""))
 
-        # zoom controls
-        zin = pg.query_selector(".maplibregl-ctrl-zoom-in")
+        # zoom controls — scope to the visible Carina panel; the Now view map
+        # also renders a .maplibregl-ctrl-zoom-in, and its panel is hidden once
+        # the Carina tab is active, so an unscoped selector hits the hidden one.
+        zin = pg.query_selector("#panel-carina .maplibregl-ctrl-zoom-in")
         check("zoom-in control present", zin is not None)
         if zin:
             zin.click()

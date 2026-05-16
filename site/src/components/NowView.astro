@@ -428,6 +428,13 @@
 
       map.fitBounds([[120.4, 14.0], [121.55, 15.4]], { padding: 24, animate: false, maxZoom: 10 });
       (window as any).__fwNowReady = true;
+      // Default-view QA/hero handles: the Now view is the landing tab, so the
+      // locked __fwMap/__fwReady contract must reflect it (not just the hidden
+      // Carina MapView). __fwReady flips once tiles + overlays have painted.
+      (window as any).__fwMap = map;
+      map.once("idle", () => {
+        (window as any).__fwReady = true;
+      });
     });
 
     // ---- toggles ----
