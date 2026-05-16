@@ -115,12 +115,22 @@ const M = METRICS;
           nowRoot.setAttribute("data-now-active", "true");
         }
         if (!now) {
-          // The Carina MapView eager-loads on its own script; once the demo
-          // tab is opened the first time we let it resize after becoming
-          // visible. MapView keys off window.__fwMap.
+          // The Carina map is created in this (until-now hidden) panel, so
+          // MapLibre has not fired its load event yet. Resize the CARINA map
+          // specifically (window.__fwMap is the default Now map) to give it a
+          // size and trigger its load + layer build. Retry briefly in case
+          // the MapView script has not run yet on a cold first paint.
           carinaStarted = true;
-          var m = window.__fwMap;
-          if (m) setTimeout(function () { m.resize(); }, 60);
+          var tries = 0;
+          (function kick() {
+            var m = window.__fwCarinaMap;
+            if (m) {
+              m.resize();
+              setTimeout(function () { m.resize(); }, 120);
+            } else if (tries++ < 40) {
+              setTimeout(kick, 75);
+            }
+          })();
         }
       }
 

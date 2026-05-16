@@ -147,7 +147,16 @@ def main() -> int:
         check("Carina demo tab present", carina_tab is not None)
         carina_tab.click()
         pg.wait_for_selector("#date-slider", state="visible", timeout=30000)
-        pg.wait_for_timeout(2500)
+        # The Carina map lives in a panel that is display:none at page load, so
+        # MapLibre only finishes loading it after the tab is shown + resized.
+        # Wait deterministically for its handle AND its layers (not a sleep)
+        # before any Carina-map introspection, or the cold-CDN first run races.
+        pg.wait_for_function(
+            "() => window.__fwCarinaMap "
+            "&& typeof window.__fwCarinaMap.getLayer === 'function' "
+            "&& window.__fwCarinaMap.getLayer('hazard-gap-fill')",
+            timeout=30000)
+        pg.wait_for_timeout(800)
 
         # slider scrub
         slider = pg.query_selector("#date-slider")
@@ -185,7 +194,10 @@ def main() -> int:
         # province click -> sidebar populates (the dashes bug)
         # click near Bulacan centroid in screen space via map center on a known feature
         clicked = pg.evaluate("""() => {
-          const m=window.__fwMap;
+          // Carina-specific check: query the Carina map explicitly. The global
+          // __fwMap may be the Now view (the default landing map), which has
+          // no hazard-gap-fill layer.
+          const m=window.__fwCarinaMap||window.__fwMap;
           if(!m) return null;
           const fs=m.queryRenderedFeatures({layers:['hazard-gap-fill']});
           if(!fs.length) return null;

@@ -352,6 +352,12 @@ const sliderDates: string[] = carina.event_dates;
       zoom: 9,
     });
 
+    // Expose the Carina map handle SYNCHRONOUSLY (not inside on-load). This
+    // map starts in a display:none tab panel, so MapLibre will not fire its
+    // load event until the panel is shown and the map is resized. The tab
+    // switcher needs this handle to call .resize() and trigger that load.
+    (window as unknown as Record<string, unknown>)["__fwCarinaMap"] = map;
+
     map.addControl(new maplibregl.NavigationControl(), "top-right");
 
     // Load all data in parallel, degrade gracefully on missing files
@@ -478,6 +484,11 @@ const sliderDates: string[] = carina.event_dates;
       map.setPaintProperty("flood-line", "line-opacity-transition", { duration: 650, delay: 0 });
 
       map.fitBounds([[120.5, 14.4], [121.4, 15.3]], { padding: 30, animate: false, maxZoom: 11 });
+      // Dedicated Carina-view handle so QA can introspect the historical-demo
+      // map deterministically. The global __fwMap/__fwReady contract belongs
+      // to the default Now view (NowView sets it); both maps setting the
+      // global raced, leaving __fwMap pointed at whichever loaded last.
+      (window as unknown as Record<string, unknown>)["__fwCarinaMap"] = map;
       (window as unknown as Record<string, unknown>)["__fwMap"] = map;
       const loading = document.getElementById("map-loading");
       if (loading) loading.style.display = "none";
