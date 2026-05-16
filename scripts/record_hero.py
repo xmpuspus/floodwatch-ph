@@ -50,51 +50,101 @@ def main() -> int:
     frames_dir = vid_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)
     try:
+        # Fixed content clip (below the nav) kept identical across every beat
+        # so ffmpeg gets uniform frames. Three honest beats: the latest
+        # observed pass, the area/route evidence lookup, then the validated
+        # method on the Carina time series.
+        CLIP = {"x": 0, "y": 96, "width": 1320, "height": 744}
+        fi = 0
+
+        def focus(pg, sel: str) -> None:
+            # Pin the beat's subject (a map or the evidence card) just under
+            # the nav so the fixed CLIP frames it instead of page text.
+            pg.evaluate(
+                "(s)=>{const e=document.querySelector(s);if(e){"
+                "const y=e.getBoundingClientRect().top+window.scrollY-104;"
+                "window.scrollTo(0,Math.max(0,y));}}",
+                sel,
+            )
+            pg.wait_for_timeout(500)
+
+        def grab(pg, n: int, gap_ms: int) -> None:
+            nonlocal fi
+            for _ in range(n):
+                pg.screenshot(path=str(frames_dir / f"f{fi:03d}.png"), clip=CLIP)
+                pg.wait_for_timeout(gap_ms)
+                fi += 1
+
         with sync_playwright() as p:
             b = p.chromium.launch()
             pg = b.new_context(viewport={"width": 1320, "height": 900}).new_page()
+
+            # Beat 1: the Now view (default) — most recent observed Sentinel-1
+            # pass, monitored expressways and rainfall context, with the
+            # freshness banner stating it is observed and dated, not live.
             pg.goto(f"http://127.0.0.1:{PORT}/map", wait_until="networkidle")
-            # Wait until MapLibre has actually rendered (basemap tiles loaded),
-            # not just a fixed sleep -- the old GIF was black because tiles had
-            # not painted yet.
             pg.wait_for_selector("canvas.maplibregl-canvas", timeout=30000)
             try:
                 pg.wait_for_function(
-                    "() => { const m=document.querySelector('.maplibregl-map');"
-                    "return m && window.__fwReady === true; }",
-                    timeout=8000,
-                )
+                    "() => window.__fwReady === true", timeout=20000)
             except Exception:  # noqa: BLE001
                 pass
-            pg.wait_for_timeout(7000)  # tiles + flood first paint settle
-            mapEl = pg.query_selector("#map")
-            box = mapEl.bounding_box()
-            mapEl.scroll_into_view_if_needed()
-            pg.wait_for_timeout(800)
-            box = pg.query_selector("#map").bounding_box()
-            clip = {"x": box["x"], "y": box["y"],
-                    "width": box["width"], "height": box["height"]}
-            # Hero = the pure SAR flood time-series. Turn the analytical
-            # hazard-gap province layer OFF so the animating water is the
-            # unambiguous subject (it is a toggle on the live site too).
-            gap = pg.query_selector("#toggle-gap")
-            if gap and gap.is_checked():
-                gap.click()
+            pg.wait_for_timeout(6000)  # tiles + overlays first paint settle
+            focus(pg, "#now-map")
+            grab(pg, 16, 300)
+
+            # Beat 2: the area/route lookup — type a gazetteer place, pick a
+            # suggestion, show the layered as-of-dated evidence card.
+            pg.goto(f"http://127.0.0.1:{PORT}/lookup",
+                    wait_until="networkidle")
+            pg.wait_for_timeout(1500)
+            q = pg.query_selector("#al-q")
+            if q:
+                q.click()
+                q.type("SLEX Alabang", delay=70)
                 pg.wait_for_timeout(900)
-            play = pg.query_selector("#play-btn")
-            if play:
-                play.click()
-            # Tightly-framed map screenshots through ~2 PLAY loops so the GIF
-            # shows the smooth cross-fade water (grow -> peak -> recede), no
-            # page chrome, clean aspect for the README.
-            n = 56
-            for i in range(n):
-                pg.screenshot(path=str(frames_dir / f"f{i:03d}.png"), clip=clip)
-                pg.wait_for_timeout(260)
+                first = pg.query_selector("#al-suggest li")
+                if first:
+                    first.click()
+                else:
+                    pg.keyboard.press("Enter")
+                try:
+                    pg.wait_for_selector("#al-result:not(.hidden)",
+                                         timeout=8000)
+                except Exception:  # noqa: BLE001
+                    pass
+                pg.wait_for_timeout(1200)
+                focus(pg, "#al-result")
+            grab(pg, 14, 320)
+
+            # Beat 3: the Carina 2024 validated-method time series. Hazard-gap
+            # context off so the animating water is the unambiguous subject.
+            pg.goto(f"http://127.0.0.1:{PORT}/map", wait_until="networkidle")
+            ct = pg.query_selector("#view-carina")
+            if ct:
+                ct.click()
+                try:
+                    pg.wait_for_function(
+                        "() => window.__fwCarinaMap "
+                        "&& window.__fwCarinaMap.getLayer "
+                        "&& window.__fwCarinaMap.getLayer('hazard-gap-fill')",
+                        timeout=30000)
+                except Exception:  # noqa: BLE001
+                    pass
+                pg.wait_for_timeout(3500)
+                gap = pg.query_selector("#toggle-gap")
+                if gap and gap.is_checked():
+                    gap.click()
+                    pg.wait_for_timeout(900)
+                play = pg.query_selector("#play-btn")
+                if play:
+                    play.click()
+            focus(pg, "#map")
+            grab(pg, 44, 260)
             b.close()
-        # sanity: a mid frame must not be mostly black (tiles failed)
+        # sanity: a Now-view frame must not be mostly black (tiles failed)
         from PIL import Image
-        mid = Image.open(frames_dir / "f028.png").convert("L")
+        mid = Image.open(frames_dir / "f008.png").convert("L")
         px = list(mid.getdata())
         dark = sum(1 for v in px if v < 28) / len(px)
         if dark > 0.6:
