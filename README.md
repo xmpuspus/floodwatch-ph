@@ -8,26 +8,28 @@
 [![Track B F1 0.955](https://img.shields.io/badge/Track%20B%20F1-0.955%20event--disjoint-success.svg)](MODEL_CARD.md)
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.20218731-blue.svg)](https://doi.org/10.5281/zenodo.20218731)
 
-> FloodWatch.PH: open-source flood-extent measurement and flood-recurrence classification for the Philippines from public satellite data. Flooding is temporal where rooftop solar is static, so this is an honest **two-track** system, and the two tracks are reported with **separate** metrics, never averaged. **Track A** (the demo) is classical, training-free Sentinel-1 SAR change detection: SAR penetrates typhoon cloud cover, which is the only reason a flood is observable at all during a Philippine typhoon (optical is blind exactly when it matters). **Track B** (the model) is the SolarMap analog: a frozen Google AlphaEarth Foundations Satellite Embedding (2017, 64-dim, CC-BY-4.0), a scikit-learn logistic-regression head, Platt-sigmoid calibration on an **event-disjoint** holdout (whole typhoon events held out, never random pixels), and a bit-exact reproducible build.
+> FloodWatch.PH: open-source flood-extent measurement and flood-recurrence classification for the Philippines from public satellite data. Flooding is temporal where rooftop solar is static, so this is an honest **two-track** system, and the two tracks are reported with **separate** metrics, never averaged. **Track A** (the demo) is classical, training-free Sentinel-1 SAR change detection: SAR penetrates typhoon cloud cover, which is the only reason a flood is observable at all during a Philippine typhoon (optical is blind exactly when it matters). **Track B** (the model) is the SolarMap analog: a frozen Google AlphaEarth Foundations Satellite Embedding (2017, 64-dim, CC-BY-4.0), a scikit-learn logistic-regression head, Platt-sigmoid calibration on an **event-disjoint** holdout (whole typhoon events held out, never random pixels), and a bit-exact reproducible build. As of **v1.1.0** the `/map` page also has a **Now view**: the most recent usable Sentinel-1 pass over the Greater Metro Manila and Central Luzon corridor (observed, dated, not live and not a forecast), monitored expressways intersected against that observed extent, and GPM rainfall accumulation shown as dated context. A fully client-side `/lookup` returns layered as-of-dated evidence for a place or corridor, never a verdict. These are complementary to, and never a replacement for, PAGASA, Project NOAH and Google Flood Hub.
 
-![FloodWatch.PH Sentinel-1 flood-extent time slider sweeping Super Typhoon Carina over Metro Manila, Bulacan and Pampanga](docs/screenshots/hero.gif)
+![FloodWatch.PH: the Now view of the most recent observed Sentinel-1 pass, the area and route evidence lookup, and the Super Typhoon Carina 2024 time series](docs/screenshots/hero.gif)
 
-<sub>Real recording of the `/map` page. The time slider steps through 4 real Sentinel-1 acquisition dates bracketing Super Typhoon Carina (Gaemi) and the enhanced southwest monsoon, 2024. Permanent water (rivers, lakes, sea) is removed from every frame so the layer is flood, not hydrography. Detected flood peaks at 184 km² across the Metro Manila + Bulacan + Pampanga area of interest. Click a province and the sidebar returns its WorldPop population, GHSL built-up area, the share of its area flooded at the event peak, and its historical Global Flood Database event count. Carina 2024 has no promptly-public official flood-extent polygon; that absence is the civic vacuum this fills.</sub>
+<sub>Real recording of the running site. Three beats: the **Now view** (the most recent usable Sentinel-1 pass over the Greater Metro Manila and Central Luzon corridor, with monitored expressways and rainfall context, observed and dated, not live); the **`/lookup`** area and route check returning layered as-of-dated evidence (it never says an area will or will not flood); and the **2024 Carina** historical time series stepping through 4 real Sentinel-1 acquisition dates bracketing Super Typhoon Carina (Gaemi) and the enhanced southwest monsoon. Permanent water (rivers, lakes, sea) is removed from every flood frame so the layer is flood, not hydrography. Carina 2024 has no promptly-public official flood-extent polygon; that absence is the civic vacuum this fills.</sub>
 
 ## What's in this repo
 
-- **`event/`**: Track A, the Sentinel-1 SAR event flood-extent pipeline. `flood_extent.py` pulls `COPERNICUS/S1_GRD` (VH, IW mode) for an event window, builds a dry pre-event baseline, applies Otsu thresholding to the event VH image, gates on "got darker than the dry baseline" (so a permanently dark surface is not called flood), then removes permanent water (`permanent_water.py`: JRC Global Surface Water occurrence >= 50% plus MERIT Hydro water cells), removes steep slope, and applies a HAND-style flood-plausible-terrain mask that suppresses the well-known Philippine rice-agriculture SAR false positive. Output is one per-timestep flood-polygon GeoJSON per event. `events.json` is the event registry.
+- **`event/`**: Track A, the Sentinel-1 SAR flood-extent pipeline. `flood_extent.py` pulls `COPERNICUS/S1_GRD` (VH, IW mode) for an event window, builds a dry pre-event baseline, applies Otsu thresholding to the event VH image, gates on "got darker than the dry baseline" (so a permanently dark surface is not called flood), then removes permanent water (`permanent_water.py`: JRC Global Surface Water occurrence >= 50% plus MERIT Hydro water cells), removes steep slope, and applies a HAND-style flood-plausible-terrain mask that suppresses the well-known Philippine rice-agriculture SAR false positive. `flood_latest.py` runs the identical detection on the most recent usable Sentinel-1 acquisition over the corridor and writes `flood_latest.geojson` with a `scan_status` (`ok` / `no_usable_pass` / `degenerate_threshold` / `low_confidence`) and an `as_of` date, emitting an honest empty state rather than a fabricated polygon. `events.json` is the event registry.
 - **`model/`**: Track B, the AlphaEarth recurrence model. `bootstrap_labels.py` queries the Global Flood Database for every Philippine flood event and builds the event-disjoint split (40 train, 17 holdout events; `holdout_events.json`, hash-pinned). `fetch_embeddings.py` samples the frozen AlphaEarth 2017 embedding at flood-recurrence-labelled points (permanent water removed) into the committed `embeddings/floodwatch_embeddings_v1.npz` cache (~1 MB, in git). `train.py` fits the logistic-regression head; `calibrate.py` fits Platt sigmoid on the event-disjoint holdout and emits the national recurrence-prone point layer.
-- **`pipeline/`**: the exposure and civic-gap join. `exposure.py` aggregates WorldPop population and GHSL built-up area per province over the event AOI. `hazard_gap.py` is the civic layer: the gap between modeled flood-proneness (Track B) and the historical observed flood record (GFD).
-- **`site/`**: the Astro static site. `/map` is the Track A time-slider demo; `/methodology`, `/recurrence`, `/privacy`, `/faq`, `/safety` document the two tracks, the honest separate metrics, and the RA 10173 posture.
-- **`scripts/`**: the integrity gates. `check_permanent_water.py` (every published flood file is permanent-water-masked), `check_event_disjoint.py` (no holdout event leaks into training; split hash matches), `check_no_pii.py` (outputs are province aggregates only), `verify_release.py` (full pre-release runner), `verify_clf.py` (hash-verify a joblib before `joblib.load`).
+- **`realtime/`**: GPM IMERG V07 rolling 24h and 72h rainfall accumulation over the Track B modeled-prone areas, written to `current_risk.geojson` as a labeled, as-of-UTC context flag. It bridges the Sentinel-1 revisit gap and is explicitly not a score and not a flood forecast.
+- **`pipeline/`**: the exposure and civic-gap joins. `exposure.py` aggregates WorldPop population and GHSL built-up area per province over the event AOI. `hazard_gap.py` is the modeled-vs-observed civic gap (Track B vs GFD). `road_exposure.py` intersects the OpenStreetMap motorway / trunk / named-expressway network (SLEX, NLEX, SCTEX, Skyway, CAVITEX, TPLEX and others) with the latest observed extent, per segment, carrying the same `scan_status`.
+- **`site/`**: the Astro static site. `/map` has a default **Now view** (the most recent observed pass, expressways and rainfall context) and a clearly labeled 2024 Carina historical tab, with freshness banners read live from each file's `_meta`. `/lookup` is the fully client-side area and route evidence check (bundled offline gazetteer, no third-party geocoder, the query never leaves the browser). `/methodology`, `/recurrence`, `/privacy`, `/faq`, `/safety` document the tracks, the honest separate metrics, and the RA 10173 posture.
+- **`scripts/`**: the integrity gates and ops. `check_permanent_water.py`, `check_event_disjoint.py`, `check_no_pii.py`, `verify_release.py`, `verify_clf.py`, plus `gate_realtime.py` (blocks broken or fabricated realtime data while allowing honest-empty states), `deploy_realias.py` (explicit public-alias repoint, rollback, GitHub-issue pager) and `qa_live.py` (behavioral live verification, 49 checks).
+- **`.github/workflows/refresh.yml`**: a daily cron (plus manual dispatch) that regenerates the observed layers, runs the gate, deploys, re-aliases and self-verifies. Runbook in `docs/ops/runbook.md`.
 - **`tests/`**: pytest suite, no network.
 
 ## What this is not
 
-- Not a real-time flood warning system. Sentinel-1 has a multi-day revisit; each slider frame is a real past acquisition, not a live feed. For warnings, use PAGASA and your LGU DRRM office.
-- Not a substitute for the official hazard maps. The official UP NOAH / Project NOAH / PAGASA / MGB layers are the authoritative planning instruments. FloodWatch is an independent, reproducible *observation* of where water actually was, and a *model* of where it recurs.
-- Not address-level. Exposure is aggregated to province. No household geometry, no per-dwelling flood status, no PII. Barangay resolution is a documented v1.1 refinement (Philippine barangay polygons are not a clean public asset).
+- Not a real-time flood warning system and not a forecast. Sentinel-1 has a multi-day revisit (roughly 6 to 12 days); the Now view and every slider frame is a real past acquisition labeled with its as-of date, not a live feed. The rainfall layer is dated accumulation context, not a prediction. The `/lookup` returns dated evidence and never says an area will or will not flood. For warnings and live conditions, use PAGASA, MMDA Flood Control and your LGU DRRM office.
+- Not a substitute for the official hazard maps or forecasts. UP NOAH / Project NOAH / PAGASA / MGB and Google Flood Hub are the authoritative instruments. FloodWatch is an independent, reproducible *observation* of where water actually was, and a *model* of where it recurs, complementary to and never a replacement for those systems.
+- Not address-level. Exposure is aggregated to province. No household geometry, no per-dwelling flood status, no PII. Barangay resolution is a documented future refinement (Philippine barangay polygons are not a clean public asset).
 - Not an accusation. FloodWatch publishes statistical and observational indicators derived from public satellite data. Patterns may have legitimate explanations and figures warrant independent verification.
 
 ## Privacy and responsible use
@@ -141,9 +143,11 @@ This dataset only matters because the policy context is contested. Philippine co
 floodwatch-ph/
 |-- event/                  # Track A: Sentinel-1 SAR event flood extent
 |   |-- flood_extent.py     # Otsu + change gate + perm-water + HAND-style mask
+|   |-- flood_latest.py     # same detection on the most recent usable S1 pass
 |   |-- permanent_water.py  # the integrity mask (decision 2)
 |   |-- fetch_s1_event.py   # S1 acquisition-coverage probe
 |   `-- events.json         # event registry (demo + validation)
+|-- realtime/               # GPM IMERG rainfall context over modeled-prone
 |-- model/                  # Track B: AlphaEarth embeddings + recurrence head
 |   |-- embeddings/floodwatch_embeddings_v1.npz   # committed cache (in git)
 |   |-- bootstrap_labels.py # GFD -> labels + event-disjoint split
@@ -151,13 +155,14 @@ floodwatch-ph/
 |   |-- train.py  calibrate.py
 |   |-- holdout_events.json # event-disjoint split (hash-pinned)
 |   `-- recurrence_clf_v1.joblib                   # committed, hash-verified
-|-- pipeline/               # exposure + civic gap join
-|   |-- exposure.py  hazard_gap.py
-|-- site/                   # Astro static site, MapLibre time slider
-|   |-- public/data/        # flood timesteps + recurrence + gap + SCHEMA.md
+|-- pipeline/               # exposure + civic gap + expressway exposure
+|   |-- exposure.py  hazard_gap.py  road_exposure.py
+|-- site/                   # Astro static site (Now view + Carina + /lookup)
+|   |-- public/data/        # flood timesteps + recurrence + gap + realtime
 |   |-- src/data/events.json # mirrored from event/events.json (Vercel boundary)
 |   `-- vercel.json
-|-- scripts/                # integrity gates + release runner
+|-- scripts/                # integrity gates + release runner + ops
+|   |-- gate_realtime.py  deploy_realias.py  qa_live.py
 |-- tests/                  # pytest, no network
 |-- docs/
 |   |-- research/floodwatch-spec.md     # the locked end-to-end spec
@@ -166,7 +171,7 @@ floodwatch-ph/
 |-- MODEL_CARD.md  CITATION.cff  CHANGELOG.md  CONTRIBUTING.md
 |-- CODE_OF_CONDUCT.md  SECURITY.md  LICENSE  Makefile  Dockerfile
 |-- requirements.txt  pyproject.toml  .zenodo.json  README.md
-`-- .github/workflows/ci.yml
+`-- .github/workflows/   # ci.yml + refresh.yml (daily observed-layer refresh)
 ```
 
 ## Methodology in one paragraph
