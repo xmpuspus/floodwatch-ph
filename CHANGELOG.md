@@ -4,6 +4,85 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-16 - near-real-time observed layers, area/route lookup
+
+v1.1.0 adds a near-real-time "Now" view next to the kept v1.0 Carina-2024
+historical demo. Everything new is observed and dated, never a forecast. The
+public data chain stays 100% open (Sentinel-1, GPM IMERG, OpenStreetMap); no
+paid dependencies; the permanent-water and event-disjoint CI gates are
+unchanged and the recurrence classifier sha256 is still b7c702532f92c43f.
+
+### Added
+
+- **Track A latest pass.** `event/fetch_s1_latest.py` + `event/flood_latest.py`
+  auto-detect the most recent usable Sentinel-1 acquisition over the Greater
+  Metro Manila + Central Luzon corridor and run the identical Otsu +
+  permanent-water + HAND detection, writing `flood_latest.geojson` with
+  `_meta.scan_status` (ok / no_usable_pass / degenerate_threshold /
+  low_confidence) and `_meta.as_of`. The first generated layer is the
+  2026-05-15 pass: scan_status ok, 27 flood polygons, ~31 km2. No-pass,
+  degenerate-Otsu and implausible-count guards emit an honest empty state
+  rather than a fabricated polygon or a blank-map that reads as "clear".
+- **Rainfall context.** `realtime/` derives 24 h and 72 h GPM IMERG V07
+  accumulation over the Track B modeled-prone mask into
+  `current_risk.geojson`, labeled rainfall accumulation as of a UTC stamp.
+  It is context for the Sentinel-1 revisit gap, explicitly not a score and
+  not a flood forecast. Bands are PAGASA advisory thresholds used as labels
+  only, with the source cited in `_meta`.
+- **Expressway / road flood-exposure.** `pipeline/road_exposure.py`
+  intersects the latest observed extent with the OpenStreetMap motorway /
+  trunk / named-expressway network (SLEX, NLEX, SCTEX, Skyway, CAVITEX,
+  TPLEX, NAIAX, CALAX, C5, EDSA, Commonwealth) into
+  `road_flood_exposure.geojson` with per-segment exposure
+  (flooded / near / clear / unknown) and a per-expressway summary. The
+  2026-05-15 pass honestly shows zero monitored segments intersecting the
+  observed extent (the detected water was rural Pampanga / Bulacan farmland).
+- **Area / route flood-prone lookup** (`/lookup`). A fully client-side check:
+  a bundled 99-entry Greater Metro Manila gazetteer (public OSM / PSA points)
+  matched in the browser, no third-party geocoder, the typed query never
+  leaves the browser and is never logged (RA-10173-safe; preserves the
+  published no-geocoders CSP posture). It returns five layered, as-of-dated
+  evidence rows (Track B recurrence, GFD 2002-2017 history, latest Sentinel-1
+  status, GPM rainfall context, nearby flagged expressway segments). It never
+  outputs a verdict, a score, or a "will / will not flood" claim, and points
+  to PAGASA, MMDA Flood Control and LGU DRRMO for live conditions.
+- **Now view + freshness banners.** `/map` now has a default Now view and a
+  clearly-labeled 2024 Carina historical tab. A site-wide banner states what
+  is shown and its as-of date, read dynamically from each file's `_meta`, and
+  says plainly when a satellite pass was not usable.
+- **Scheduled refresh + ops.** `.github/workflows/refresh.yml` regenerates all
+  three layers on a daily cron with a least-privilege, secret-scoped,
+  SHA-pinned workflow. `scripts/gate_realtime.py` blocks broken or fabricated
+  data from deploying while allowing honest-empty states through.
+  `scripts/deploy_realias.py` makes the public-alias repoint explicit and
+  verified, with rollback and a GitHub-issue pager on failure. Runbook in
+  `docs/ops/runbook.md`.
+- **Related-work and defensibility** (`docs/research/related-work.md`). Prior
+  art surveyed against Google Flood Hub (Philippine coverage is riverine
+  forecast only, not pluvial or urban), Project NOAH, PAGASA, Copernicus EMS
+  GFM, the Global Flood Database and others. FloodWatch is positioned as an
+  independent, open, reproducible observed-extent and recurrence-vs-record
+  measurement, complementary to and never a replacement for those systems.
+
+### Changed
+
+- `/map` payload is lazy-loaded: the default Now view transfers about 289 KB
+  gzip versus about 897 KB before; the recurrence and national hazard layers
+  load only when their toggle or the Carina tab is opened.
+- `earthengine-api` pinned to 1.7.26 across root and pipeline requirements;
+  `pyproj==3.6.1` added for the metric-CRS road intersection.
+
+### Fixed
+
+- Copy audit corrections: the embedding scale is stated as its true 300 m
+  (not 10 m) everywhere, the embeddings cache size as about 1 MB (not
+  ~10 MB), v1.0 aggregation as province (not barangay), and several stale
+  CHANGELOG and spec figures reconciled to the generated data.
+- The locked `__fwMap` / `__fwReady` deploy-verification handles are exposed
+  from the default Now view, and the Carina demo map now renders reliably
+  when its tab is opened (it is created in a hidden panel, which previously
+  left MapLibre's load event unfired).
+
 ## [1.0.0] - 2026-05-15 - inaugural public release
 
 v1.0.0 ships one calibrated Track A demo event, the Track A IoU/F1 validation

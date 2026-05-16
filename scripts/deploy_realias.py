@@ -51,6 +51,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -113,6 +114,14 @@ def _current_prod_url(args: argparse.Namespace, site: Path, dry: bool) -> str | 
 def _deploy(args: argparse.Namespace, site: Path, dry: bool) -> str:
     _run(_vercel_base(args) + ["pull", "--yes", "--environment=production"],
          site, dry=dry)
+    # `vercel build` reuses a cached .vercel/output and Astro reuses dist/ and
+    # .astro/, so a source change can build locally yet ship the OLD bundle
+    # (HTTP 200 and __fwReady still pass because they exist in the stale JS;
+    # only the content-hash in the script src reveals it). Clear them so every
+    # refresh deploys the code that is actually on disk.
+    if not dry:
+        for stale in (".vercel/output", "dist", ".astro", "node_modules/.vite"):
+            shutil.rmtree(site / stale, ignore_errors=True)
     _run(_vercel_base(args) + ["build", "--prod"], site, dry=dry)
     out = _run(_vercel_base(args) + ["deploy", "--prebuilt", "--prod", "--yes"],
                site, dry=dry)

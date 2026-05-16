@@ -398,7 +398,12 @@ const sliderDates: string[] = carina.event_dates;
       return ["case", ["==", ["get", "date"], date], active, 0];
     }
 
-    map.on("load", () => {
+    // This handler is registered AFTER `await Promise.all([...])` above, so on
+    // a slow connection the map's load event can fire during that await and be
+    // missed (deterministic on the live CDN, hidden locally where the fetch is
+    // instant). Run it directly if the map is already loaded; the MapLibre
+    // `load` event fires exactly once so this never double-runs.
+    const __carinaOnLoad = () => {
       // ---- CONTEXT layers first (bottom): they must never bury the flood ----
       // Hazard gap is analytical context, not a blanket. Only the civically
       // meaningful "under-observed prone" provinces get a visible fill; the
@@ -497,7 +502,33 @@ const sliderDates: string[] = carina.event_dates;
       map.once("idle", () => {
         (window as unknown as Record<string, unknown>)["__fwReady"] = true;
       });
-    });
+    };
+    // This init runs after `await Promise.all([...])`. On the live CDN the map
+    // finishes loading DURING that await, so any edge-triggered hook (`load`,
+    // `idle`, `styledata`) attached now can already have fired and be missed,
+    // and a single isStyleLoaded() check loses if it is momentarily false.
+    // Poll instead: it cannot miss a state transition. The flag makes the
+    // body run exactly once even if a stray event also fires.
+    let __carinaDone = false;
+    const __runCarinaOnce = (): void => {
+      if (__carinaDone) return;
+      __carinaDone = true;
+      __carinaOnLoad();
+    };
+    let __carinaTries = 0;
+    const __pollCarina = (): void => {
+      if (__carinaDone) return;
+      if (map.isStyleLoaded()) {
+        __runCarinaOnce();
+      } else if (__carinaTries++ < 200) {
+        setTimeout(__pollCarina, 50);
+      } else {
+        // Last resort after 10s: the style query can stay false on some
+        // engines even when usable; attempt once so the demo is not blank.
+        __runCarinaOnce();
+      }
+    };
+    __pollCarina();
 
     // ---- slider logic --------------------------------------------------
 
