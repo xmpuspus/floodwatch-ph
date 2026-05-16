@@ -15,7 +15,7 @@ const M = METRICS;
       Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
     </p>
 
-    <h2 class="text-xl mt-10 mb-3">Track A &mdash; event flood extent (the demo)</h2>
+    <h2 class="text-xl mt-10 mb-3">Track A: event flood extent (the demo)</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
       <strong>Sensor:</strong> Sentinel-1 C-band SAR (<code>COPERNICUS/S1_GRD</code>), VV and VH polarization, IW mode, Copernicus open license. SAR penetrates typhoon cloud cover. It is the only sensor that sees the ground during a Philippine flood. Sentinel-2 optical is cloud-blocked on purpose during typhoons; omitting it from Track A is an intentional honesty decision, not a gap.
     </p>
@@ -51,17 +51,17 @@ const M = METRICS;
       Track A is parameter-free; Otsu has no fitted parameters. The event-disjoint holdout discipline (decision 1) governs Track B. Track A does not require a holdout split for the detection method itself.
     </p>
 
-    <h2 class="text-xl mt-10 mb-3">Track B &mdash; recurrence-prone classifier</h2>
+    <h2 class="text-xl mt-10 mb-3">Track B: recurrence-prone classifier</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
       Track B answers a different question: which places flood again and again, independent of any single event? This is the SolarMap analog: a trained classifier on a frozen embedding, reproducible and hash-verified.
     </p>
 
     <h3 class="text-lg mt-6 mb-2">Architecture</h3>
     <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
-      <li><strong>Embedding:</strong> Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), 10 m resolution, 64-dim unit-norm vectors, annual 2017-2025, CC-BY-4.0. Fixed at the 2017 annual (contemporaneous with the GFD record end). Server-side Earth Engine reduction to a small client download; no bulk raw-imagery fetch.</li>
+      <li><strong>Embedding:</strong> Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), natively 10 m, sampled here at <strong>300 m</strong> (mean-aggregated per cell; flood recurrence is an area property), 64-dim unit-norm vectors, annual 2017-2025, CC-BY-4.0. Fixed at the 2017 annual (contemporaneous with the GFD record end). Server-side Earth Engine reduction to a small client download; no bulk raw-imagery fetch.</li>
       <li><strong>Head:</strong> <code>sklearn.linear_model.LogisticRegression</code> on the 64-dim embedding. Platt-sigmoid calibrated on the event-disjoint holdout. Bit-exact, approximately 30 seconds on any laptop, no GPU, deterministic, hash-verified.</li>
       <li><strong>Labels:</strong> Positives = pixels inside GFD historical flood-event footprints (2002-2017, 57 Philippines events), permanent water removed. Negatives = land pixels never flooded across all GFD events.</li>
-      <li><strong>Committed cache:</strong> <code>model/embeddings/floodwatch_embeddings_v1.npz</code> (~10 MB). <code>make train</code> runs offline from this cache. No network required after the initial EE pull.</li>
+      <li><strong>Committed cache:</strong> <code>model/embeddings/floodwatch_embeddings_v1.npz</code> (~1 MB). <code>make train</code> runs offline from this cache. No network required after the initial EE pull.</li>
     </ul>
 
     <h3 class="text-lg mt-6 mb-2">Event-disjoint holdout (decision 1)</h3>

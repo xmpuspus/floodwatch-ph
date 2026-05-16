@@ -356,10 +356,11 @@ const sliderDates: string[] = carina.event_dates;
 
     // Load all data in parallel, degrade gracefully on missing files
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [floodData, hazardData, recurrenceData, exposureData]: [any, any, any, any] = await Promise.all([
+    // recurrence_prone.geojson (~1.5 MB) is OFF by default. Don't pull it on
+    // load; fetch lazily on the first "Recurrence-prone overlay" toggle.
+    const [floodData, hazardData, exposureData]: [any, any, any] = await Promise.all([
       safeFetch(`${DATA_BASE}/flood_carina_2024.geojson`),
       safeFetch(`${DATA_BASE}/hazard_gap.geojson`),
-      safeFetch(`${DATA_BASE}/recurrence_prone.geojson`),
       safeFetch(`${DATA_BASE}/barangay_exposure.json`),
     ]);
 
@@ -435,23 +436,8 @@ const sliderDates: string[] = carina.event_dates;
         map.on("mouseleave", "hazard-gap-fill", () => { map.getCanvas().style.cursor = ""; });
       }
 
-      if (recurrenceData && recurrenceData.features && (recurrenceData.features as unknown[]).length > 0) {
-        map.addSource("recurrence", { type: "geojson", data: recurrenceData });
-        map.addLayer({
-          id: "recurrence-dots",
-          type: "circle",
-          source: "recurrence",
-          layout: { visibility: "none" },
-          filter: ["==", ["get", "prone"], true],
-          paint: {
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 4, 16, 6],
-            "circle-color": "#d97757",
-            "circle-opacity": 0.7,
-            "circle-stroke-color": "#ffffff",
-            "circle-stroke-width": 0.8,
-          },
-        });
-      }
+      // recurrence-dots is added lazily on first toggle (see below) so the
+      // ~1.5 MB file is never fetched unless the user asks for it.
 
       // ---- FLOOD on TOP (the hero): vivid water, never buried ----
       map.addSource("flood", { type: "geojson", data: floodData ?? { type: "FeatureCollection", features: [] } });
@@ -560,9 +546,34 @@ const sliderDates: string[] = carina.event_dates;
       if (map.getLayer("hazard-gap-line")) map.setLayoutProperty("hazard-gap-line", "visibility", vis);
     });
 
-    document.getElementById("toggle-recurrence")?.addEventListener("change", (e) => {
-      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
-      if (map.getLayer("recurrence-dots")) map.setLayoutProperty("recurrence-dots", "visibility", vis);
+    // Lazy: fetch and add the ~1.5 MB recurrence layer on first activation.
+    let recurrenceLoading = false;
+    document.getElementById("toggle-recurrence")?.addEventListener("change", async (e) => {
+      const checked = (e.target as HTMLInputElement).checked;
+      if (map.getLayer("recurrence-dots")) {
+        map.setLayoutProperty("recurrence-dots", "visibility", checked ? "visible" : "none");
+        return;
+      }
+      if (!checked || recurrenceLoading) return;
+      recurrenceLoading = true;
+      const recurrenceData = await safeFetch(`${DATA_BASE}/recurrence_prone.geojson`);
+      recurrenceLoading = false;
+      if (recurrenceData && recurrenceData.features && (recurrenceData.features as unknown[]).length > 0) {
+        map.addSource("recurrence", { type: "geojson", data: recurrenceData });
+        map.addLayer({
+          id: "recurrence-dots",
+          type: "circle",
+          source: "recurrence",
+          filter: ["==", ["get", "prone"], true],
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 4, 16, 6],
+            "circle-color": "#d97757",
+            "circle-opacity": 0.7,
+            "circle-stroke-color": "#ffffff",
+            "circle-stroke-width": 0.8,
+          },
+        });
+      }
     });
 
     // ---- sidebar back button -------------------------------------------
@@ -576,13 +587,38 @@ const sliderDates: string[] = carina.event_dates;
     });
   }
 
-  init().catch((err: unknown) => {
-    console.error("FloodWatch map init error:", err);
-    const mapEl = document.getElementById("map");
-    if (mapEl) {
-      mapEl.innerHTML = '<div class="p-6 text-sm text-ink-500">Map data is loading. If this persists, check the browser console.</div>';
-    }
-  });
+  function runInit(): void {
+    init().catch((err: unknown) => {
+      console.error("FloodWatch map init error:", err);
+      const mapEl = document.getElementById("map");
+      if (mapEl) {
+        mapEl.innerHTML = '<div class="p-6 text-sm text-ink-500">Map data is loading. If this persists, check the browser console.</div>';
+      }
+    });
+  }
+
+  // PERF (audit): the Carina demo eager-loaded ~4.5 MB of GeoJSON on every
+  // /map visit, even when the default view is the lightweight Now view. Defer
+  // the whole init (and therefore every fetch) until the Carina panel is
+  // actually shown. On the standalone /map (no panel wrapper) it runs at once.
+  const carinaPanel = document.getElementById("panel-carina");
+  let mapStarted = false;
+  function maybeInitCarina(): void {
+    if (mapStarted) return;
+    // Visible when there is no panel wrapper, or the wrapper is not hidden.
+    if (carinaPanel && carinaPanel.classList.contains("hidden")) return;
+    mapStarted = true;
+    runInit();
+  }
+  if (carinaPanel) {
+    new MutationObserver(maybeInitCarina).observe(carinaPanel, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    maybeInitCarina();
+  } else {
+    runInit();
+  }
 </script>
 
 <style>

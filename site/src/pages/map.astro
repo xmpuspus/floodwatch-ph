@@ -1,32 +1,133 @@
 ---
 import Base from "../layouts/Base.astro";
 import MapView from "../components/MapView.astro";
+import NowView from "../components/NowView.astro";
+import FreshnessBanner from "../components/FreshnessBanner.astro";
 import { METRICS } from "../data/metrics";
 const M = METRICS;
 ---
-<Base title="flood extent map · FloodWatch.PH" pathname="/map" description="Interactive Sentinel-1 SAR flood extent time-slider for Super Typhoon Carina 2024. Province hazard gap layer and recurrence-prone overlay over Metro Manila, Bulacan, and Pampanga.">
-  <section class="max-w-6xl mx-auto px-6 pt-8 pb-4">
-    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">Track A &middot; Sentinel-1 SAR &middot; Super Typhoon Carina (Gaemi) 2024</p>
-    <h1 class="text-3xl md:text-4xl mb-3 leading-tight">Observed flood extent, Metro Manila + Bulacan + Pampanga.</h1>
+<Base title="flood map · FloodWatch.PH" pathname="/map" description="The Now view shows the most recent observed Sentinel-1 SAR pass, monitored expressways, and rainfall context over Greater Metro Manila. A separate 2024 Carina view is a clearly labeled historical demonstration. Observed, not a forecast.">
+  <FreshnessBanner variant="site" />
+
+  <section class="max-w-6xl mx-auto px-6 pt-7 pb-3">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">Sentinel-1 SAR &middot; observed flood extent</p>
+    <h1 class="text-3xl md:text-4xl mb-3 leading-tight">The flood map: what was observed, and when.</h1>
     <p class="text-ink-700 max-w-prose leading-relaxed">
-      The slider steps through the Sentinel-1 acquisition dates bracketing Super Typhoon Carina (landfall ~Jul 24, 2024) - read at runtime from the flood file, not hardcoded. Each frame is a real SAR acquisition, not interpolation. Permanent rivers, lakes, and coastal water removed via MERIT Hydro HAND + JRC Global Surface Water mask. Click any province to see exposure figures. The hazard-gap layer (provinces colored by gap classification) shows where modeled flood-proneness diverges from the historical observed record. Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces); city and barangay resolution is a v1.1 refinement.
-    </p>
-    <p class="text-xs text-ink-500 mt-2">
-      Track A IoU vs GFD event 4300 (Koppu 2015 validation): <strong>{M.trackA_iou}</strong> &middot; F1: <strong>{M.trackA_f1}</strong>. The validated method is applied to the ungauged Carina 2024 demo event.
+      Two views. <strong>Now</strong> shows the most recent observed Sentinel-1
+      SAR pass over Greater Metro Manila and the SLEX/NLEX corridor, the
+      monitored expressways intersected with it, and GPM IMERG rainfall as
+      context, every layer stamped with its own as-of date. The
+      <strong>2024 Carina demo</strong> is a historical demonstration of the
+      same validated method on Super Typhoon Carina (July to August 2024), with
+      the province hazard-gap layer. Neither view is live and neither is a
+      forecast.
     </p>
   </section>
 
-  <MapView />
+  <!-- View switch -->
+  <section class="max-w-6xl mx-auto px-6 mb-4">
+    <div class="flex gap-2 text-sm" role="tablist" aria-label="Map view">
+      <button
+        id="view-now"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-now"
+        class="px-4 py-2 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
+      >
+        Now (latest observed pass)
+      </button>
+      <button
+        id="view-carina"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-carina"
+        class="px-4 py-2 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900"
+      >
+        2024 Carina demo (historical)
+      </button>
+    </div>
+  </section>
+
+  <!-- NOW panel (default) -->
+  <div id="panel-now" role="tabpanel" aria-labelledby="view-now">
+    <FreshnessBanner variant="now" />
+    <div class="h-3"></div>
+    <NowView />
+  </div>
+
+  <!-- CARINA panel (historical demo, kept intact) -->
+  <div id="panel-carina" role="tabpanel" aria-labelledby="view-carina" class="hidden">
+    <FreshnessBanner variant="carina" />
+    <section class="max-w-6xl mx-auto px-6 pt-4 pb-2">
+      <p class="text-xs uppercase tracking-[0.2em] text-accent-coral-dark mb-1 font-mono">
+        historical demonstration &middot; not current conditions
+      </p>
+      <p class="text-ink-700 max-w-prose leading-relaxed text-sm">
+        Super Typhoon Carina (Gaemi) 2024, Metro Manila + Bulacan + Pampanga.
+        The slider steps through the Sentinel-1 acquisition dates, read at
+        runtime from the flood file, not hardcoded. Each frame is a real SAR
+        acquisition. Permanent rivers and lakes removed. Click any province for
+        exposure figures. The hazard-gap layer shows where modeled
+        flood-proneness diverges from the historical observed record. Exposure
+        and the modeled-vs-observed gap are aggregated to province (FAO GAUL
+        level-2, ~82 Philippine provinces); city and barangay resolution is a
+        v1.1 refinement.
+      </p>
+      <p class="text-xs text-ink-500 mt-2">
+        Track A IoU vs GFD event 4300 (Koppu 2015 validation): <strong>{M.trackA_iou}</strong> &middot; F1: <strong>{M.trackA_f1}</strong>. The validated method is applied to the ungauged Carina 2024 demo.
+      </p>
+    </section>
+    <MapView />
+  </div>
 
   <section class="max-w-6xl mx-auto px-6 py-6 text-xs text-ink-500 leading-relaxed">
     <p class="mb-2">
       Observed flood extent derived from public satellite data (Copernicus Sentinel-1 C-band SAR). Permanent-water mask applied: figures represent flood, not rivers or lakes. Exposure figures are province aggregates (WorldPop population, Microsoft GlobalML built-up area). No household geometry, no per-dwelling flood status, no PII.
     </p>
     <p class="mb-2 italic">
-      Patterns may have legitimate explanations; figures warrant independent verification. Not an official hazard map. Not engineering advice. Intended for civic transparency and LGU planning research.
+      Patterns may have legitimate explanations; figures warrant independent verification. Not an official hazard map. Not a forecast. Not engineering advice. Intended for civic transparency and LGU planning research.
     </p>
     <p>
       Cite as: FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph. CC-BY-4.0 on data. SAR data: Copernicus/Sentinel-1, open. Province boundaries: FAO GAUL level-2, public.
     </p>
   </section>
+
+  <script is:inline>
+    (function () {
+      var bNow = document.getElementById("view-now");
+      var bCar = document.getElementById("view-carina");
+      var pNow = document.getElementById("panel-now");
+      var pCar = document.getElementById("panel-carina");
+      var nowRoot = document.getElementById("now-root");
+      var carinaStarted = false;
+      var onCls = "px-4 py-2 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider";
+      var offCls = "px-4 py-2 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900";
+
+      function show(now) {
+        pNow.classList.toggle("hidden", !now);
+        pCar.classList.toggle("hidden", now);
+        bNow.setAttribute("aria-selected", String(now));
+        bCar.setAttribute("aria-selected", String(!now));
+        bNow.className = now ? onCls : offCls;
+        bCar.className = !now ? onCls : offCls;
+        if (now && nowRoot) {
+          // Lazy: NowView only fetches its data once activated.
+          nowRoot.setAttribute("data-now-active", "true");
+        }
+        if (!now) {
+          // The Carina MapView eager-loads on its own script; once the demo
+          // tab is opened the first time we let it resize after becoming
+          // visible. MapView keys off window.__fwMap.
+          carinaStarted = true;
+          var m = window.__fwMap;
+          if (m) setTimeout(function () { m.resize(); }, 60);
+        }
+      }
+
+      bNow.addEventListener("click", function () { show(true); });
+      bCar.addEventListener("click", function () { show(false); });
+      // Default: Now view, activated immediately so its as-of dates load.
+      show(true);
+    })();
+  </script>
 </Base>

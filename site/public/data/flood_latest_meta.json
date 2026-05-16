@@ -1,0 +1,39 @@
+{
+  "event": "latest",
+  "label": "Latest Sentinel-1 pass \u2014 Greater Metro Manila + Central Luzon",
+  "role": "realtime",
+  "gauged": false,
+  "permanent_water_masked": true,
+  "aoi_name": "Greater Metro Manila + Central Luzon (NCR, Bulacan, Pampanga, Rizal, Laguna, Cavite, Bataan \u2014 SLEX/NLEX corridor)",
+  "bbox": [
+    120.4,
+    14.0,
+    121.55,
+    15.4
+  ],
+  "dates": [
+    {
+      "date": "2026-05-15",
+      "flood_area_km2": 31.04,
+      "otsu_threshold_db": -23.242,
+      "n_polygons": 27
+    }
+  ],
+  "scan_status": "ok",
+  "observed_not_forecast": true,
+  "generated_at": "2026-05-16T04:49:03Z",
+  "as_of": "2026-05-15",
+  "lookback_days": 14,
+  "baseline_days": 60,
+  "s1_scene_ids": [
+    "S1C_IW_GRDH_1SDV_20260515T100532_20260515T100557_007663_00F91E_C14E",
+    "S1C_IW_GRDH_1SDV_20260515T100557_20260515T100622_007663_00F91E_2F09"
+  ],
+  "feature_count": 27,
+  "method": "S1 VH: Otsu-on-VH + got-darker-vs-dry-baseline change gate + permanent-water + slope + HAND-style flood-plausible-terrain mask (identical to event/flood_extent.py), run on the latest usable S1 pass",
+  "disclaimer": "Observed flood extent derived from public Sentinel-1 SAR. This is the most recent satellite pass (S1 revisit ~6\u201312 days), not a forecast and not live. Patterns may have legitimate explanations; figures warrant independent verification.",
+  "otsu_threshold_db": -23.242,
+  "orbit_pass": "ASCENDING",
+  "relative_orbit": 142,
+  "aoi_coverage": 0.9964
+}

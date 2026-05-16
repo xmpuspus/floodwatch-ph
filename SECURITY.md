@@ -24,7 +24,7 @@ Do not open a public issue. Acknowledged within 5 working days.
 
 - The FloodWatch.PH site is a static Astro build deployed to Vercel. No server-side handler processes user input at runtime. No database is exposed.
 - The Earth Engine pipeline runs locally with a service-account key or interactive user auth. The key never enters Vercel, never enters git history. `.gitignore` and `.dockerignore` block common credential naming patterns.
-- Barangay exposure data is pre-aggregated before publication. The site does not perform spatial joins at request time.
+- Province exposure data is pre-aggregated before publication. The site does not perform spatial joins at request time.
 
 ## joblib / pickle deserialization
 
@@ -41,10 +41,11 @@ non-zero if the hash does not match before calling `joblib.load`.
 
 ## Data publication boundaries
 
-Published flood extent and recurrence outputs are aggregated to barangay level. No
-per-dwelling geometry, no household identifiers, no PII property keys appear in any
-published GeoJSON. CI gate `scripts/check_no_pii.py` enforces this and exits non-zero
-on any violation; the release gate (`make verify`) runs it before every publication.
+Published flood extent and recurrence outputs are aggregated to province level
+(FAO GAUL level-2). No per-dwelling geometry, no household identifiers, no PII
+property keys appear in any published GeoJSON. CI gate `scripts/check_no_pii.py`
+enforces this and exits non-zero on any violation; the release gate
+(`make verify`) runs it before every publication.
 
 Flood-extent polygon features identify only the date and event key, not any property
 that could re-identify a dwelling.

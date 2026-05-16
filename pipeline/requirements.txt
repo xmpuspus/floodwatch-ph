@@ -1,7 +1,8 @@
 # FloodWatch.PH — Earth Engine pull deps (Track A SAR + Track B embedding sample
 # + exposure join). Independent from the deterministic model deps in the root
 # requirements.txt; only needed to regenerate data from Earth Engine.
-earthengine-api==1.6.7
+earthengine-api==1.7.26
 numpy==1.26.4
 shapely==2.0.6
 requests==2.32.3
+pyproj==3.6.1

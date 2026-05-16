@@ -20,6 +20,6 @@ The civic point is the gap: 337 sampled locations the model flags as flood-prone
 Everything is public: MIT code, CC-BY-4.0 data, GitHub, Zenodo DOI, model card, privacy impact assessment, CI integrity gates that enforce the permanent-water rule and the event-disjoint rule. It is a civic-tech research artifact, not a warning system and not an accusation. Patterns may have legitimate explanations and figures warrant independent verification.
 
 Code and method: https://github.com/xmpuspus/floodwatch-ph
-Live map: https://floodwatch.ph
+Live map: https://floodwatch-ph-five.vercel.app
 
 Built on Sentinel-1 (Copernicus), Google AlphaEarth, the Global Flood Database (Cloud to Street), MERIT Hydro, JRC Global Surface Water, WorldPop and OpenStreetMap. Related work: the Global Flood Database, UN-SPIDER's Sentinel-1 flood recommended practice, and my earlier SolarMap.PH.

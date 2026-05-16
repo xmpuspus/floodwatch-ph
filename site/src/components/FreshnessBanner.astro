@@ -1,0 +1,193 @@
+---
+// FreshnessBanner -- site-wide honesty strip.
+//
+// THE CORE FIX (product-audit Critical): nothing on this site is live. The
+// Carina demo is 22 months old; the "Now" layers are the most recent
+// OBSERVED satellite pass, lagged by the Sentinel-1 revisit (~6-12 days).
+// During active flooding a non-technical visitor must not read any of it as
+// current. This banner states, in plain language, exactly what is shown and
+// its as-of date, pulled DYNAMICALLY from each data file's _meta at load.
+// Nothing here is hardcoded; dates come from the JSON.
+//
+// Renders a server-side honest placeholder, then the client fills the real
+// as-of dates and (critically) downgrades the wording the moment any
+// scan_status is not a clean "ok" / "no_data". Same-origin fetch only
+// (/data/*.json), so the audited CSP "no third-party" posture holds.
+//
+// Props:
+//   variant: "carina"  -> on /map default demo + home: stress 2024 demo
+//            "now"      -> on the Now view: stress observed-not-live
+//            "site"     -> compact, home top: one honest line + link
+interface Props {
+  variant?: "carina" | "now" | "site";
+}
+const { variant = "site" } = Astro.props;
+---
+
+<aside
+  id="fw-freshness"
+  class="fw-freshness"
+  role="region"
+  aria-label="Data freshness and what this shows"
+  data-variant={variant}
+>
+  <div class="max-w-6xl mx-auto px-6 py-3">
+    <div class="flex items-start gap-3">
+      <span aria-hidden="true" class="fw-fresh-mark">i</span>
+      <div class="text-[13px] leading-relaxed text-ink-900">
+        <p id="fw-fresh-line" class="font-medium">
+          Reading what this map shows and when it was observed...
+        </p>
+        <p id="fw-fresh-detail" class="text-ink-700 mt-1"></p>
+        <p class="text-ink-500 mt-1 text-[12px]">
+          Not a forecast. For live conditions, warnings, and routing during an
+          active flood, use PAGASA
+          (<a href="https://bagong.pagasa.dost.gov.ph" class="no-underline text-accent-steel">bagong.pagasa.dost.gov.ph</a>),
+          MMDA Flood Control, and your LGU DRRMO. FloodWatch is complementary to
+          and never a replacement for these and Project NOAH / Google Flood Hub.
+        </p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // All copy here is the audit-approved freshness wording (copy-audit crack d),
+  // with em-dashes normalised to commas/parentheses per the global rule,
+  // meaning preserved exactly. Dates are interpolated from _meta, never typed.
+  const $ = (id: string) => document.getElementById(id);
+
+  async function getMeta(url: string): Promise<any | null> {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch {
+      return null;
+    }
+  }
+
+  function fmtUTC(iso: string | null | undefined): string {
+    if (!iso) return "an unknown time";
+    // Show the date and, when present, the UTC time, without reformatting
+    // away the source precision. ISO date-only stays a date.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return (
+      d.toISOString().slice(0, 16).replace("T", " ") + " UTC"
+    );
+  }
+
+  (async () => {
+    const root = $("fw-freshness") as HTMLElement | null;
+    const lineEl = $("fw-fresh-line");
+    const detEl = $("fw-fresh-detail");
+    if (!root || !lineEl || !detEl) return;
+    const variant = root.dataset.variant ?? "site";
+
+    const [s1, rain] = await Promise.all([
+      getMeta("/data/flood_latest_meta.json"),
+      getMeta("/data/current_risk.geojson"),
+    ]);
+
+    const rainMeta = rain && rain._meta ? rain._meta : null;
+    const s1Status: string = s1?.scan_status ?? "unknown";
+    const s1AsOf = s1?.as_of ?? null;
+    const rainAsOf = rainMeta?.as_of ?? null;
+    const rainStatus: string = rainMeta?.scan_status ?? "unknown";
+
+    // ---- the latest observed Sentinel-1 line (honest by scan_status) ----
+    let latestLine: string;
+    if (s1Status === "ok" && s1AsOf) {
+      latestLine =
+        `Latest Sentinel-1 SAR acquisition over the area: ${s1AsOf} ` +
+        `(revisit ~6 to 12 days; this is the most recent observed pass, not live).`;
+    } else if (s1Status === "no_usable_pass" || s1Status === "unknown") {
+      latestLine =
+        "The most recent Sentinel-1 pass over Metro Manila was not usable. " +
+        "No recent observed extent is available; this is not a clear-conditions signal.";
+    } else if (s1Status === "degenerate_threshold") {
+      latestLine =
+        `The last Sentinel-1 pass${s1AsOf ? ` (${s1AsOf})` : ""} had no reliable ` +
+        "water signal, so no extent is shown. This is not a clear-conditions signal.";
+    } else if (s1Status === "low_confidence") {
+      latestLine =
+        `The last Sentinel-1 pass${s1AsOf ? ` (${s1AsOf})` : ""} was inconclusive, ` +
+        "so no extent is shown. This is not a clear-conditions signal.";
+    } else {
+      latestLine =
+        "The most recent Sentinel-1 pass was not usable. This is not a clear-conditions signal.";
+    }
+
+    // ---- rainfall context line ----
+    const rainLine =
+      rainStatus === "ok" && rainAsOf
+        ? `Rainfall context: GPM IMERG accumulation as of ${fmtUTC(rainAsOf)}. ` +
+          "Satellite rainfall estimate, not a gauge reading and not a forecast."
+        : "Rainfall context (GPM IMERG accumulation) is unavailable for the most recent window.";
+
+    if (variant === "now") {
+      lineEl.textContent =
+        "This is the most recent OBSERVED satellite pass, not a live feed and not a forecast.";
+      detEl.textContent = latestLine + " " + rainLine;
+    } else if (variant === "carina") {
+      lineEl.textContent =
+        "This map shows a 2024 historical demonstration (Super Typhoon Carina, July to August 2024), not current conditions.";
+      detEl.textContent =
+        "The Sentinel-1 SAR passes shown are the demo's 2024-07 and 2024-08 Carina acquisitions. " +
+        "Sentinel-1 revisit is ~6 to 12 days; this is observed satellite data for that window, not a live feed and not a forecast. " +
+        "For the most recent observed pass and rainfall context, open the Now view. " +
+        latestLine;
+    } else {
+      // compact site-wide line for the home page
+      lineEl.textContent =
+        "Nothing here is live. FloodWatch shows observed satellite data on dated passes, plus a 2024 historical demo, never a forecast.";
+      detEl.innerHTML =
+        latestLine +
+        ' <a href="/map" class="no-underline text-accent-steel">Open the Now view and the 2024 demo</a>.';
+    }
+
+    // Escalate the visual state when no usable observation exists, so the
+    // strip never looks like a calm "all clear" while a pass was withheld.
+    const degraded =
+      !(s1Status === "ok") &&
+      !(s1Status === "unknown" && variant === "carina");
+    root.classList.add(degraded ? "is-degraded" : "is-observed");
+  })();
+</script>
+
+<style>
+  .fw-freshness {
+    border-top: 1px solid rgb(142 152 172 / 0.3);
+    border-bottom: 1px solid rgb(142 152 172 / 0.3);
+    background: #f3f1ea;
+  }
+  /* observed-but-not-live: steady amber-ish accent rail */
+  .fw-freshness.is-observed {
+    border-left: 4px solid #d97757;
+    background: #faf3ee;
+  }
+  /* a pass was withheld / unusable: stronger coral, no "calm" read */
+  .fw-freshness.is-degraded {
+    border-left: 4px solid #a8431e;
+    background: #fbeee8;
+  }
+  .fw-fresh-mark {
+    flex: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 0.1rem;
+    border-radius: 9999px;
+    background: #22324a;
+    color: #fbfaf6;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.15rem;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+  }
+  .is-degraded .fw-fresh-mark {
+    background: #a8431e;
+  }
+</style>

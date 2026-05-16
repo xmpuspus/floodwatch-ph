@@ -14,7 +14,7 @@ import Base from "../layouts/Base.astro";
       <li>Province flood exposure aggregates: population (WorldPop, rounded to nearest 10), built-up area in km&sup2; (Microsoft GlobalML footprints), observed historical events (Global Flood Database count), and peak flood share (max fraction of unit area flooded across the demo event dates). The on-official-hazard-map field is null in v1.0 (that overlay is a v1.1 refinement).</li>
       <li>Flood polygon GeoJSONs at the observed open-water extent level. These are environmental polygons, not dwelling-level geometry.</li>
       <li>Hazard-gap classification per province: under_observed_prone / charted / monitored / low.</li>
-      <li>Track B recurrence-prone sample-grid points. Points are on a 10-30 m grid, not building centroids. No dwelling identifiers.</li>
+      <li>Track B recurrence-prone sample-grid points. Points are on a <strong>300 m</strong> grid, not building centroids. No dwelling identifiers.</li>
       <li>The trained classifier, the committed embeddings cache, and the full reproducibility chain.</li>
     </ul>
 
@@ -23,6 +23,7 @@ import Base from "../layouts/Base.astro";
       <li>Per-household flood status geometry. No geometry that would let a third party determine whether a specific dwelling was flooded.</li>
       <li>Owner names, resident names, phone numbers, tax-declaration data, or anything coupling a location to a natural person.</li>
       <li>Any PII property key in any published GeoJSON. The CI gate <code>scripts/check_no_pii.py</code> asserts this on every release.</li>
+      <li>Any record of an area or route a user looks up. The lookup is offline and in-browser; FloodWatch receives nothing.</li>
     </ul>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
       Population counts in <code>barangay_exposure.json</code> (filename kept for compatibility; v1.0 units are provinces) are rounded to the nearest 10. At province scale individual household data cannot be reverse-engineered.
@@ -62,9 +63,12 @@ import Base from "../layouts/Base.astro";
       FloodWatch.PH computes statistical indicators derived from these public sources. Patterns shown may have legitimate explanations. The dataset does not constitute an official hazard map, an engineering assessment, or a code-compliance record, and should not be cited as such.
     </p>
 
-    <h2 class="text-xl mt-8 mb-3 text-ink-900">Telemetry, cookies, analytics</h2>
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">Telemetry, cookies, analytics, and the area lookup</h2>
+    <p class="text-base text-ink-700 leading-relaxed mb-3">
+      No first-party cookies. No analytics scripts. No user accounts. No advertising. Vercel sets standard CDN cookies for cache routing; we do not read or use them. The site is a static build. The <code>vercel.json</code> Content-Security-Policy explicitly enumerates which endpoints the browser can reach: <code>'self'</code>, OSM tile servers for the basemap, and OSM attribution endpoints. No third-party geocoder, no analytics endpoints, no tracking.
+    </p>
     <p class="text-base text-ink-700 leading-relaxed">
-      No first-party cookies. No analytics scripts. No user accounts. No advertising. Vercel sets standard CDN cookies for cache routing; we do not read or use them. The site is a static build. The <code>vercel.json</code> Content-Security-Policy explicitly enumerates which endpoints the browser can reach: <code>'self'</code>, OSM tile servers for the basemap, and OSM attribution endpoints. No geocoders, no analytics endpoints, no third-party tracking.
+      The "is this area flood-prone?" lookup runs <strong>entirely in your browser</strong> against a bundled offline place-name index (a static gazetteer shipped with the site). The text you type is matched locally and tested against the flood-evidence polygons with in-browser point-in-polygon. Your query is <strong>never transmitted to any server, never logged, and never republished</strong>. It is your own input about your own area of interest; under RA 10173 it is not collected or processed by FloodWatch because it never leaves your device.
     </p>
 
     <p class="text-[11px] text-ink-500 mt-12 pt-6 border-t border-ink-300/30">

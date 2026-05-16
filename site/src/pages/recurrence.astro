@@ -17,7 +17,7 @@ const M = METRICS;
 
     <h2 class="text-xl mt-10 mb-3">The embedding: Google AlphaEarth</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      The frozen substrate is Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), 10 m resolution, 64-dimensional unit-norm vectors, annual cadence 2017-2025, CC-BY-4.0 (produced by Google and Google DeepMind). The embedding year is fixed at <strong>2017</strong>: the earliest AlphaEarth annual, contemporaneous with the Global Flood Database record end.
+      The frozen substrate is Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), natively 10 m, sampled here at <strong>300 m</strong> (mean-aggregated per cell; flood recurrence is an area property), 64-dimensional unit-norm vectors, annual cadence 2017-2025, CC-BY-4.0 (produced by Google and Google DeepMind). The embedding year is fixed at <strong>2017</strong>: the earliest AlphaEarth annual, contemporaneous with the Global Flood Database record end.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
       The annual cadence is too coarse for a single event (Track A's job) but is well-suited to "does this place's land-embedding signature predict it floods repeatedly." The embeddings are sampled server-side on Earth Engine and downloaded as a small NPZ cache; no bulk raw-imagery fetch.
@@ -62,7 +62,7 @@ const M = METRICS;
 
     <h2 class="text-xl mt-10 mb-3">What the output looks like</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      The Track B output is <code>site/public/data/recurrence_prone.geojson</code>: a FeatureCollection of Point features on a 10-30 m sample grid over the AOI. Each point has a calibrated <code>score</code> (0-1) and a boolean <code>prone</code> flag (score >= deployed threshold). No dwelling identifiers. Points are a sample grid, not building centroids.
+      The Track B output is <code>site/public/data/recurrence_prone.geojson</code>: a FeatureCollection of Point features on a <strong>300 m</strong> sample grid over the AOI. Each point has a calibrated <code>score</code> (0-1) and a boolean <code>prone</code> flag (score >= deployed threshold). No dwelling identifiers. Points are a sample grid, not building centroids.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
       The hazard-gap pipeline aggregates Track B scores to province level (FAO GAUL level-2, ~82 Philippine provinces; mean score over the unit) and compares against the historical observed record (Global Flood Database) to produce the <code>gap</code> classification (<code>under_observed_prone</code> / <code>charted</code> / <code>monitored</code> / <code>low</code>). The v1.0 pipeline does not compare against the official hazard maps; that overlay is a v1.1 refinement, deferred because those government layers are token-gated or SPA-only. City and barangay resolution is likewise a v1.1 refinement.

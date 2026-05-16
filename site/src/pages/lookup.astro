@@ -1,0 +1,59 @@
+---
+import Base from "../layouts/Base.astro";
+import AreaLookup from "../components/AreaLookup.astro";
+---
+<Base
+  title="area &amp; route flood-evidence lookup · FloodWatch.PH"
+  pathname="/lookup"
+  description="Offline, in-browser lookup of dated flood evidence for a place or a route across Greater Metro Manila and the SLEX/NLEX corridor. Observed and modeled layers, each as-of-dated. Not a forecast, not a safety instruction. Your query never leaves your browser."
+>
+  <section class="max-w-3xl mx-auto px-6 pt-8 pb-2">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">
+      evidence lookup &middot; complementary to PAGASA / NOAH / Flood Hub
+    </p>
+    <h1 class="text-3xl md:text-4xl mb-3 leading-tight text-ink-900">
+      What dated flood evidence exists for a place or a route.
+    </h1>
+    <p class="text-ink-700 leading-relaxed">
+      Type a place, barangay, landmark, or expressway interchange in Greater
+      Metro Manila, or pick two points to test a corridor. FloodWatch returns
+      layered, as-of-dated evidence: a modeled recurrence score, the historical
+      observed record, the most recent observed satellite pass, rainfall
+      context, and any nearby monitored expressway flagged on that pass. It is
+      not a flood score and not a verdict. Each row is stamped with its own
+      date. For the SLEX/NLEX corridor case national coverage is a later
+      refinement.
+    </p>
+    <p class="text-[13px] text-ink-500 mt-3 leading-relaxed">
+      FloodWatch is independent, open, and reproducible, and is complementary to
+      and never a replacement for PAGASA, Project NOAH, MMDA Flood Control, and
+      Google Flood Hub. It never forecasts. The whole lookup runs in your
+      browser against a bundled offline place index; your query is never
+      transmitted, logged, or republished.
+    </p>
+  </section>
+
+  <AreaLookup />
+
+  <section class="max-w-3xl mx-auto px-6 py-6 text-xs text-ink-500 leading-relaxed">
+    <p class="mb-2">
+      Evidence assembled in-browser from the same public layers the rest of the
+      site publishes: Track B recurrence (AlphaEarth 2017 embedding, 300 m
+      grid), the Global Flood Database historical record (2002-2017), the most
+      recent Sentinel-1 SAR pass (Copernicus, ~6-12 day revisit, observed not
+      live), GPM IMERG rainfall accumulation context, and the OpenStreetMap
+      expressway network intersected with the latest observed extent. Place
+      coordinates are curated public OpenStreetMap / PSA reference points.
+    </p>
+    <p class="mb-2 italic">
+      Observed flood extent derived from public satellite data. Patterns may
+      have legitimate explanations; figures warrant independent verification.
+      Not an official hazard map. Not a forecast. Not routing or safety advice.
+    </p>
+    <p>
+      Cite as: FloodWatch.PH (2026),
+      <a href="https://github.com/xmpuspus/floodwatch-ph" class="text-accent-steel no-underline">github.com/xmpuspus/floodwatch-ph</a>.
+      CC-BY-4.0 on data.
+    </p>
+  </section>
+</Base>

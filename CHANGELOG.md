@@ -14,9 +14,9 @@ calibrated on the full GFD Philippines event history with an event-disjoint hold
 
 - **Track A -- Sentinel-1 SAR flood-extent change detection.** Per-timestep flood
   polygon GeoJSON for Super Typhoon Carina / Gaemi + enhanced SW monsoon, Jul-Aug 2024,
-  Metro Manila + Bulacan + Pampanga (bbox `[120.5, 14.4, 121.4, 15.3]`). Six real
-  S1 acquisition dates: 2024-06-16, 06-28 (dry baseline), 07-10 (pre), 07-22, 07-30
-  (peak / recession), 08-03 (post). Carina 2024 has no promptly-public official
+  Metro Manila + Bulacan + Pampanga (bbox `[120.5, 14.4, 121.4, 15.3]`). Four real
+  S1 event acquisition dates (2024-07-10, 07-22, 07-30, 08-03), with a dry
+  pre-event baseline composite from 2024-06-16 and 06-28. Carina 2024 has no promptly-public official
   flood-extent polygon; the absence of a reference is documented explicitly in
   `_meta.gauged: false`.
 - **Track A validation against GFD event 4300.** IoU and F1 of the Otsu change-detection
@@ -31,7 +31,7 @@ calibrated on the full GFD Philippines event history with an event-disjoint hold
   AlphaEarth Satellite Embedding V1 (64-dim, 2017, CC-BY-4.0, produced by Google and
   Google DeepMind), trained on GFD Philippines events 2002-2017, Platt-sigmoid
   calibrated on an event-disjoint holdout. Committed cache:
-  `model/embeddings/floodwatch_embeddings_v1.npz` (~10 MB). `make train` reproduces
+  `model/embeddings/floodwatch_embeddings_v1.npz` (~1 MB). `make train` reproduces
   the model bit-exact in approximately 30 seconds with no GPU.
 - **Event-disjoint holdout.** Whole typhoon events held out (named in
   `model/holdout_events.json`). CI gate `scripts/check_event_disjoint.py` enforces
@@ -39,18 +39,21 @@ calibrated on the full GFD Philippines event history with an event-disjoint hold
   in the Makefile.
 - **`make hash-verify`.** Asserts `recurrence_clf_v1.joblib` sha256 `b7c702532f92c43f`.
   Deterministic from pinned deps in `requirements.txt`.
-- **Barangay exposure join** (`pipeline/exposure.py`). WorldPop population and
-  Microsoft GlobalML building counts aggregated to barangay level. Counts rounded to
-  the nearest 10. CI gate `scripts/check_no_pii.py` asserts no per-dwelling geometry
-  and no PII property keys in any published output.
-- **Hazard gap layer** (`pipeline/hazard_gap.py`). Barangay-level comparison of
-  observed recurrence score (Track B) vs presence on the official UP NOAH / PAGASA /
-  MGB hazard map. `gap: "uncharted"` flags barangays with observed recurrent flooding
-  absent from the official hazard layer -- the headline civic finding.
-- **Astro + MapLibre site** (`site/`). Time-slider over the six Carina 2024 S1
-  acquisition dates. Click a barangay for exposed population, building count, and
-  official hazard-map status. Pages: index, map, methodology, recurrence, privacy,
-  faq, safety.
+- **Province exposure join** (`pipeline/exposure.py`). WorldPop population and
+  Microsoft GlobalML built-up area aggregated to province level (FAO GAUL level-2,
+  ~82 Philippine provinces). City and barangay resolution is a documented v1.1
+  refinement. Counts rounded to the nearest 10. CI gate `scripts/check_no_pii.py`
+  asserts no per-dwelling geometry and no PII property keys in any published output.
+- **Hazard gap layer** (`pipeline/hazard_gap.py`). Province-level comparison of
+  modeled flood-proneness (Track B) vs the historical observed record (Global Flood
+  Database). `gap: "under_observed_prone"` flags provinces modeled flood-prone but
+  with few or no events in the historical observed record, the headline civic
+  finding. The official UP NOAH / PAGASA / MGB hazard-map cross-reference is a
+  documented v1.1 refinement (those layers are token-gated or SPA-only).
+- **Astro + MapLibre site** (`site/`). Time-slider over the four Carina 2024 S1
+  event acquisition dates. Click a province for exposed population, built-up area,
+  observed historical events, and peak flood share. Pages: index, map, methodology,
+  recurrence, privacy, faq, safety.
 - **CI gate suite** (`scripts/`): `check_permanent_water.py`, `check_event_disjoint.py`,
   `check_no_pii.py`, site/src/data/events.json byte-identity vs event/events.json,
   `make hash-verify`, Astro typecheck + build, pytest.

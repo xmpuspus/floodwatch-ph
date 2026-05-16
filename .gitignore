@@ -42,3 +42,7 @@ docs/screenshots/_vid/
 !model/embeddings/floodwatch_embeddings_v1.npz
 !site/public/data/*.geojson
 !site/public/data/*.json
+
+# Local investigation/run artifacts (workflow-discipline: project-local, not committed)
+tmp/
+pipeline/_osm_roads_cache.geojson

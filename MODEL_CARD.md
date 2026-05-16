@@ -53,14 +53,14 @@ The Carina 2024 demo event has no promptly-public official flood-extent polygon;
 | Released | 2026-05-15 (v1.0.0) |
 | License | MIT (code); CC-BY-4.0 (embeddings from AlphaEarth) |
 | Reproducibility | Bit-exact; `make hash-verify` asserts sha256 `b7c702532f92c43f` |
-| Encoder | Google AlphaEarth Foundations "Satellite Embedding V1" (`GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL`), 10 m, 64-dim, unit-norm, annual, year **2017**. "Produced by Google and Google DeepMind." License: CC-BY-4.0. |
+| Encoder | Google AlphaEarth Foundations "Satellite Embedding V1" (`GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL`), 64-dim, unit-norm, annual, year **2017**. AlphaEarth is natively 10 m; FloodWatch samples it at **300 m** (the embedding is mean-aggregated over the cell, flood recurrence is an area property; this is fast and reproducible). "Produced by Google and Google DeepMind." License: CC-BY-4.0. |
 | Classifier head | `sklearn.linear_model.LogisticRegression` on the 64-dim embedding |
 | Calibrator | Platt sigmoid on the event-disjoint holdout |
 | Task | Per-pixel flood-recurrence-prone classification |
 | Embedding year | 2017 (earliest AlphaEarth annual; contemporaneous with GFD record end) |
 | Positive class | Points inside GFD historical flood-event footprints (2002-2017, Philippines), permanent water removed |
 | Negative class | Land points not flooded in any GFD Philippines event |
-| Committed cache | `model/embeddings/floodwatch_embeddings_v1.npz` (~10 MB) |
+| Committed cache | `model/embeddings/floodwatch_embeddings_v1.npz` (~1 MB) |
 | Decision threshold | `0.5` |
 
 ### Training data
@@ -156,8 +156,8 @@ All inputs are publicly licensed. No paywall, no non-commercial clause.
 - The AlphaEarth embedding year is fixed at 2017. Land-cover changes since 2017 (urban expansion, reclamation, reforestation) are not reflected.
 - The Otsu threshold is scene-specific. Shadowed areas, very calm river surfaces, and rice paddy water can confound the change detection.
 - Permanent-water masking uses JRC GSW occurrence >= 50%. Areas with seasonal water near the threshold may be over- or under-masked depending on monsoon phase.
-- Track B outputs are a 10-30 m sample grid, not a per-building assessment. Do not interpret a positive point as a statement about a specific dwelling.
-- Exposure figures (WorldPop population, Microsoft footprint building counts) are modeled estimates, not census counts. They are rounded to the nearest 10 at barangay level.
+- Track B is sampled and scored on a 300 m grid, not a per-building assessment. Do not interpret a positive point as a statement about a specific dwelling.
+- Exposure figures (WorldPop population, Microsoft footprint building counts) are modeled estimates, not census counts. They are rounded to the nearest 10 at province level (FAO GAUL level-2).
 - The official hazard-map comparison uses UP NOAH / PAGASA / MGB published extents as available; coverage and vintage vary by LGU.
 
 ---

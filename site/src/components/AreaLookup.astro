@@ -1,0 +1,475 @@
+---
+// AreaLookup, the "is this area / my route flood-prone?" evidence lookup.
+//
+// DROP-IN: this component is self-contained. Agent D wires it into a page.
+// It does NOT import the site layout/header/footer. Place it inside a page's
+// <main>. All logic is client-side; the typed query never leaves the browser.
+//
+// PRIVACY (audit-Critical, RA 10173): the place name is matched against the
+// bundled static gazetteer (imported at build time). The only network reads
+// are the same-origin static evidence GeoJSONs the site already serves
+// (/data/*.geojson), identical to the existing MapView. No geocoder, no
+// per-query request, no logging. See src/lib/areaLookup.ts header.
+//
+// Evidence layers (each as-of-dated, no aggregate score, no traffic light):
+//   1. Track B modeled recurrence-prone (AlphaEarth 2017 embedding, 300 m grid)
+//   2. GFD historical observed record (Global Flood Database, 2002-2017)
+//   3. Latest observed Sentinel-1 SAR pass (carries scan_status honestly)
+//   4. GPM IMERG rainfall context (already-fallen rain, not a forecast)
+//   5. Nearby monitored expressway segments flagged in the latest pass
+---
+
+<section
+  id="area-lookup"
+  class="max-w-3xl mx-auto px-6 py-8"
+  aria-labelledby="al-heading"
+>
+  <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">
+    evidence lookup &middot; Greater Metro Manila
+  </p>
+  <h2 id="al-heading" class="text-2xl md:text-3xl mb-3 leading-tight text-ink-900">
+    Is this area, or my route, flood-prone?
+  </h2>
+
+  <!-- Guardrail header, exact approved copy (copy-audit crack e). -->
+  <div
+    class="border-l-4 border-accent-coral bg-paper-alt px-4 py-3 text-sm text-ink-900 leading-relaxed mb-5"
+    role="note"
+  >
+    This is <strong>observed and modeled evidence as of dated satellite layers,
+    not a forecast and not a safety instruction.</strong> It does not
+    say this area will or will not flood.
+  </div>
+
+  <!-- Mode switch -->
+  <div class="flex gap-2 mb-4 text-sm" role="tablist" aria-label="Lookup mode">
+    <button
+      id="mode-area"
+      role="tab"
+      aria-selected="true"
+      class="px-3 py-1.5 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
+    >
+      a place
+    </button>
+    <button
+      id="mode-route"
+      role="tab"
+      aria-selected="false"
+      class="px-3 py-1.5 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900"
+    >
+      a route / corridor
+    </button>
+  </div>
+
+  <!-- AREA input -->
+  <div id="panel-area">
+    <label for="al-q" class="block text-sm font-medium text-ink-900 mb-1">
+      Place, barangay, landmark, or expressway interchange
+    </label>
+    <div class="relative">
+      <input
+        id="al-q"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="e.g. Marikina, Provident Village, SLEX Alabang"
+        class="w-full border border-ink-300/60 rounded-md px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-accent-flood focus:border-accent-flood"
+        aria-describedby="al-priv"
+        aria-autocomplete="list"
+        aria-controls="al-suggest"
+        aria-expanded="false"
+        role="combobox"
+      />
+      <ul
+        id="al-suggest"
+        role="listbox"
+        class="hidden absolute z-10 left-0 right-0 mt-1 bg-white border border-ink-300/60 rounded-md shadow-sm max-h-64 overflow-auto text-sm"
+      >
+      </ul>
+    </div>
+    <p id="al-priv" class="text-[11px] text-ink-500 mt-1.5 leading-relaxed">
+      Matched offline in your browser against a bundled Metro Manila place
+      index. Your query is never transmitted to any server, never logged, and
+      never republished.
+    </p>
+  </div>
+
+  <!-- ROUTE input -->
+  <div id="panel-route" class="hidden">
+    <p class="text-sm text-ink-700 mb-3 leading-relaxed">
+      Pick two points from the offline index to build a corridor (a band about
+      <strong>400 m</strong> either side of the straight line between them,
+      sampled every ~350 m). National routing is a later refinement; this is the
+      SLEX/NLEX corridor case.
+    </p>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div>
+        <label for="al-from" class="block text-sm font-medium text-ink-900 mb-1">From</label>
+        <input
+          id="al-from"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="e.g. SLEX Magallanes"
+          class="w-full border border-ink-300/60 rounded-md px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-accent-flood"
+          aria-autocomplete="list"
+          aria-controls="al-suggest-from"
+          role="combobox"
+        />
+        <ul id="al-suggest-from" role="listbox" class="hidden mt-1 bg-white border border-ink-300/60 rounded-md shadow-sm max-h-48 overflow-auto text-sm"></ul>
+      </div>
+      <div>
+        <label for="al-to" class="block text-sm font-medium text-ink-900 mb-1">To</label>
+        <input
+          id="al-to"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="e.g. SLEX Alabang"
+          class="w-full border border-ink-300/60 rounded-md px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-accent-flood"
+          aria-autocomplete="list"
+          aria-controls="al-suggest-to"
+          role="combobox"
+        />
+        <ul id="al-suggest-to" role="listbox" class="hidden mt-1 bg-white border border-ink-300/60 rounded-md shadow-sm max-h-48 overflow-auto text-sm"></ul>
+      </div>
+    </div>
+    <button
+      id="al-route-go"
+      class="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-ink-900 text-white text-sm hover:bg-ink-700 disabled:opacity-40 disabled:cursor-not-allowed"
+      disabled
+    >
+      Show evidence along this corridor
+    </button>
+  </div>
+
+  <!-- Status / live region -->
+  <p id="al-status" class="text-sm text-ink-500 mt-4" role="status" aria-live="polite"></p>
+
+  <!-- RESULT -->
+  <div id="al-result" class="hidden mt-6">
+    <div class="card">
+      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-1">evidence for</p>
+      <p id="al-result-place" class="text-lg font-semibold text-ink-900 mb-3"></p>
+
+      <!-- Evidence framing, exact approved copy. -->
+      <p class="text-[13px] text-ink-700 leading-relaxed border-l-2 border-ink-300/40 pl-3 mb-4">
+        For the area you entered, FloodWatch shows: (1) observed Sentinel-1 SAR
+        flood extent on its dated acquisition passes, (2) the Track B modeled
+        recurrence-prone score (300 m grid, 2017 embedding), and (3) the
+        historical Global Flood Database record. These are observations and a
+        model, each as-of-dated. A thin record is not proof of safety; a high
+        score is not a prediction.
+      </p>
+
+      <dl id="al-layers" class="divide-y divide-ink-300/30"></dl>
+
+      <!-- Mandatory redirect, exact approved copy. -->
+      <div class="mt-5 border border-accent-coral/40 bg-accent-coral/5 rounded-md px-4 py-3 text-[13px] text-ink-900 leading-relaxed">
+        <strong>Not a forecast.</strong> For live conditions, warnings, and
+        routing during an active flood, use PAGASA
+        (<a href="https://bagong.pagasa.dost.gov.ph" class="text-accent-steel no-underline">bagong.pagasa.dost.gov.ph</a>),
+        MMDA Flood Control, and your LGU DRRMO. FloodWatch is complementary to
+        and never a replacement for these and Project NOAH / Google Flood Hub.
+      </div>
+
+      <!-- Public-records disclaimer, site standard line, verbatim. -->
+      <p class="text-[11px] text-ink-500 italic mt-3 leading-relaxed">
+        Observed flood extent derived from public satellite data. Patterns may
+        have legitimate explanations; figures warrant independent verification.
+      </p>
+    </div>
+  </div>
+
+  <!-- Out-of-scope / not-found -->
+  <div id="al-empty" class="hidden mt-6">
+    <div class="border-l-2 border-ink-300/50 bg-paper-alt px-4 py-3 text-sm text-ink-700 leading-relaxed">
+      <p id="al-empty-msg"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import {
+    searchGazetteer,
+    lookupArea,
+    lookupCorridor,
+    inScope,
+    CORRIDOR_BUFFER_M,
+    type GazEntry,
+    type EvidenceBundle,
+    type LayerResult,
+  } from "../lib/areaLookup";
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  // ---- mode switch --------------------------------------------------------
+  const mArea = $("mode-area") as HTMLButtonElement;
+  const mRoute = $("mode-route") as HTMLButtonElement;
+  const pArea = $("panel-area");
+  const pRoute = $("panel-route");
+
+  function setMode(area: boolean) {
+    pArea.classList.toggle("hidden", !area);
+    pRoute.classList.toggle("hidden", area);
+    mArea.setAttribute("aria-selected", String(area));
+    mRoute.setAttribute("aria-selected", String(!area));
+    mArea.className = area
+      ? "px-3 py-1.5 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
+      : "px-3 py-1.5 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900";
+    mRoute.className = !area
+      ? "px-3 py-1.5 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
+      : "px-3 py-1.5 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900";
+    hideAllResults();
+  }
+  mArea.addEventListener("click", () => setMode(true));
+  mRoute.addEventListener("click", () => setMode(false));
+
+  // ---- shared result rendering -------------------------------------------
+  const result = $("al-result");
+  const empty = $("al-empty");
+  const status = $("al-status");
+
+  function hideAllResults() {
+    result.classList.add("hidden");
+    empty.classList.add("hidden");
+    status.textContent = "";
+  }
+
+  function badge(state: LayerResult["state"]): string {
+    const map: Record<string, [string, string]> = {
+      intersects: ["intersects", "bg-accent-coral/15 text-accent-coral-dark border-accent-coral/40"],
+      near: ["nearby", "bg-accent-steel/15 text-accent-steel border-accent-steel/40"],
+      clear: ["no overlap on this dated layer", "bg-ink-700/8 text-ink-700 border-ink-300/50"],
+      withheld: ["pass not usable", "bg-ink-900/8 text-ink-900 border-ink-900/30"],
+      unavailable: ["layer unavailable", "bg-ink-300/15 text-ink-500 border-ink-300/50"],
+    };
+    const [label, cls] = map[state] ?? ["", ""];
+    // Non-color cue: a leading glyph, so it never relies on color alone.
+    const glyph =
+      state === "intersects" ? "●" : state === "near" ? "◐" : state === "withheld" || state === "unavailable" ? "○" : "·";
+    return `<span class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded-full border ${cls}"><span aria-hidden="true">${glyph}</span>${label}</span>`;
+  }
+
+  function row(title: string, sub: string, r: LayerResult, extra = ""): string {
+    const asOf = r.asOf ? `<span class="text-[11px] font-mono text-ink-500 whitespace-nowrap">as of ${r.asOf}</span>` : "";
+    return `
+      <div class="py-3">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <dt class="text-sm font-semibold text-ink-900">${title}</dt>
+          <div class="flex items-center gap-2">${badge(r.state)}${asOf}</div>
+        </div>
+        <p class="text-[12px] text-ink-500 mt-0.5">${sub}</p>
+        <dd class="text-[13px] text-ink-700 mt-1.5 leading-relaxed">${r.detail}${extra}</dd>
+      </div>`;
+  }
+
+  function renderResult(placeLabel: string, ev: EvidenceBundle) {
+    $("al-result-place").textContent = placeLabel;
+    const segs =
+      ev.roads.segments.length > 0
+        ? `<ul class="list-disc list-outside ml-5 mt-1.5 text-[13px] text-ink-700 space-y-0.5">${ev.roads.segments
+            .map((s) => `<li>${s}</li>`)
+            .join("")}</ul>`
+        : "";
+    $("al-layers").innerHTML = [
+      row(
+        "Modeled flood-recurrence",
+        "AlphaEarth embedding model, calibrated · 300 m grid",
+        ev.recurrence,
+      ),
+      row(
+        "Historical observed record",
+        "Global Flood Database (GFD), 2002-2017 (coverage ends 2017)",
+        ev.gfd,
+      ),
+      row(
+        "Most recent Sentinel-1 SAR pass",
+        "Observed, NOT live, ~6-12 day revisit",
+        ev.latest,
+      ),
+      row(
+        "Rainfall context",
+        "GPM IMERG accumulation over prone areas, context only, not a forecast",
+        ev.rainfall,
+      ),
+      row(
+        "Nearby monitored expressways",
+        "OSM expressway/major-road network ∩ latest observed SAR extent",
+        ev.roads,
+        segs,
+      ),
+    ].join("");
+    empty.classList.add("hidden");
+    result.classList.remove("hidden");
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function showEmpty(msg: string) {
+    $("al-empty-msg").textContent = msg;
+    result.classList.add("hidden");
+    empty.classList.remove("hidden");
+  }
+
+  // ---- autocomplete wiring (reusable) ------------------------------------
+  type Picked = GazEntry | null;
+
+  function wireAutocomplete(
+    input: HTMLInputElement,
+    list: HTMLElement,
+    onPick: (e: GazEntry) => void,
+  ) {
+    let active = -1;
+    let current: GazEntry[] = [];
+
+    function close() {
+      list.classList.add("hidden");
+      list.innerHTML = "";
+      active = -1;
+      input.setAttribute("aria-expanded", "false");
+    }
+
+    function render(items: GazEntry[]) {
+      current = items;
+      if (items.length === 0) {
+        close();
+        return;
+      }
+      list.innerHTML = items
+        .map(
+          (e, i) =>
+            `<li role="option" id="al-opt-${i}" data-i="${i}" class="px-3 py-2 cursor-pointer hover:bg-paper-alt ${
+              i === active ? "bg-paper-alt" : ""
+            }"><span class="text-ink-900">${e.name}</span> <span class="text-[11px] text-ink-500 font-mono">${e.kind} · ${e.province}</span></li>`,
+        )
+        .join("");
+      list.classList.remove("hidden");
+      input.setAttribute("aria-expanded", "true");
+    }
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim();
+      if (q.length < 2) {
+        close();
+        return;
+      }
+      render(searchGazetteer(q).map((m) => m.entry));
+    });
+
+    input.addEventListener("keydown", (ev) => {
+      if (list.classList.contains("hidden")) return;
+      if (ev.key === "ArrowDown") {
+        ev.preventDefault();
+        active = Math.min(active + 1, current.length - 1);
+        render(current);
+      } else if (ev.key === "ArrowUp") {
+        ev.preventDefault();
+        active = Math.max(active - 1, 0);
+        render(current);
+      } else if (ev.key === "Enter") {
+        ev.preventDefault();
+        if (active >= 0 && current[active]) {
+          onPick(current[active]);
+          close();
+        } else if (current[0]) {
+          onPick(current[0]);
+          close();
+        }
+      } else if (ev.key === "Escape") {
+        close();
+      }
+    });
+
+    list.addEventListener("click", (ev) => {
+      const li = (ev.target as HTMLElement).closest("li");
+      if (!li) return;
+      const i = Number(li.getAttribute("data-i"));
+      if (current[i]) {
+        onPick(current[i]);
+        close();
+      }
+    });
+
+    input.addEventListener("blur", () => setTimeout(close, 150));
+  }
+
+  // ---- AREA mode ----------------------------------------------------------
+  const qInput = $("al-q") as HTMLInputElement;
+  wireAutocomplete(qInput, $("al-suggest"), async (entry) => {
+    qInput.value = entry.name;
+    if (!inScope(entry.lng, entry.lat)) {
+      showEmpty(
+        `${entry.name} is outside the Greater Metro Manila + SLEX/NLEX corridor that v1.0 covers. National coverage is a later refinement. No lookup is sent anywhere.`,
+      );
+      return;
+    }
+    status.textContent = "Assembling evidence layers in your browser…";
+    try {
+      const ev = await lookupArea(entry.lng, entry.lat);
+      status.textContent = "";
+      renderResult(`${entry.name} (${entry.kind}, ${entry.province})`, ev);
+    } catch {
+      status.textContent = "";
+      showEmpty("Could not read the bundled evidence layers. No query was transmitted.");
+    }
+  });
+
+  // Submitting free text with no pick -> try best match, else not-found.
+  qInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" && $("al-suggest").classList.contains("hidden")) {
+      const m = searchGazetteer(qInput.value.trim());
+      if (m.length === 0) {
+        showEmpty(
+          "Place not found in the offline Metro Manila gazetteer. No lookup is sent anywhere. Try a nearby city, barangay, landmark, or expressway interchange.",
+        );
+      }
+    }
+  });
+
+  // ---- ROUTE mode ---------------------------------------------------------
+  let fromE: Picked = null;
+  let toE: Picked = null;
+  const fromInput = $("al-from") as HTMLInputElement;
+  const toInput = $("al-to") as HTMLInputElement;
+  const goBtn = $("al-route-go") as HTMLButtonElement;
+
+  function refreshGo() {
+    goBtn.disabled = !(fromE && toE);
+  }
+
+  wireAutocomplete(fromInput, $("al-suggest-from"), (e) => {
+    fromInput.value = e.name;
+    fromE = e;
+    refreshGo();
+  });
+  wireAutocomplete(toInput, $("al-suggest-to"), (e) => {
+    toInput.value = e.name;
+    toE = e;
+    refreshGo();
+  });
+
+  goBtn.addEventListener("click", async () => {
+    if (!fromE || !toE) return;
+    if (!inScope(fromE.lng, fromE.lat) || !inScope(toE.lng, toE.lat)) {
+      showEmpty(
+        "One or both corridor points are outside the Greater Metro Manila + SLEX/NLEX corridor v1.0 covers. No lookup is sent anywhere.",
+      );
+      return;
+    }
+    status.textContent = `Sampling the corridor every ~350 m (≈${CORRIDOR_BUFFER_M} m buffer) in your browser…`;
+    try {
+      const ev = await lookupCorridor(
+        [fromE.lng, fromE.lat],
+        [toE.lng, toE.lat],
+      );
+      status.textContent = "";
+      renderResult(
+        `Corridor: ${fromE.name} → ${toE.name} (≈${CORRIDOR_BUFFER_M} m buffer)`,
+        ev,
+      );
+    } catch {
+      status.textContent = "";
+      showEmpty("Could not read the bundled evidence layers. No query was transmitted.");
+    }
+  });
+</script>

@@ -67,7 +67,8 @@ the README reports their metrics **separately** (never averaged into one number)
 ### Track B - Trained-model track (the SolarMap analog)
 
 - **Substrate:** frozen Google AlphaEarth Foundations "Satellite Embedding V1"
-  (`GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL`), 10 m, 64-dim, unit-norm, annual
+  (`GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL`), natively 10 m but **sampled at 300 m**
+  in this pipeline (see model/fetch_embeddings.py), 64-dim, unit-norm, annual
   2017-2025, CC-BY-4.0 ("produced by Google and Google DeepMind"). This replaces
   SolarMap's CLIP-ViT-L tile-embedding step with a download - and removes the
   Esri tile-fetch + IP-throttle pain entirely (anti-throttle lesson, §3 dec. 3).
@@ -81,7 +82,7 @@ the README reports their metrics **separately** (never averaged into one number)
   contemporaneous with the GFD record end). The annual cadence is too coarse for
   a single event (Track A's job) but is ideal for "does this place's land-
   embedding signature predict it floods repeatedly".
-- **Committed cache:** `model/embeddings/floodwatch_embeddings_v1.npz` (~10 MB),
+- **Committed cache:** `model/embeddings/floodwatch_embeddings_v1.npz` (~1 MB),
   the AlphaEarth vectors sampled at every labelled point. `make train` runs
   offline from this cache, identical to SolarMap's `dataset_v4.npz`.
 
@@ -110,7 +111,7 @@ the README reports their metrics **separately** (never averaged into one number)
    dwelling. The PIA documents this. Conservative civic language throughout
    ("observed flood extent", "warrants verification", never "the government
    lied").
-6. **Bit-exact deterministic build** from the committed ~10 MB embeddings cache;
+6. **Bit-exact deterministic build** from the committed ~1 MB embeddings cache;
    `make hash-verify` asserts a canonical sha256; the event-disjoint split is
    itself hash-pinned so a leaked split fails CI.
 
