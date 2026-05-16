@@ -45,8 +45,6 @@ jobs:
     permissions:
       contents: read
       issues: write   # the deploy_realias pager files an issue on failure
-    env:
-      EE_KEY_FILE: ${{ runner.temp }}/ee-key.json
     steps:
       - name: Checkout (pinned)
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -71,8 +69,12 @@ jobs:
       - name: Materialise EE service-account key (never echoed)
         run: |
           umask 077
-          printf '%s' "$EE_SERVICE_ACCOUNT_KEY" > "$EE_KEY_FILE"
-          python -c "import json,os;json.load(open(os.environ['EE_KEY_FILE']));print('EE key materialised and is valid JSON')"
+          # $RUNNER_TEMP is a built-in env var (the `runner` context is not
+          # available in a job-level env: block — that rejected the workflow).
+          # Export EE_KEY_FILE for every later step (regen, cleanup).
+          echo "EE_KEY_FILE=$RUNNER_TEMP/ee-key.json" >> "$GITHUB_ENV"
+          printf '%s' "$EE_SERVICE_ACCOUNT_KEY" > "$RUNNER_TEMP/ee-key.json"
+          python -c "import json;json.load(open('$RUNNER_TEMP/ee-key.json'));print('EE key materialised and is valid JSON')"
         env:
           EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
 
