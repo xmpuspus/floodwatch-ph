@@ -243,6 +243,55 @@ export type EvidenceBundle = {
   roads: LayerResult & { segments: string[] };
 };
 
+// R2: state the recurrence-vs-record gap as ONE conservative sentence per
+// result, instead of leaving the user to infer it across two of five rows.
+// Derived only from the recurrence (model) and gfd (historical record)
+// layers already computed. Conservative civic-tech-ph language: it never
+// says an area will or will not flood, never an accusation; the strongest
+// form is "warrants verification".
+export function synthesizeGap(ev: EvidenceBundle): string {
+  const modeledProne =
+    ev.recurrence.state === "intersects" || ev.recurrence.state === "near";
+  const recordThin =
+    ev.gfd.state === "near" || ev.gfd.state === "clear";
+  const recordHas = ev.gfd.state === "intersects";
+
+  if (ev.recurrence.state === "unavailable" || ev.gfd.state === "unavailable") {
+    return (
+      "The recurrence model or the historical record is unavailable for this " +
+      "location, so the modeled-vs-record gap cannot be stated here. The dated " +
+      "evidence rows below still apply."
+    );
+  }
+  if (modeledProne && recordThin) {
+    return (
+      "The recurrence model rates this location modeled-prone while the " +
+      "historical observed record (GFD, 2002-2017) is thin or empty here: " +
+      "this is the under-observed-prone gap. A thin record is not proof of " +
+      "safety; this warrants independent verification with local records."
+    );
+  }
+  if (modeledProne && recordHas) {
+    return (
+      "The recurrence model rates this location modeled-prone and the " +
+      "historical observed record also shows flooding here, so the two agree. " +
+      "Modeled-prone and recorded, not under-observed."
+    );
+  }
+  if (!modeledProne && recordHas) {
+    return (
+      "The historical observed record shows flooding here, while the nearest " +
+      "recurrence sample is below the modeled-prone threshold. Recorded but " +
+      "not modeled-prone at this sample; verify with local records."
+    );
+  }
+  return (
+    "Neither the recurrence model nor the historical observed record flags " +
+    "this exact location as flood-prone. A thin record is not proof of " +
+    "safety; the dated evidence rows below describe what was observed."
+  );
+}
+
 // Same-origin static file load, identical to the site's existing MapView
 // pattern. This is the ONLY network read and it carries no query data.
 async function loadJSON(url: string): Promise<any | null> {

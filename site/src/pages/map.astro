@@ -3,64 +3,56 @@ import Base from "../layouts/Base.astro";
 import MapView from "../components/MapView.astro";
 import NowView from "../components/NowView.astro";
 import FreshnessBanner from "../components/FreshnessBanner.astro";
+import AccountabilitySurface from "../components/AccountabilitySurface.astro";
 import { METRICS } from "../data/metrics";
 const M = METRICS;
 ---
-<Base title="flood map · FloodWatch.PH" pathname="/map" description="The Now view shows the most recent observed Sentinel-1 SAR pass, monitored expressways, and rainfall context over Greater Metro Manila. A separate 2024 Carina view is a clearly labeled historical demonstration. Observed, not a forecast.">
-  <FreshnessBanner variant="site" />
+<Base title="flood map · FloodWatch.PH" pathname="/map" description="The default view is the observed flood extent and the province hazard-gap layer: where the recurrence model and the historical observed record diverge. A second tab carries rainfall and expressway context (source: RainViewer / PAGASA). Observed, not a forecast.">
 
-  <section class="max-w-6xl mx-auto px-6 pt-7 pb-3">
-    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">Sentinel-1 SAR &middot; observed flood extent</p>
-    <h1 class="text-3xl md:text-4xl mb-3 leading-tight">The flood map: what was observed, and when.</h1>
+  <section class="max-w-6xl mx-auto px-6 pt-9 pb-3">
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">hazard gap &middot; observed flood extent</p>
+    <h1 class="text-3xl md:text-4xl mb-3 leading-tight text-ink-900">Where the model and the record diverge.</h1>
     <p class="text-ink-700 max-w-prose leading-relaxed">
-      Two views. <strong>Now</strong> shows the most recent observed Sentinel-1
-      SAR pass over Greater Metro Manila and the SLEX/NLEX corridor, the
-      monitored expressways intersected with it, and GPM IMERG rainfall as
-      context, every layer stamped with its own as-of date. The
-      <strong>2024 Carina demo</strong> is a historical demonstration of the
-      same validated method on Super Typhoon Carina (July to August 2024), with
-      the province hazard-gap layer. Neither view is live and neither is a
-      forecast.
+      The default view is the observed Sentinel-1 SAR flood extent for Super
+      Typhoon Carina (July to August 2024) with the province hazard-gap layer:
+      where modeled flood-proneness diverges from the historical observed
+      record. A second tab carries rainfall and expressway context from
+      RainViewer / PAGASA, which FloodWatch does not produce. Neither view is
+      live and neither is a forecast.
     </p>
   </section>
 
-  <!-- View switch -->
+  <!-- View switch. Default = the hazard-gap / observed view (tab 1). The
+       rainfall + expressway context is tab 2, clearly labelled context. -->
   <section class="max-w-6xl mx-auto px-6 mb-4">
-    <div class="flex gap-2 text-sm" role="tablist" aria-label="Map view">
-      <button
-        id="view-now"
-        role="tab"
-        aria-selected="true"
-        aria-controls="panel-now"
-        class="px-4 py-2 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
-      >
-        Now (latest observed pass)
-      </button>
+    <div class="flex gap-2 text-sm flex-wrap" role="tablist" aria-label="Map view">
       <button
         id="view-carina"
         role="tab"
-        aria-selected="false"
+        aria-selected="true"
         aria-controls="panel-carina"
+        class="px-4 py-2 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
+      >
+        Hazard gap + observed extent
+      </button>
+      <button
+        id="view-now"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-now"
         class="px-4 py-2 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900"
       >
-        2024 Carina demo (historical)
+        Rainfall + expressway context (RainViewer / PAGASA)
       </button>
     </div>
   </section>
 
-  <!-- NOW panel (default) -->
-  <div id="panel-now" role="tabpanel" aria-labelledby="view-now">
-    <FreshnessBanner variant="now" />
-    <div class="h-3"></div>
-    <NowView />
-  </div>
-
-  <!-- CARINA panel (historical demo, kept intact) -->
-  <div id="panel-carina" role="tabpanel" aria-labelledby="view-carina" class="hidden">
+  <!-- CARINA / hazard-gap panel (DEFAULT, visible at first paint) -->
+  <div id="panel-carina" role="tabpanel" aria-labelledby="view-carina">
     <FreshnessBanner variant="carina" />
     <section class="max-w-6xl mx-auto px-6 pt-4 pb-2">
-      <p class="text-xs uppercase tracking-[0.2em] text-accent-coral-dark mb-1 font-mono">
-        historical demonstration &middot; not current conditions
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-1 font-mono">
+        the civic view &middot; observed, historical demonstration
       </p>
       <p class="text-ink-700 max-w-prose leading-relaxed text-sm">
         Super Typhoon Carina (Gaemi) 2024, Metro Manila + Bulacan + Pampanga.
@@ -74,10 +66,18 @@ const M = METRICS;
         v1.1 refinement.
       </p>
       <p class="text-xs text-ink-500 mt-2">
-        Track A IoU vs GFD event 4300 (Koppu 2015 validation): <strong>{M.trackA_iou}</strong> &middot; F1: <strong>{M.trackA_f1}</strong>. The validated method is applied to the ungauged Carina 2024 demo.
+        Track A IoU vs GFD event 4300 (Koppu 2015 validation): <strong>{M.trackA_iou}</strong> &middot; F1: <strong>{M.trackA_f1}</strong>. The validated method is applied to the ungauged Carina 2024 demonstration.
       </p>
     </section>
     <MapView />
+    <AccountabilitySurface variant="map" />
+  </div>
+
+  <!-- NOW panel (rainfall + expressway context, tab 2, hidden at first paint) -->
+  <div id="panel-now" role="tabpanel" aria-labelledby="view-now" class="hidden">
+    <FreshnessBanner variant="now" />
+    <div class="h-3"></div>
+    <NowView />
   </div>
 
   <section class="max-w-6xl mx-auto px-6 py-6 text-xs text-ink-500 leading-relaxed">
@@ -99,28 +99,27 @@ const M = METRICS;
       var pNow = document.getElementById("panel-now");
       var pCar = document.getElementById("panel-carina");
       var nowRoot = document.getElementById("now-root");
-      var carinaStarted = false;
       var onCls = "px-4 py-2 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider";
       var offCls = "px-4 py-2 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900";
 
-      function show(now) {
-        pNow.classList.toggle("hidden", !now);
-        pCar.classList.toggle("hidden", now);
-        bNow.setAttribute("aria-selected", String(now));
-        bCar.setAttribute("aria-selected", String(!now));
-        bNow.className = now ? onCls : offCls;
-        bCar.className = !now ? onCls : offCls;
-        if (now && nowRoot) {
-          // Lazy: NowView only fetches its data once activated.
+      // carina = true  -> the hazard-gap / observed view is shown (DEFAULT).
+      function show(carina) {
+        pCar.classList.toggle("hidden", !carina);
+        pNow.classList.toggle("hidden", carina);
+        bCar.setAttribute("aria-selected", String(carina));
+        bNow.setAttribute("aria-selected", String(!carina));
+        bCar.className = carina ? onCls : offCls;
+        bNow.className = !carina ? onCls : offCls;
+        if (!carina && nowRoot) {
+          // Lazy: NowView (Corridor watch) only fetches its data once the
+          // context tab is opened.
           nowRoot.setAttribute("data-now-active", "true");
         }
-        if (!now) {
-          // The Carina map is created in this (until-now hidden) panel, so
-          // MapLibre has not fired its load event yet. Resize the CARINA map
-          // specifically (window.__fwMap is the default Now map) to give it a
-          // size and trigger its load + layer build. Retry briefly in case
-          // the MapView script has not run yet on a cold first paint.
-          carinaStarted = true;
+        if (carina) {
+          // The Carina map is created by MapView, which inits as soon as
+          // #panel-carina is not hidden (it is the default, visible panel).
+          // On a tab return, kick a resize so MapLibre repaints after any
+          // display:none cycle.
           var tries = 0;
           (function kick() {
             var m = window.__fwCarinaMap;
@@ -134,9 +133,10 @@ const M = METRICS;
         }
       }
 
-      bNow.addEventListener("click", function () { show(true); });
-      bCar.addEventListener("click", function () { show(false); });
-      // Default: Now view, activated immediately so its as-of dates load.
+      bCar.addEventListener("click", function () { show(true); });
+      bNow.addEventListener("click", function () { show(false); });
+      // Default: the hazard-gap / observed view. MapView paints it and sets
+      // window.__fwReady on map idle (qa_live depends on the default painting).
       show(true);
     })();
   </script>

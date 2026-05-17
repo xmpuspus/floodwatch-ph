@@ -50,8 +50,10 @@ const REBUILT_UTC =
           Corridor watch
         </h2>
         <p id="cw-gloss" class="text-sm text-ink-700 mt-1.5 leading-relaxed">
-          What the satellites and radar have observed over the expressways —
-          the most recent observed passes, not a live feed and not a forecast.
+          Rainfall and expressway context, source RainViewer / PAGASA, not
+          produced by FloodWatch. The most recent observed passes, lagged. Not
+          a live feed and not a forecast. This is secondary context, not the
+          product; the spine is the recurrence-vs-record gap.
         </p>
         <p class="text-sm text-ink-900 mt-3 leading-relaxed font-medium">
           Did the latest satellite pass see water on the expressways?
@@ -98,7 +100,7 @@ const REBUILT_UTC =
         role="status"
         aria-live="off"
       >
-        Layers refresh independently — see each layer's own clock.
+        Layers refresh independently; see each layer's own clock.
       </p>
     </div>
   </section>
@@ -110,11 +112,12 @@ const REBUILT_UTC =
     <!-- Tier 1 -->
     <div class="bg-paper border border-ink-300/30 p-4">
       <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
-        Freshest observation
+        Rainfall context (RainViewer / PAGASA)
       </p>
       <p class="text-[12px] text-ink-700 leading-relaxed mb-3">
-        Ground-radar rainfall, refreshed every few minutes. Shows where rain has
-        most recently been falling, not where roads are flooded.
+        Ground-radar rainfall, source RainViewer / PAGASA, not produced by
+        FloodWatch. Shows where rain has recently been falling, not where roads
+        are flooded. Context only.
       </p>
       <label class="flex items-center gap-1.5 cursor-pointer text-xs mb-2">
         <input id="cw-toggle-rain" type="checkbox" class="accent-accent-steel" />
@@ -221,7 +224,7 @@ const REBUILT_UTC =
         Rainfall accumulation context
       </p>
       <p class="text-[12px] text-ink-700 leading-relaxed mb-3">
-        Rainfall accumulation context — dated, processed once a day. Context for
+        Rainfall accumulation context, dated, processed once a day. Context for
         the radar-revisit gap, not a score and not a forecast.
       </p>
       <label class="flex items-center gap-1.5 cursor-pointer text-xs">
@@ -713,7 +716,7 @@ const REBUILT_UTC =
       // it never overrides the radar layer (added before roads/flood) ----
       // maxzoom = the provider's real top tile level so MapLibre OVERZOOMS
       // (scales those tiles up) past it instead of requesting unsupported
-      // zooms — RainViewer/GIBS return a "Zoom Level Not Supported"
+      // zooms: RainViewer/GIBS return a "Zoom Level Not Supported"
       // placeholder PNG (not a 404) for out-of-range z, which would
       // otherwise paint over the map.
       map.addSource("cw-viirs", {
@@ -930,7 +933,7 @@ const REBUILT_UTC =
         "RainViewer / PAGASA",
         "nowcast (~10-min source)",
         "rainviewer",
-        `Rain radar: PAGASA national radar via RainViewer — last frame ${fmtAcqUTC(rv.acquiredUtc)}, ` +
+        `Rain radar: PAGASA national radar via RainViewer, last frame ${fmtAcqUTC(rv.acquiredUtc)}, ` +
           `updated ${tickingAge(rv.acquiredUtc).replace(/^updated /, "").replace(/^last pass /, "")} ago. ` +
           `Ground-radar observation, not a forecast. Source: RainViewer / PAGASA.`,
       );
@@ -987,7 +990,7 @@ const REBUILT_UTC =
         "viirs",
         `Supplementary observed flat-water signal: NASA LANCE VIIRS near-real-time ` +
           `flood, ${fmtAcqUTC(vi.acquiredUtc)} one-day composite. Optical, about 250 m, ` +
-          `cloud-limited — typhoon cloud often blanks it. Not the primary layer, not live, ` +
+          `cloud-limited. Typhoon cloud often blanks it. Not the primary layer, not live, ` +
           `not a forecast.`,
       );
       tickerLayers.push({ name: "Supplementary observed flat-water signal", acquiredIso: vi.acquiredUtc });
@@ -1009,7 +1012,7 @@ const REBUILT_UTC =
       // Track-A extent is now rendered as a filled/textured water mass.
       `Latest usable Sentinel-1 SAR pass: ${sarAsOf ?? "acquisition time unavailable"}. ` +
         `Sentinel-1A + Sentinel-1C, ~6-day revisit, ~24 h product latency. Dated ground ` +
-        `truth — not live, not a forecast. The shaded water is a SAR detection on that ` +
+        `truth, not live, not a forecast. The shaded water is a SAR detection on that ` +
         `single pass, not a photograph and not a continuous view.`,
     );
     if (sarAsOf) tickerLayers.push({ name: "Latest usable Sentinel-1 SAR pass", acquiredIso: `${sarAsOf}T00:00:00Z` });
@@ -1036,7 +1039,7 @@ const REBUILT_UTC =
     if (capEl) {
       // §1a + §1b verbatim, on their own line ABOVE the source line.
       capEl.textContent =
-        `Satellite basemap: NASA GIBS true-colour, ${dateUtc} — daily mosaic, ` +
+        `Satellite basemap: NASA GIBS true-colour, ${dateUtc}. Daily mosaic, ` +
         `one pass per day, not live. True-colour is optical: typhoon cloud ` +
         `often hides the ground on the very dates flooding matters. It is a ` +
         `backdrop, not the observed-water layer.`;
@@ -1076,7 +1079,7 @@ const REBUILT_UTC =
       if (toggle) toggle.disabled = true;
       const lab = $("cw-basemap-disabled");
       if (lab) {
-        lab.textContent = " unavailable — see caption";
+        lab.textContent = " unavailable, see caption";
         lab.classList.remove("hidden");
       }
       return;
@@ -1156,7 +1159,7 @@ const REBUILT_UTC =
     if (capEl) {
       capEl.textContent =
         `Observed rain radar, last ${frames.length} frames ` +
-        `${fmtFrameUtc(first.frameUtc)} → ${fmtFrameUtc(last.frameUtc)} — ` +
+        `${fmtFrameUtc(first.frameUtc)} → ${fmtFrameUtc(last.frameUtc)}, ` +
         `PAGASA via RainViewer, ~10-min source, observed not a forecast.`;
       capEl.classList.remove("hidden");
     }
@@ -1169,7 +1172,7 @@ const REBUILT_UTC =
     const paintFrame = (): void => {
       const f = frames[idx];
       if (frameEl) {
-        frameEl.textContent = `Frame ${fmtFrameUtc(f.frameUtc)} — observed`;
+        frameEl.textContent = `Frame ${fmtFrameUtc(f.frameUtc)}, observed`;
         frameEl.classList.remove("hidden");
       }
       const src = map.getSource("cw-rain");

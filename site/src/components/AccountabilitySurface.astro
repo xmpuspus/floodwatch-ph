@@ -1,0 +1,302 @@
+---
+// AccountabilitySurface -- the wave B payoff, consumed wave A.
+//
+// Reads /data/flood_control_accountability.json (the aggregate-only file
+// Agent-WBD writes; schema in docs/plans/recenter/10-wb-data-brief.md sec 3):
+//   { _meta: { source, snapshot_sha256, n_projects, total_allocation_php,
+//              generated_utc, geolocation_caveat, disclaimer,
+//              public_record_block },
+//     by_province: [ { province, region, n_projects, allocation_php,
+//              recurrence_score, gap, observed_flood_passes, flagged_rate,
+//              warrants_investigation, disclaimer } ],
+//     by_type:    [ { project_type, n_projects, allocation_php, flagged_rate } ],
+//     by_tranche: [ { tranche, n_projects, allocation_php, flagged_rate } ] }
+//
+// The file does not exist until Agent-WBD lands wave B. Until then this
+// section degrades to the honest in-progress roadmap line (same null-guard
+// pattern the home page already uses for road_flood_exposure.geojson _meta).
+// It never breaks the build (client fetch only, no build-time import) and it
+// never renders a list of named flagged projects -- only aggregates.
+//
+// variant:
+//   "home"   -> full section: roadmap line + aggregates when present
+//   "map"    -> compact panel under the Carina view
+//   "lookup" -> a single line appended to a place result
+interface Props {
+  variant?: "home" | "map" | "lookup";
+}
+const { variant = "home" } = Astro.props;
+
+// Verbatim destination thesis. NOT a backed claim until the JSON renders;
+// stated here as the in-progress roadmap line.
+const THESIS = "Where flood-control money was spent, and where the water still came.";
+---
+
+<section
+  id={`fw-acct-${variant}`}
+  class="fw-acct"
+  data-variant={variant}
+  data-thesis={THESIS}
+  aria-label="Flood-control accountability (in progress)"
+>
+  {variant === "home" && (
+    <div class="max-w-prose mx-auto px-6 py-12 border-t border-ink-300/30">
+      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-3">
+        where this is going
+      </p>
+      <h2 class="text-2xl mb-4 leading-tight text-ink-900">{THESIS}</h2>
+      <div id="fw-acct-home-body">
+        <p class="text-base text-ink-700 leading-relaxed mb-4">
+          The recurrence-vs-record gap above is step 1. Step 2 holds public
+          flood-control spending against it: DPWH and BetterGovPH project
+          records, cross-referenced with where Sentinel-1 still observed
+          flooding and where the recurrence model rates the ground prone. This
+          is the destination, stated as an in-progress roadmap line, not a
+          backed claim. The spending layer is a separate data build with its
+          own legal-language gate. Nothing below claims a finding the live data
+          cannot support yet.
+        </p>
+        <p class="text-sm text-ink-500 leading-relaxed">
+          Conservative by design: aggregates only, no named project is ever
+          singled out as failed, and any indicator reads "warrants independent
+          investigation," never an accusation.
+        </p>
+      </div>
+    </div>
+  )}
+
+  {variant === "map" && (
+    <section class="max-w-6xl mx-auto px-6 py-5">
+      <div class="border border-ink-300/40 bg-paper p-5">
+        <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
+          flood-control accountability &middot; in progress
+        </p>
+        <h2 class="text-lg text-ink-900 mb-2 leading-snug">{THESIS}</h2>
+        <div id="fw-acct-map-body">
+          <p class="text-sm text-ink-700 leading-relaxed">
+            The hazard-gap view is the observed substrate. The next data build
+            holds public flood-control spending against it (DPWH and BetterGovPH
+            records, cross-referenced with observed Sentinel-1 flooding and the
+            recurrence model). Aggregates only when it lands, never a named
+            project list, and stated as "warrants independent investigation."
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {variant === "lookup" && (
+    <div
+      id="fw-acct-lookup-body"
+      class="mt-4 border-l-2 border-ink-300/40 pl-3 text-[13px] text-ink-700 leading-relaxed"
+    >
+      <p>
+        Flood-control spending for this province is the next data build. When
+        it lands it will state one conservative sentence here from public
+        DPWH/BetterGovPH records, aggregates only, never a named project.
+      </p>
+    </div>
+  )}
+</section>
+
+<script>
+  // Client fetch only. Same-origin static file, identical pattern to the
+  // home page's road_flood_exposure.geojson _meta guard (index.astro). If the
+  // file is absent or malformed, the server-rendered roadmap copy stands and
+  // nothing breaks. If it is present, aggregates replace the roadmap body and
+  // the un-strippable _meta.disclaimer + public_record_block are shown.
+  type ByProvince = {
+    province: string;
+    region?: string;
+    n_projects?: number;
+    allocation_php?: number;
+    recurrence_score?: number;
+    gap?: string;
+    observed_flood_passes?: number;
+    flagged_rate?: number;
+    warrants_investigation?: boolean;
+  };
+  type ByType = {
+    project_type: string;
+    n_projects?: number;
+    allocation_php?: number;
+    flagged_rate?: number;
+  };
+  type ByTranche = {
+    tranche: string;
+    n_projects?: number;
+    allocation_php?: number;
+    flagged_rate?: number;
+  };
+  type AcctMeta = {
+    source?: string;
+    n_projects?: number;
+    total_allocation_php?: number;
+    generated_utc?: string;
+    geolocation_caveat?: string;
+    disclaimer?: string;
+    public_record_block?: string;
+  };
+  type AcctFile = {
+    _meta?: AcctMeta;
+    by_province?: ByProvince[];
+    by_type?: ByType[];
+    by_tranche?: ByTranche[];
+  };
+
+  function pesoShort(n: number | undefined): string {
+    if (n == null || !isFinite(n) || n <= 0) return "an amount on public record";
+    if (n >= 1e12) return "P" + (n / 1e12).toFixed(2) + "T";
+    if (n >= 1e9) return "P" + (n / 1e9).toFixed(1) + "B";
+    if (n >= 1e6) return "P" + (n / 1e6).toFixed(1) + "M";
+    return "P" + Math.round(n).toLocaleString();
+  }
+
+  function intFmt(n: number | undefined): string {
+    return n == null || !isFinite(n) ? "--" : Math.round(n).toLocaleString();
+  }
+
+  async function getAcct(): Promise<AcctFile | null> {
+    try {
+      const r = await fetch("/data/flood_control_accountability.json");
+      if (!r.ok) return null;
+      const j = (await r.json()) as AcctFile;
+      // Governance guard: refuse to render aggregates without the
+      // un-strippable disclaimer. Absent/blank -> degrade to the roadmap line.
+      if (!j || !j._meta || !j._meta.disclaimer || !j._meta.disclaimer.trim()) {
+        return null;
+      }
+      return j;
+    } catch {
+      return null;
+    }
+  }
+
+  function esc(s: string): string {
+    return s.replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ] as string,
+    );
+  }
+
+  function disclaimerBlock(m: AcctMeta): string {
+    const src = m.source ? esc(m.source) : "public DPWH / BetterGovPH records";
+    const geo = m.geolocation_caveat ? ` ${esc(m.geolocation_caveat)}.` : "";
+    const pub = m.public_record_block ? esc(m.public_record_block) : "";
+    return `
+      <div class="mt-5 border border-ink-300/40 bg-paper-alt px-4 py-3 text-[12px] text-ink-700 leading-relaxed" role="note">
+        <p class="font-medium text-ink-900 mb-1">All figures are public record.</p>
+        <p>${esc(m.disclaimer ?? "")}</p>
+        ${pub ? `<p class="mt-2">${pub}</p>` : ""}
+        <p class="mt-2 text-ink-500">Source: ${src}.${geo} ${
+          m.generated_utc ? "Generated " + esc(m.generated_utc) + "." : ""
+        }</p>
+      </div>`;
+  }
+
+  function renderHome(j: AcctFile): string {
+    const m = j._meta as AcctMeta;
+    const prov = (j.by_province ?? []).filter(
+      (p) => p.warrants_investigation === true,
+    );
+    // ONE conservative sentence for the lead province (highest allocation
+    // among warrants_investigation). No named project, aggregate province
+    // only. Numbers from the file, never hardcoded.
+    let lead = "";
+    if (prov.length > 0) {
+      const top = [...prov].sort(
+        (a, b) => (b.allocation_php ?? 0) - (a.allocation_php ?? 0),
+      )[0];
+      lead = `${pesoShort(top.allocation_php)} was allocated to flood control in ${esc(
+        top.province,
+      )}; the recurrence model rates it modeled-prone and Sentinel-1 observed flooding on ${intFmt(
+        top.observed_flood_passes,
+      )} dated pass${top.observed_flood_passes === 1 ? "" : "es"} here. Per DPWH/BetterGovPH records; warrants independent investigation.`;
+    }
+    const tranche = (j.by_tranche ?? [])
+      .map(
+        (t) =>
+          `<tr class="border-t border-ink-300/30"><td class="py-1.5 pr-4">${esc(
+            t.tranche,
+          )}</td><td class="py-1.5 pr-4 font-mono tabular-nums">${intFmt(
+            t.n_projects,
+          )}</td><td class="py-1.5 font-mono tabular-nums">${pesoShort(
+            t.allocation_php,
+          )}</td></tr>`,
+      )
+      .join("");
+    return `
+      <p class="text-base text-ink-700 leading-relaxed mb-4">
+        Public flood-control records now cross-reference the observed substrate.
+        Across ${intFmt(m.n_projects)} flood-control projects on public record
+        (${pesoShort(
+          m.total_allocation_php,
+        )} total allocation), these are the aggregates where money was allocated
+        and where the recurrence model and Sentinel-1 still indicate flooding.
+        Aggregates only. No named project is singled out.
+      </p>
+      ${
+        lead
+          ? `<p class="text-base text-ink-900 leading-relaxed mb-4 border-l-2 border-accent-coral/50 pl-3">${lead}</p>`
+          : ""
+      }
+      ${
+        tranche
+          ? `<div class="overflow-x-auto mb-2"><table class="w-full text-[13px] text-ink-700"><thead><tr class="text-left text-[11px] uppercase tracking-wider text-ink-500 font-mono"><th class="pb-1 pr-4">budget tranche</th><th class="pb-1 pr-4">projects</th><th class="pb-1">allocation</th></tr></thead><tbody>${tranche}</tbody></table></div>`
+          : ""
+      }
+      ${disclaimerBlock(m)}`;
+  }
+
+  function renderMap(j: AcctFile): string {
+    const m = j._meta as AcctMeta;
+    const prov = (j.by_province ?? []).filter(
+      (p) => p.warrants_investigation === true,
+    ).length;
+    return `
+      <p class="text-sm text-ink-700 leading-relaxed">
+        Across ${intFmt(m.n_projects)} flood-control projects on public record
+        (${pesoShort(
+          m.total_allocation_php,
+        )} total), ${intFmt(
+          prov,
+        )} province aggregate${
+          prov === 1 ? "" : "s"
+        } show money allocated where the recurrence model and Sentinel-1 still
+        indicate flooding. Aggregate counts only; no named project is listed
+        here. Each reads "warrants independent investigation."
+      </p>
+      ${disclaimerBlock(m)}`;
+  }
+
+  function renderLookup(j: AcctFile): string {
+    const m = j._meta as AcctMeta;
+    return `
+      <p>Across ${intFmt(m.n_projects)} flood-control projects on public
+      record, the province aggregates are available. This view does not list
+      named projects. ${esc(
+        m.disclaimer ?? "",
+      )}</p>`;
+  }
+
+  (async () => {
+    const roots = document.querySelectorAll<HTMLElement>(".fw-acct");
+    if (!roots.length) return;
+    const j = await getAcct();
+    if (!j) return; // server-rendered roadmap line stands. Graceful degrade.
+    roots.forEach((root) => {
+      const v = root.dataset.variant ?? "home";
+      if (v === "home") {
+        const body = root.querySelector("#fw-acct-home-body");
+        if (body) body.innerHTML = renderHome(j);
+      } else if (v === "map") {
+        const body = root.querySelector("#fw-acct-map-body");
+        if (body) body.innerHTML = renderMap(j);
+      } else if (v === "lookup") {
+        const body = root.querySelector("#fw-acct-lookup-body");
+        if (body) body.innerHTML = renderLookup(j);
+      }
+    });
+  })();
+</script>

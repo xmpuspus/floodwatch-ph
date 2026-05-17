@@ -91,11 +91,12 @@ const { variant = "site" } = Astro.props;
     return `updated ${h} h ${m % 60} min ago`;
   }
 
-  // The genuinely-freshest layer is the client-fetched RainViewer radar
-  // (PAGASA relay, ~10-min nowcast). Same CORS-open manifest the Corridor
-  // watch uses; already in the CSP; a fixed nationwide request with NO user
-  // input, so the lookup-stays-in-browser invariant is untouched. radar.past
-  // only (observation) -- never radar.nowcast (forecast).
+  // RainViewer radar (PAGASA relay) is rainfall CONTEXT only. It is NOT
+  // produced by FloodWatch and is never the lead or "freshest" signal. Same
+  // CORS-open manifest the context tab uses; already in the CSP; a fixed
+  // nationwide request with NO user input, so the lookup-stays-in-browser
+  // invariant is untouched. radar.past only (observation), never
+  // radar.nowcast (forecast).
   async function getRainNow(): Promise<{
     age: string;
     utc: string;
@@ -137,17 +138,15 @@ const { variant = "site" } = Astro.props;
       getRainNow(),
     ]);
 
-    // §5 freshness-clock rule: surface the FRESHEST observed signal first and
-    // timestamp it; never the word "live". The rain radar (minutes old) is
-    // the freshest; Sentinel-1 flood extent is the dated ground truth. Lead
-    // with rain when it resolved; fall back honestly when it did not (never
-    // fabricate freshness).
-    const freshLead =
+    // Re-center: rain is rainfall CONTEXT, never the lead and never
+    // "freshest". The dated Sentinel-1 observed record is what FloodWatch
+    // stands on; rain (RainViewer / PAGASA) is attributed context only. The
+    // rain age, if it resolved, is reported in the detail line as context,
+    // not as the headline.
+    const rainContext =
       rainNow !== null
-        ? `Freshest observation: rain radar over the corridor, ` +
-          `${rainNow.age} (${rainNow.utc}, PAGASA via RainViewer). ` +
-          `Observed, not a forecast. Layers refresh independently, each ` +
-          `with its own as-of time; Sentinel-1 flood extent is dated.`
+        ? `Rainfall context: RainViewer / PAGASA radar, ${rainNow.age} ` +
+          `(${rainNow.utc}). Not produced by FloodWatch, not a forecast.`
         : null;
 
     const rainMeta = rain && rain._meta ? rain._meta : null;
@@ -188,29 +187,29 @@ const { variant = "site" } = Astro.props;
 
     if (variant === "now") {
       lineEl.textContent =
-        freshLead ??
-        "This is observed satellite data, each layer shown with its own " +
-          "as-of time, not a live feed and not a forecast.";
-      detEl.textContent = latestLine + " " + rainLine;
+        "Rainfall and expressway context, source RainViewer / PAGASA, not " +
+        "produced by FloodWatch. Most recent observed pass, lagged. Not a " +
+        "live feed and not a forecast.";
+      detEl.textContent =
+        latestLine + " " + rainLine + (rainContext ? " " + rainContext : "");
     } else if (variant === "carina") {
       lineEl.textContent =
         "This map shows a 2024 historical demonstration (Super Typhoon Carina, July to August 2024), not current conditions.";
       detEl.textContent =
         "The Sentinel-1 SAR passes shown are the demo's 2024-07 and 2024-08 Carina acquisitions. " +
         "Sentinel-1 has a ~6-day revisit (Sentinel-1A + Sentinel-1C, restored ~May 2025) with ~24 h product latency; this is observed satellite data for that window, not a live feed and not a forecast. " +
-        "For the most recent observed pass and rainfall context, open the Now view. " +
+        "Rainfall and expressway context (RainViewer / PAGASA) is on the second tab. " +
         latestLine;
     } else {
-      // compact site-wide line for the home page: lead with the freshest
-      // observed signal (rain radar, minutes old) when it resolved; honest
-      // dated framing otherwise. Never "live".
+      // compact site-wide line: the open reproducible record, not a live
+      // feed. Rain is context, never the lead.
       lineEl.textContent =
-        freshLead ??
         "FloodWatch shows observed satellite data on dated passes, plus a " +
-          "2024 historical demo, never a forecast.";
+        "2024 historical demonstration. The open reproducible record, not a " +
+        "live feed and never a forecast.";
       detEl.innerHTML =
         latestLine +
-        ' <a href="/map" class="no-underline text-accent-steel">Open the Corridor watch and the 2024 demo</a>.';
+        ' <a href="/map" class="no-underline text-accent-steel">Open the hazard-gap map and the 2024 demonstration</a>.';
     }
 
     // Escalate the visual state when no usable observation exists, so the
