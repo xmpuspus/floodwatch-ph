@@ -29,6 +29,10 @@ on:
         description: "Regenerate + gate only; do not deploy/re-alias"
         type: boolean
         default: false
+      skip_regen:
+        description: "Deploy the committed (last-good) data as-is; skip Earth Engine regeneration. Use for a code-only deploy or when the EE key is unavailable."
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -67,6 +71,7 @@ jobs:
           pip install "earthengine-api==1.7.26" "pyproj==3.6.1" "pyyaml"
 
       - name: Materialise EE service-account key (never echoed)
+        if: ${{ inputs.skip_regen != true }}
         run: |
           umask 077
           # $RUNNER_TEMP is a built-in env var (the `runner` context is not
@@ -79,12 +84,15 @@ jobs:
           EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
 
       - name: Regenerate Track A — flood_latest (Sentinel-1)
+        if: ${{ inputs.skip_regen != true }}
         run: python event/flood_latest.py
 
       - name: Regenerate rainfall context — current_risk (GPM IMERG)
+        if: ${{ inputs.skip_regen != true }}
         run: python realtime/current_risk.py
 
       - name: Regenerate expressway exposure — road_flood_exposure
+        if: ${{ inputs.skip_regen != true }}
         run: python pipeline/road_exposure.py --refresh-osm
 
       - name: Pre-deploy GATE (block garbage, allow honest-empty)
