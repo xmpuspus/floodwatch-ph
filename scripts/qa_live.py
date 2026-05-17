@@ -113,23 +113,43 @@ def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
           and "not a forecast" in (gloss.inner_text().lower()
                                    if gloss else ""),
           (head.inner_text() if head else "no headline"))
+    # Block-3 (HARD GATE) is co-located with the expressway visual on the
+    # corridor surface itself. Match on whitespace-NORMALISED textContent:
+    # the redirect is line-wrapped in source, so a raw substring match is a
+    # false negative (the text is present and visible).
     block3 = ("For live conditions, warnings, and routing during an active "
               "flood, use PAGASA")
-    check("corridor Block-1 observed-evidence guardrail present",
-          "not a forecast and not a safety instruction" in html.lower()
-          or "observed and modeled evidence" in html.lower())
-    check("corridor Block-2 evidence-framing guardrail present",
-          "a thin record is not proof of safety" in html.lower()
-          or "these are observations and a model" in html.lower())
     co = pg.evaluate(
         """(t) => { const r=document.getElementById('now-root');
         const g=document.getElementById('now-expressway-grid');
-        return !!(r && g && r.contains(g) && r.textContent.includes(t)); }""",
+        const norm = s => (s||'').replace(/\\s+/g,' ').trim();
+        return !!(r && g && r.contains(g)
+                  && norm(r.textContent).includes(t)); }""",
         block3)
     check("corridor Block-3 PAGASA/MMDA/DRRMO redirect co-located with "
           "the expressway visual (HARD GATE)", bool(co))
     check("corridor Block-4 public-records disclaimer present",
           "patterns may have legitimate explanations" in html.lower())
+
+    # Block-1 (lookup-result header) and Block-2 (evidence framing) are
+    # required on the lookup/result panel per the Agent-F copy spec §6, not
+    # on the always-on /map corridor map. Assert them on /lookup (their
+    # actual home), whitespace-normalised.
+    import urllib.request
+    try:
+        lk = urllib.request.urlopen(
+            base.rstrip("/") + "/lookup/", timeout=20).read().decode(
+            "utf-8", "replace")
+        lk = " ".join(lk.split()).lower()
+    except Exception as e:  # noqa: BLE001
+        lk = ""
+        check("corridor Block-1/2 lookup surface reachable", False, repr(e))
+    check("corridor Block-1 lookup-result header present (/lookup, §6)",
+          "not a forecast and not a safety instruction" in lk
+          or "observed and modeled evidence" in lk)
+    check("corridor Block-2 evidence-framing present (/lookup, §6)",
+          "a thin record is not proof of safety" in lk
+          or "these are observations and a model" in lk)
 
     # (2) window.__fwCorridor exists; each of rain/gfm/viics is a known
     # state. ok|empty|fail are ALL a PASS (honest-empty contract).
