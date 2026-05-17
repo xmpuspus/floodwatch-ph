@@ -1,0 +1,105 @@
+[flood_control] 44983 flood-control projects, total_allocation_php=1972257679834, 43482 resolved to a province, snapshot_sha256=5b411cf3f112fabd1913c70681791e5e2b78b43a8393f489f48bd882f154e123
+[flood_control] wrote flood_control_accountability.json (82 provinces, 11 types, 5 tranches)
+[flood_control] wrote flood_control_by_id.json (44983 projects)
+  Abra: n=395 alloc=24936151626 rec=0.249 passes=0 warrants=False
+  Agusan Del Norte: n=305 alloc=25667573972 rec=0.763 passes=0 warrants=True
+  Agusan Del Sur: n=178 alloc=9161640813 rec=0.81 passes=0 warrants=True
+  Aklan: n=208 alloc=8968752903 rec=0.676 passes=0 warrants=True
+  Albay: n=1137 alloc=67543976630 rec=0.858 passes=0 warrants=True
+  Antique: n=149 alloc=7285952878 rec=0.383 passes=0 warrants=False
+  Apayao: n=143 alloc=7012565499 rec=0.232 passes=0 warrants=False
+  Aurora: n=243 alloc=9756152437 rec=0.496 passes=0 warrants=False
+  Basilan: n=52 alloc=2747683940 rec=0.037 passes=0 warrants=False
+  Bataan: n=398 alloc=13115670186 rec=0.753 passes=0 warrants=True
+  Batanes: n=126 alloc=1675938425 rec=0.0 passes=0 warrants=False
+  Batangas: n=1089 alloc=30241196382 rec=0.387 passes=0 warrants=False
+  Benguet: n=475 alloc=13619091337 rec=0.104 passes=0 warrants=False
+  Biliran: n=359 alloc=6602867805 rec=0.63 passes=0 warrants=True
+  Bohol: n=384 alloc=17078424217 rec=0.232 passes=0 warrants=False
+  Bukidnon: n=351 alloc=21762949406 rec=0.42 passes=0 warrants=False
+  Bulacan: n=2351 alloc=119061795897 rec=0.913 passes=0 warrants=True
+  Cagayan: n=576 alloc=27875018926 rec=0.884 passes=0 warrants=True
+  Camarines Norte: n=385 alloc=20639202487 rec=0.642 passes=0 warrants=True
+  Camarines Sur: n=875 alloc=47495714941 rec=0.875 passes=0 warrants=True
+  Camiguin: n=115 alloc=4383854156 rec=0.482 passes=0 warrants=False
+  Capiz: n=209 alloc=8094148463 rec=0.815 passes=0 warrants=True
+  Catanduanes: n=220 alloc=9079096294 rec=0.023 passes=0 warrants=False
+  Cavite: n=1119 alloc=55507119546 rec=0.667 passes=0 warrants=True
+  Cebu: n=1708 alloc=79549096977 rec=0.413 passes=0 warrants=False
+  Compostela: n=314 alloc=19019572122 rec=0.713 passes=0 warrants=True
+  Davao Del Sur: n=885 alloc=44195407039 rec=0.646 passes=0 warrants=True
+  Davao Oriental: n=335 alloc=14869071394 rec=0.433 passes=0 warrants=False
+  Davao del Norte: n=175 alloc=10423186202 rec=0.835 passes=0 warrants=True
+  Dinagat: n=124 alloc=4969411811 rec=0.35 passes=0 warrants=False
+  Eastern Samar: n=236 alloc=9793429444 rec=0.373 passes=0 warrants=False
+  Guimaras: n=73 alloc=2617770051 rec=0.403 passes=0 warrants=False
+  Ifugao: n=145 alloc=5243853068 rec=0.373 passes=0 warrants=False
+  Ilocos Norte: n=1264 alloc=39523164577 rec=0.724 passes=0 warrants=True
+  Ilocos Sur: n=656 alloc=15709715123 rec=0.737 passes=0 warrants=True
+  Iloilo: n=862 alloc=33290005345 rec=0.741 passes=0 warrants=True
+  Isabela: n=958 alloc=57138898341 rec=0.893 passes=0 warrants=True
+  Kalinga: n=332 alloc=6734388851 rec=0.789 passes=0 warrants=True
+  La Union: n=490 alloc=21541575416 rec=0.749 passes=0 warrants=True
+  Laguna: n=721 alloc=30229069217 rec=0.822 passes=0 warrants=True
+  Lanao Del Norte: n=315 alloc=10569773642 rec=0.633 passes=0 warrants=True
+  Lanao Del Sur: n=72 alloc=3229542109 rec=0.251 passes=0 warrants=False
+  Leyte: n=1208 alloc=58261883730 rec=0.759 passes=0 warrants=True
+  Maguindanao: n=44 alloc=3115893754 rec=0.918 passes=0 warrants=True
+  Marinduque: n=198 alloc=9214916717 rec=0.053 passes=0 warrants=False
+  Masbate: n=261 alloc=9695756656 rec=0.57 passes=0 warrants=False
+  Metropolitan Manila: n=5433 alloc=199780705060 rec=0.843 passes=0 warrants=True
+  Mindoro Occidental: n=360 alloc=28981660831 rec=0.787 passes=0 warrants=True
+  Mindoro Oriental: n=473 alloc=34255491047 rec=0.897 passes=0 warrants=True
+  Misamis Occidental: n=166 alloc=5285609825 rec=0.707 passes=0 warrants=True
+  Misamis Oriental: n=640 alloc=34589547812 rec=0.428 passes=0 warrants=False
+  Mountain Province: n=217 alloc=6455289307 rec=0.147 passes=0 warrants=False
+  Negros Occidental: n=780 alloc=32579181364 rec=0.681 passes=0 warrants=True
+  Negros Oriental: n=432 alloc=17626995403 rec=0.289 passes=0 warrants=False
+  North Cotabato: n=318 alloc=16404060439 rec=0.849 passes=0 warrants=True
+  Northern Samar: n=256 alloc=7698291281 rec=0.584 passes=0 warrants=False
+  Nueva Ecija: n=750 alloc=31522185216 rec=0.937 passes=0 warrants=True
+  Nueva Vizcaya: n=288 alloc=14872735947 rec=0.563 passes=0 warrants=False
+  Palawan: n=343 alloc=19026339225 rec=0.478 passes=0 warrants=False
+  Pampanga: n=1121 alloc=44249885841 rec=0.976 passes=2 warrants=True
+  Pangasinan: n=1642 alloc=50161095013 rec=0.913 passes=0 warrants=True
+  Quezon: n=816 alloc=26621631115 rec=0.534 passes=0 warrants=False
+  Quirino: n=72 alloc=2502567927 rec=0.239 passes=0 warrants=False
+  Rizal: n=970 alloc=25553742740 rec=0.817 passes=0 warrants=True
+  Romblon: n=295 alloc=19757503658 rec=0.313 passes=0 warrants=False
+  Samar: n=327 alloc=12002664015 rec=0.386 passes=0 warrants=False
+  Saranggani: n=150 alloc=7278028702 rec=0.286 passes=0 warrants=False
+  Shariff Kabunsuan: n=78 alloc=3861062856 rec=0.782 passes=0 warrants=True
+  Siquijor: n=81 alloc=3621102225 rec=0.371 passes=0 warrants=False
+  Sorsogon: n=459 alloc=23956701811 rec=0.804 passes=0 warrants=True
+  South Cotabato: n=390 alloc=14414999735 rec=0.466 passes=0 warrants=False
+  Southern Leyte: n=210 alloc=8824260964 rec=0.247 passes=0 warrants=False
+  Sultan Kudarat: n=208 alloc=10608417891 rec=0.781 passes=0 warrants=True
+  Sulu: n=7 alloc=496405862 rec=0.607 passes=0 warrants=True
+  Surigao Del Norte: n=272 alloc=14264703652 rec=0.72 passes=0 warrants=True
+  Surigao Del Sur: n=215 alloc=12527471279 rec=0.644 passes=0 warrants=True
+  Tarlac: n=990 alloc=56819111388 rec=0.886 passes=2 warrants=True
+  Tawi-tawi: n=2 alloc=52131314 rec=0.436 passes=0 warrants=False
+  Zambales: n=580 alloc=31892252022 rec=0.753 passes=0 warrants=True
+  Zamboanga Del Norte: n=306 alloc=16863707724 rec=0.544 passes=0 warrants=False
+  Zamboanga Del Sur: n=398 alloc=14971087943 rec=0.799 passes=0 warrants=True
+  Zamboanga Sibugay: n=219 alloc=10980252601 rec=0.803 passes=0 warrants=True
+=== by_type ===
+  flood control: n=34908 alloc=1661198973897 flagged_rate=0.0001
+  drainage: n=7529 alloc=177708616446 flagged_rate=0.0
+  slope protection: n=1786 alloc=79799259500 flagged_rate=0.0
+  flood mitigation: n=215 alloc=17223149415 flagged_rate=0.0
+  dike: n=163 alloc=10430886529 flagged_rate=0.0
+  revetment: n=144 alloc=10423467172 flagged_rate=0.0
+  seawall: n=87 alloc=5923601044 flagged_rate=0.0
+  river control: n=59 alloc=4773151025 flagged_rate=0.0
+  bank protection: n=56 alloc=3402580728 flagged_rate=0.0
+  pumping station: n=34 alloc=1316334160 flagged_rate=0.0
+  river wall: n=2 alloc=57659918 flagged_rate=0.0
+=== by_tranche ===
+  <₱10M: n=10299 alloc=58454693766 flagged_rate=0.0
+  ₱10-50M: n=21415 alloc=681132472349 flagged_rate=0.0
+  ₱50-100M: n=9305 alloc=773355561699 flagged_rate=0.0003
+  ₱100-500M: n=2783 alloc=435665327984 flagged_rate=0.0
+  >₱500M: n=29 alloc=23649624036 flagged_rate=0.0
+=== provinces warranting investigation: 45/82 ===
+observed_flood_passes>0 provinces: ['Pampanga', 'Tarlac']
