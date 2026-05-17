@@ -33,29 +33,40 @@ Status: done. Pipeline runs to completion; governance check passes.
 
 - Source: BetterGovPH `bettergovph/dpwh-transparency-data` (CC0), 248,220 raw
   rows, file `dpwh_transparency_data.parquet`.
-- Flood-control subset: 44,983 projects (canonical category 33,866 plus the
-  title-keyword fallback the brief requires: dike, drainage, flood control,
-  river control, slope protection, pumping station, revetment, seawall, flood
-  mitigation, river wall, bank protection).
-- total_allocation_php = 1,972,257,679,834.
-- 43,482 of 44,983 resolved to a province polygon (96.7%); the rest had no
-  usable coords and no resolvable province text.
+- Flood-control subset: 36,711 projects. Population is the exact DPWH
+  category "Flood Control and Drainage" (33,866) plus rescued rows whose
+  category is uninformative (blank or a funding-shell program code such as
+  GAA 20XX, Unprogrammed, CSSP, MFO, OO-, LP, LFP, SSP) AND whose description
+  is clearly flood-control by keyword (2,845). A row carrying an explicit
+  non-flood infrastructure category (Roads, Bridges, Buildings and
+  Facilities, Water Provision and Storage, Buildings) is never reclassified,
+  even when its description mentions drainage or slope-protection components.
+- total_allocation_php = 1,740,510,212,408 (about ₱1.74T).
+- 35,485 of 36,711 resolved to a province polygon; the rest had no usable
+  coords and no resolvable province text.
 - by_province: 82 provinces. by_type: 11 classes. by_tranche: 5 bands.
 - snapshot_sha256 = `5b411cf3f112fabd1913c70681791e5e2b78b43a8393f489f48bd882f154e123`
 - 45 of 82 provinces meet the conservative `warrants_investigation` rule
   (allocation > 0 AND (recurrence_score >= 0.60 OR observed_flood_passes > 0)).
 - Sentinel-1 Carina observed extent intersects flood-control project locations
-  in Pampanga and Tarlac (2 dated passes each); both are modeled-prone.
+  in Pampanga and Tarlac (modeled-prone provinces).
 
-These numbers differ from the feasibility doc's ~9,855 / ₱545B estimate
-because that was a planning estimate. The figures above are computed from the
-live BetterGovPH data with the title-keyword fallback, per compute-before-
-narrating. Agent-WA and metrics.ts must interpolate these, not hardcode them.
+Filter-defect correction: an earlier revision used a broad title-keyword
+fallback that pulled in 10,509 explicitly-typed non-flood projects (7,674
+"Roads", 99 "Bridges", others) and inflated the total to ₱1.97T. Counting a
+DPWH-categorized Roads project as flood-control spending is an over-claim the
+conservative posture forbids. The corrected filter only rescues
+uninformative-category rows and never overrides an explicit infrastructure
+category. Regression check confirms zero road/bridge/building-categorized
+rows in the subset. These numbers differ from the feasibility doc's ~9,855 /
+₱545B planning estimate; they are computed from the live BetterGovPH data,
+per compute-before-narrating. Agent-WA and metrics.ts must interpolate these,
+not hardcode them.
 
 ## Governance verification (passed)
 
 - `python3 -c "...assert d['_meta']['disclaimer']==g.DISCLAIMER..."` prints
-  `governance OK 44983 1972257679834`.
+  `governance OK 36711 1740510212408`.
 - `assert_governed` passes on both files; tampering the disclaimer raises.
 - `_meta.public_record_block` equals the constant on both files.
 - `flood_control_accountability.json` has no project titles and no projects

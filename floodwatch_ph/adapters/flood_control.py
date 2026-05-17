@@ -18,6 +18,7 @@ Differences from ghostwatch:
 from __future__ import annotations
 
 import logging
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -68,8 +69,9 @@ _STATUS_MAP: dict[str, list[str]] = {
     "not_started": ["not yet started", "not started", "for implementation", "pending", "procurement"],
 }
 
-# Title-keyword fallback for the flood-control subset when the category column
-# is absent or does not carry the canonical label.
+# Description-keyword set used only to rescue rows whose category is
+# uninformative (blank or a non-descriptive program code). It never
+# reclassifies a row that already carries an explicit infrastructure category.
 _FLOOD_CONTROL_KEYWORDS = [
     "flood control",
     "drainage",
@@ -84,8 +86,55 @@ _FLOOD_CONTROL_KEYWORDS = [
     "bank protection",
 ]
 
-# Canonical category value in the bettergovph dataset.
+# Canonical category value in the bettergovph dataset. An exact, stripped,
+# case-insensitive match on this is the primary inclusion rule.
 _FLOOD_CONTROL_CATEGORY = "flood control and drainage"
+
+# Any of these words in the category means it carries an explicit
+# infrastructure type. Such a row is never rescued by description keywords,
+# even when the description mentions drainage or slope-protection components.
+# A DPWH-categorized "Roads" project is road spending, not flood-control
+# spending.
+_EXPLICIT_INFRA_WORDS = [
+    "road",
+    "bridge",
+    "building",
+    "water supply",
+    "water provision",
+    "hospital",
+    "school",
+    "port",
+    "harbor",
+    "dam",
+    "flood control",
+    "drainage",
+    "slope protection",
+    "seawall",
+    "revetment",
+    "dike",
+    "pumping",
+    "bank protection",
+    "rain water",
+    "septage",
+    "sewerage",
+    "accessibility",
+    "electrical",
+    "consultancy",
+    "waterway",
+    "multi purpose",
+]
+
+# Program-code prefixes and tokens that mark a category as uninformative
+# (a funding shell, not a project type). Only rows in this state are eligible
+# for description-keyword rescue.
+_PROGRAM_CODE_PREFIX = re.compile(
+    r"^(gaa |unprogrammed|trust funds|contingent|sra |pamana|special road|"
+    r"r\.a\.|support for|pagcor)"
+)
+_PROGRAM_CODE_TOKEN = re.compile(
+    r"\b(cssp|mfo|oo-|lp|lfp|ssp|ndrrmf|faps|beff|hfep|cp|itemization|fmr|"
+    r"augmentation)\b"
+)
 
 
 class FloodControlAdapter(BaseAdapter):
@@ -271,11 +320,44 @@ class FloodControlAdapter(BaseAdapter):
         return result
 
     @staticmethod
-    def _is_flood_control(category: str, title: str) -> bool:
-        cat = category.lower().strip()
-        if _FLOOD_CONTROL_CATEGORY in cat or ("flood control" in cat):
+    def _category_uninformative(category: str) -> bool:
+        """True when the category is a funding shell, not a project type.
+
+        Blank or a non-descriptive program code (GAA 20XX ..., Unprogrammed
+        ..., CSSP, MFO, OO-, LP, LFP, SSP, etc.) with no infrastructure-type
+        word. A category carrying any explicit infra word is informative and
+        therefore never uninformative.
+        """
+        s = category.strip().lower()
+        if s in ("", "nan", "none", "null"):
             return True
-        text = f"{category} {title}".lower()
+        if any(w in s for w in _EXPLICIT_INFRA_WORDS):
+            return False
+        if _PROGRAM_CODE_PREFIX.match(s):
+            return True
+        if _PROGRAM_CODE_TOKEN.search(s):
+            return True
+        return False
+
+    @staticmethod
+    def _is_flood_control(category: str, title: str) -> bool:
+        """Defensible flood-control membership.
+
+        1. Exact (stripped, case-insensitive) match on the canonical DPWH
+           category "Flood Control and Drainage" is always included.
+        2. Otherwise, a row is rescued ONLY when its category is uninformative
+           (a funding shell) AND its description clearly indicates flood
+           control by keyword.
+        3. A row carrying an explicit non-flood infrastructure category
+           (Roads, Bridges, Buildings, ...) is never reclassified, even when
+           the description mentions drainage or slope-protection components.
+        """
+        cat = category.strip().lower()
+        if cat == _FLOOD_CONTROL_CATEGORY:
+            return True
+        if not FloodControlAdapter._category_uninformative(category):
+            return False
+        text = title.lower()
         return any(kw in text for kw in _FLOOD_CONTROL_KEYWORDS)
 
     @staticmethod

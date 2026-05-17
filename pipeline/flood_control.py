@@ -316,6 +316,12 @@ def main() -> int:
             "total_allocation_php": total_alloc_int,
             "generated_utc": generated,
             "scope": "BetterGovPH DPWH transparency, flood-control subset",
+            "population": (
+                "DPWH category 'Flood Control and Drainage' plus "
+                "unclassified-category projects whose description is "
+                "flood-control; explicitly road/bridge/building-categorized "
+                "projects excluded even when they include drainage components"
+            ),
             "geolocation_caveat": "MYPS planning coords; ~10-15% uncertain (COA)",
             "warrants_investigation_rule": (
                 "allocation_php > 0 AND (recurrence_score >= 0.60 OR "
@@ -336,6 +342,12 @@ def main() -> int:
             "snapshot_sha256": snapshot_sha,
             "n_projects": n_projects,
             "generated_utc": generated,
+            "population": (
+                "DPWH category 'Flood Control and Drainage' plus "
+                "unclassified-category projects whose description is "
+                "flood-control; explicitly road/bridge/building-categorized "
+                "projects excluded even when they include drainage components"
+            ),
             "geolocation_caveat": "MYPS planning coords; ~10-15% uncertain (COA)",
             "disclaimer": governance.DISCLAIMER,
             "public_record_block": governance.PUBLIC_RECORD_BLOCK,

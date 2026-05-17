@@ -5,7 +5,11 @@ This document is the contract Agent-WA codes the UI against. It is committed
 before the real JSON lands so UI work runs in parallel.
 
 Source: BetterGovPH `bettergovph/dpwh-transparency-data` (CC0 1.0 public domain),
-flood-control subset only. Project locations are DPWH/BetterGovPH MYPS planning
+flood-control subset only. Population: DPWH category "Flood Control and
+Drainage" plus unclassified-category projects whose description is
+flood-control; explicitly road/bridge/building-categorized projects are
+excluded even when they include drainage components. Project locations are
+DPWH/BetterGovPH MYPS planning
 coordinates; an estimated 10 to 15 percent carry coordinate uncertainty per COA.
 This surface reports where money was allocated and where Sentinel-1 still
 observed flooding. It is not a finding of fraud, project failure, or causation.
@@ -31,6 +35,7 @@ anywhere the UI can list. This is what the accountability page fetches.
     "total_allocation_php": 0,             // int, sum of allocation across subset
     "generated_utc": "2026-05-17T00:00:00Z",
     "scope": "BetterGovPH DPWH transparency, flood-control subset",
+    "population": "DPWH category 'Flood Control and Drainage' plus unclassified-category projects whose description is flood-control; explicitly road/bridge/building-categorized projects excluded even when they include drainage components",
     "geolocation_caveat": "MYPS planning coords; ~10-15% uncertain (COA)",
     "warrants_investigation_rule": "allocation_php > 0 AND (recurrence_score >= 0.60 OR observed_flood_passes > 0)",
     "prone_threshold": 0.60,
@@ -105,6 +110,7 @@ look up a specific id the user already holds. Friction is intentional.
     "snapshot_sha256": "<same hex as file 1>",
     "n_projects": 0,
     "generated_utc": "2026-05-17T00:00:00Z",
+    "population": "DPWH category 'Flood Control and Drainage' plus unclassified-category projects whose description is flood-control; explicitly road/bridge/building-categorized projects excluded even when they include drainage components",
     "geolocation_caveat": "MYPS planning coords; ~10-15% uncertain (COA)",
     "disclaimer": "<DISCLAIMER, exact>",
     "public_record_block": "<PUBLIC_RECORD_BLOCK, exact>"
