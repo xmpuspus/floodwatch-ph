@@ -76,6 +76,14 @@ const sliderDates: string[] = carina.event_dates;
         <input id="toggle-recurrence" type="checkbox" class="accent-ink-500" />
         <span class="text-ink-700">Recurrence-prone overlay</span>
       </label>
+      <!-- §1d satellite backdrop, OFF by default, F1 fail-safe (disabled
+           until the GIBS mosaic date resolves). Drawn at the BOTTOM of the
+           stack; the locked flood hero z-order is unchanged. -->
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input id="toggle-basemap" type="checkbox" class="accent-accent-steel" disabled />
+        <span class="text-ink-700">Satellite backdrop (NASA GIBS true-colour, dated daily mosaic)</span>
+        <span id="mv-basemap-disabled" class="hidden text-[11px] text-ink-500 italic"></span>
+      </label>
     </div>
   </div>
 </section>
@@ -104,8 +112,12 @@ const sliderDates: string[] = carina.event_dates;
       <div id="legend-source" class="text-[10px] text-ink-500 mt-1.5 font-mono">FloodWatch.PH &middot; Sentinel-1 SAR</div>
     </div>
 
-    <div class="absolute bottom-1 right-2 bg-white/85 px-1.5 py-0.5 text-[9px] text-ink-500 rounded-sm border border-ink-300/30 leading-tight">
-      &copy; OpenStreetMap contributors. SAR: Copernicus/Sentinel-1.
+    <!-- §1a/1b/1c persistent dated basemap caption -- the satellite lines
+         render in this SOLID chip, never on the tiles, only while GIBS tiles
+         are drawn (F7). Reverts to the v1.2 line unchanged on OSM. -->
+    <div class="absolute bottom-1 right-2 bg-white/85 px-1.5 py-0.5 text-[9px] text-ink-500 rounded-sm border border-ink-300/30 leading-tight max-w-[340px]">
+      <span id="mv-basemap-cap" class="hidden block text-ink-600 mb-0.5"></span>
+      <span id="mv-credit-src">&copy; OpenStreetMap contributors. SAR: Copernicus/Sentinel-1.</span>
     </div>
   </div>
 
@@ -183,6 +195,7 @@ const sliderDates: string[] = carina.event_dates;
 <script>
   import maplibregl from "maplibre-gl";
   import "maplibre-gl/dist/maplibre-gl.css";
+  import { fetchGibsTrueColor } from "../lib/realtimeClient";
 
   // Server-rendered fallback dates. The real slider dates are read from the
   // flood GeoJSON _meta.dates at runtime in init(); this is only the
@@ -404,6 +417,25 @@ const sliderDates: string[] = carina.event_dates;
     // instant). Run it directly if the map is already loaded; the MapLibre
     // `load` event fires exactly once so this never double-runs.
     const __carinaOnLoad = () => {
+      // ---- §1 SATELLITE BASEMAP at the very BOTTOM of the stack ----
+      // Added FIRST so the hazard-gap context, the recurrence overlay, and
+      // the flood hero all draw ABOVE it. OFF by default (§1d / F1); real
+      // tiles + the toggle are wired only after the GIBS date resolves.
+      map.addSource("mv-basemap", {
+        type: "raster",
+        tiles: ["https://example.invalid/{z}/{x}/{y}.jpg"],
+        tileSize: 256,
+        minzoom: 0,
+        maxzoom: 9,
+      });
+      map.addLayer({
+        id: "mv-basemap-raster",
+        type: "raster",
+        source: "mv-basemap",
+        layout: { visibility: "none" },
+        paint: { "raster-opacity": 1 },
+      });
+
       // ---- CONTEXT layers first (bottom): they must never bury the flood ----
       // Hazard gap is analytical context, not a blanket. Only the civically
       // meaningful "under-observed prone" provinces get a visible fill; the
@@ -617,6 +649,86 @@ const sliderDates: string[] = carina.event_dates;
         });
       }
     });
+
+    // ---- §1 satellite basemap (NASA GIBS true-colour) ------------------
+    //
+    // F1 fail-safe: enable the toggle and draw true-colour ONLY if the GIBS
+    // mosaic date resolved. Otherwise the toggle stays disabled, no tiles are
+    // ever set, and the Carina map stays on OSM. The dated caption (§1a/1b/1c)
+    // is shown only while GIBS tiles are drawn; it reverts on OSM.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vizFlags: any =
+      (window as any).__fwViz ??
+      ((window as any).__fwViz = {
+        satelliteBasemap: "off",
+        rainPlayback: "idle",
+        sarRaster: "off",
+        heroDated: false,
+      });
+
+    function fmtBasemap(dateUtc: string): string {
+      // §1a + §1b verbatim.
+      return (
+        "Satellite basemap: NASA GIBS true-colour, " +
+        dateUtc +
+        " — daily mosaic, one pass per day, not live. True-colour is " +
+        "optical: typhoon cloud often hides the ground on the very dates " +
+        "flooding matters. It is a backdrop, not the observed-water layer."
+      );
+    }
+
+    const bm = await fetchGibsTrueColor();
+    const bmToggle = document.getElementById("toggle-basemap") as HTMLInputElement | null;
+    const bmCap = document.getElementById("mv-basemap-cap");
+    const bmSrc = document.getElementById("mv-credit-src");
+    const bmDisabled = document.getElementById("mv-basemap-disabled");
+    if (!bm.ok) {
+      vizFlags.satelliteBasemap = "unavailable";
+      if (bmToggle) bmToggle.disabled = true;
+      if (bmDisabled) {
+        bmDisabled.textContent = " unavailable — see caption";
+        bmDisabled.classList.remove("hidden");
+      }
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const src: any = map.getSource("mv-basemap");
+      if (src && typeof src.setTiles === "function") src.setTiles([bm.tileUrl]);
+      if (bmToggle) {
+        bmToggle.disabled = false;
+        bmToggle.addEventListener("change", (e) => {
+          const on = (e.target as HTMLInputElement).checked;
+          if (map.getLayer("mv-basemap-raster"))
+            map.setLayoutProperty(
+              "mv-basemap-raster",
+              "visibility",
+              on ? "visible" : "none",
+            );
+          if (on) {
+            if (bmCap) {
+              bmCap.textContent = fmtBasemap(bm.basemapDateUtc);
+              bmCap.classList.remove("hidden");
+            }
+            // §1c verbatim source line while GIBS tiles are drawn.
+            if (bmSrc)
+              bmSrc.textContent =
+                "© OpenStreetMap contributors. Satellite imagery courtesy " +
+                "NASA EOSDIS GIBS / Worldview / LANCE. SAR: Copernicus / " +
+                "Sentinel-1. Rain: RainViewer / PAGASA, NASA GPM IMERG. " +
+                "NRT optical: NASA GIBS.";
+            vizFlags.satelliteBasemap = "on";
+          } else {
+            if (bmCap) {
+              bmCap.textContent = "";
+              bmCap.classList.add("hidden");
+            }
+            if (bmSrc)
+              bmSrc.textContent =
+                "© OpenStreetMap contributors. SAR: Copernicus/Sentinel-1.";
+            vizFlags.satelliteBasemap = "off";
+          }
+        });
+      }
+    }
 
     // ---- sidebar back button -------------------------------------------
 
