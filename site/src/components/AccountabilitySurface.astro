@@ -200,19 +200,36 @@ const THESIS = "Where flood-control money was spent, and where the water still c
     const prov = (j.by_province ?? []).filter(
       (p) => p.warrants_investigation === true,
     );
-    // ONE conservative sentence for the lead province (highest allocation
-    // among warrants_investigation). No named project, aggregate province
-    // only. Numbers from the file, never hardcoded.
+    // ONE conservative sentence for the lead province. No named project,
+    // aggregate province only. Numbers from the file, never hardcoded.
+    //
+    // The Sentinel-1 clause is only stated when the province actually has an
+    // observed pass that intersected a flood-control site. Asserting
+    // "observed flooding on 0 dated passes" is a contradiction, so prefer the
+    // highest-allocation province where observed_flood_passes > 0 (the
+    // strongest "money spent and the water still came" case). If none has an
+    // observed pass, fall back to the highest-allocation modeled-prone
+    // province and state the recurrence basis only, never a false observation.
     let lead = "";
     if (prov.length > 0) {
-      const top = [...prov].sort(
-        (a, b) => (b.allocation_php ?? 0) - (a.allocation_php ?? 0),
-      )[0];
-      lead = `${pesoShort(top.allocation_php)} was allocated to flood control in ${esc(
-        top.province,
-      )}; the recurrence model rates it modeled-prone and Sentinel-1 observed flooding on ${intFmt(
-        top.observed_flood_passes,
-      )} dated pass${top.observed_flood_passes === 1 ? "" : "es"} here. Per DPWH/BetterGovPH records; warrants independent investigation.`;
+      const byAlloc = (a: ByProvince, b: ByProvince) =>
+        (b.allocation_php ?? 0) - (a.allocation_php ?? 0);
+      const observed = prov
+        .filter((p) => (p.observed_flood_passes ?? 0) > 0)
+        .sort(byAlloc);
+      if (observed.length > 0) {
+        const top = observed[0];
+        lead = `${pesoShort(top.allocation_php)} was allocated to flood control in ${esc(
+          top.province,
+        )}; the recurrence model rates it modeled-prone and Sentinel-1 observed flooding there on ${intFmt(
+          top.observed_flood_passes,
+        )} dated Carina-2024 pass${top.observed_flood_passes === 1 ? "" : "es"}. Per DPWH/BetterGovPH records; warrants independent investigation.`;
+      } else {
+        const top = [...prov].sort(byAlloc)[0];
+        lead = `${pesoShort(top.allocation_php)} was allocated to flood control in ${esc(
+          top.province,
+        )}, which the recurrence model rates modeled-prone. Per DPWH/BetterGovPH records; warrants independent investigation.`;
+      }
     }
     const tranche = (j.by_tranche ?? [])
       .map(

@@ -4,6 +4,18 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-05-17 - Coherent accountability lead sentence
+
+The home flood-control accountability section picked the highest-allocation
+province regardless of whether Sentinel-1 actually observed flooding there,
+producing the contradictory sentence "Sentinel-1 observed flooding on 0 dated
+passes here" for Metropolitan Manila. The lead now prefers the
+highest-allocation province that actually has an observed Sentinel-1 pass (the
+strongest "money spent and the water still came" case) and falls back to a
+recurrence-only sentence that never asserts an observation when there is none.
+A contradictory-envelope invariant was added in both qa_live and a unit test
+so the observed-flooding-on-zero pairing can never reappear.
+
 ## [1.4.0] - 2026-05-17 - North Star re-center: flood-control accountability
 
 FloodWatch was drifting toward a weather app: the defensible spine (the
