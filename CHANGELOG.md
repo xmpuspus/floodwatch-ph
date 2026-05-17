@@ -4,6 +4,36 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-05-17 - North Star re-center: flood-control accountability
+
+FloodWatch was drifting toward a weather app: the defensible spine (the
+recurrence-vs-record gap, single-repo bit-exact reproducibility, the
+pluvial/urban class the forecasters exclude) sat two-thirds down the homepage
+behind realtime rain chrome. This release re-centers on the project's actual
+goal, correlating flood-control spending against where the water still came.
+
+Wave A, narrative re-center, no new data. The homepage leads with the
+recurrence-vs-record gap as step one of the accountability question. The /map
+default tab is now the civic observed and hazard-gap view; the realtime rain
+and expressway view is the second tab, attributed to RainViewer and PAGASA,
+never "freshest", never the lead. /lookup states the modeled-prone-versus-thin-
+record gap as one conservative sentence per result. The cinematic basemap is
+retired as a default concern. All site copy was rewritten in plain English.
+
+Wave B, the flood-control accountability layer. DPWH flood-control project
+locations from the BetterGovPH CC0 dataset (36,711 projects, ₱1.74 trillion
+allocated, computed from the source not estimated) are cross-referenced against
+FloodWatch's own Sentinel-1 observed flood extent and recurrence model. Output
+is conservative and aggregate-only (by province, project type, budget tranche),
+with a hardcoded un-strippable disclaimer and an all-data-is-public-record
+block in every generated artifact, named project detail only by direct id
+lookup, and the language "warrants independent investigation", never "ghost"
+or any claim of project failure or causation. The ~10 to 15 percent MYPS
+coordinate uncertainty is stated, not hidden. New CI gates enforce the
+governance, an AI-fingerprint scan, and a guard that FloodWatch's 337
+modeled-prone provinces can never be conflated with the unrelated COA
+337-ghost figure.
+
 ## [1.3.1] - 2026-05-17 - Display times in Philippine time
 
 Every user-visible timestamp now shows Philippine time (PHT, UTC+8, no DST)
