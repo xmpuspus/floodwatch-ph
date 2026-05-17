@@ -104,6 +104,11 @@ def main() -> int:
             pg.wait_for_timeout(3800)  # rain tiles fetch + 30s-clock first tick
             focus(pg, "#now-map")
             grab(pg, 16, 300)
+            # Note: the NASA GIBS satellite backdrop is an honest opt-in site
+            # feature (dated, fail-safe), but true-colour over Metro Manila on
+            # a given date is often dark/low-content — a poor hero subject, so
+            # it is deliberately not a hero beat. The SAR raster + rain beats
+            # above already carry the v1.3 cinematic look.
 
             # Beat 2: the area/route lookup — type a gazetteer place, pick a
             # suggestion, show the layered as-of-dated evidence card.
