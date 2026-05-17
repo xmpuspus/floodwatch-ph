@@ -98,14 +98,14 @@ const M = METRICS;
               "The most recent Sentinel-1 pass was not usable, so expressway exposure could not be computed for this window. This is not a clear-conditions signal.";
           } else if (flooded === 0) {
             lineEl.textContent =
-              "No monitored expressway segments (SLEX, NLEX, Skyway, CAVITEX, and the rest) intersect the most recent observed flood extent. This is the truthful current state of the latest pass, not an all-clear: the satellite revisit is about 6 to 12 days and conditions change between passes.";
+              "No monitored expressway segments (SLEX, NLEX, Skyway, CAVITEX, and the rest) intersect the most recent observed flood extent. This is the truthful current state of the latest pass, not an all-clear: the satellite has a ~6-day revisit with ~24 h product latency and conditions change between passes.";
           } else {
             lineEl.textContent =
               flooded + " monitored expressway segment" + (flooded === 1 ? "" : "s") +
               " intersected observed water on the latest pass. Observed, not a forecast or routing instruction.";
           }
           if (asOfEl && m.as_of) {
-            asOfEl.textContent = "Observed pass as of " + m.as_of + " (Sentinel-1 revisit ~6 to 12 days, not live).";
+            asOfEl.textContent = "Observed pass as of " + m.as_of + " (Sentinel-1 ~6-day revisit, ~24 h product latency, not live).";
           }
         })
         .catch(function () {

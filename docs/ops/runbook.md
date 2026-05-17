@@ -16,7 +16,7 @@ how the public alias is repointed, and how to recover when something breaks.
 - **Never** on `pull_request`. The workflow handles secrets; a fork PR must
   never be able to run it.
 
-Why daily: Sentinel-1 revisits the Philippines every ~6-12 days, so a new SAR
+Why daily: Sentinel-1 revisits the Philippines about every 6 days (Sentinel-1A + Sentinel-1C, restored ~May 2025) with ~24 h product latency, so a new SAR
 pass appears at most once a day's worth of latency after acquisition. GPM
 IMERG latency is ~30 minutes to a few hours, so a daily run keeps the rainfall
 context current without hammering Earth Engine. If a major event is in

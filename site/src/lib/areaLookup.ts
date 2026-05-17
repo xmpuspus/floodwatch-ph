@@ -356,7 +356,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
       latest = {
         state: "withheld",
         asOf,
-        detail: `Most recent satellite pass was not usable: ${reason}. This is NOT "clear", no observation was possible. Sentinel-1 revisit is ~6-12 days.`,
+        detail: `Most recent satellite pass was not usable: ${reason}. This is NOT "clear", no observation was possible. Sentinel-1 has a ~6-day revisit with ~24 h product latency.`,
       };
     } else {
       const inPoly = pts.some((p) =>
@@ -368,7 +368,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
         state: cls === "clear" ? "clear" : cls,
         asOf,
         detail: inPoly
-          ? `This location falls inside observed Sentinel-1 SAR open-water extent on the ${asOf} acquisition pass. Observed, NOT live, NOT a forecast (revisit ~6-12 days).`
+          ? `This location falls inside observed Sentinel-1 SAR open-water extent on the ${asOf} acquisition pass. Observed, NOT live, NOT a forecast (~6-day revisit, ~24 h product latency).`
           : cls === "near"
             ? `Nearest observed Sentinel-1 open-water polygon on the ${asOf} pass is ~${km.toFixed(1)} km away. Observed, NOT live.`
             : `No observed Sentinel-1 open water near this location on the most recent usable pass (${asOf}). This describes one dated pass only, not "no flooding".`,
