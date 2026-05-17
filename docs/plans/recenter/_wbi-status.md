@@ -116,3 +116,55 @@ Status: done. All gates green, pytest green, site build green.
 - `cd site && pnpm typecheck` -> 0 errors / 0 warnings / 0 hints
 - `cd site && pnpm build` -> 9 pages built, Complete
 - `ruff check` on all new/modified Python -> All checks passed
+
+## qa_live re-centered-contract pass (round 2)
+
+The orchestrator ran qa_live against a local static build and found 6 FAILs,
+all qa_live still encoding the OLD v1.3 design that wave A deliberately
+reversed (no product regressions). Fixed:
+
+- FAILs 1-4 (v1.3 cinematic hero block): DELETED the four retired
+  assertions (Carina-2024 dated overlay server-rendered, "Open the Corridor
+  watch" CTA, `__fwViz.heroDated`, FreshnessBanner-above-the-hero) and
+  REPLACED them with the re-centered contract: home H1 ==
+  "Where the model says it floods, but the record barely shows it."
+  (server-rendered, no JS); the destination-thesis roadmap line
+  server-rendered; FreshnessBanner is NOT the home lead (absent or never
+  before the spine H1); no retired cinematic hero element / old CTA /
+  live-now promise (a plain text link mentioning the 2024 demonstration is
+  the new spine-first design, not a regression; "not current conditions and
+  not a forecast" is honest negation, not a live promise).
+- FAIL 5 (corridor gfm honest-empty caption): wave A changed the
+  freshnessClock.ts honestEmpty() copy from the em-dash form to the colon
+  form. Updated all three `_HONEST_EMPTY_FRAGMENT` strings to the verbatim
+  current copy ("... unavailable: could not reach ...").
+- FAIL 6 (province click opens detail card): NOT a regression — the
+  re-centered layout pushed the projected polygon centroid below the 900px
+  viewport so the synthetic click missed. Rewrote the click step: scroll
+  `#panel-carina canvas` into view, then pick the click point from a
+  canvas-internal pixel (map center, then a small inset grid) that actually
+  returns a hazard-gap-fill feature, click at its viewport coords. All
+  post-click assertions unchanged; verified Bulacan populates
+  (pop=2,891,470, events=41, built=85.3, peak=1.21%).
+- Tab flow confirmed consistent: the civic hazard-gap panel is the default
+  (no `#view-carina` click to reach slider/hazard-gap/province); the
+  realtime "Now" view needs a `#view-now` click; the historical-demo flow
+  switches back via `#view-carina`.
+- Made the pre-existing v1.3 §3b rain per-frame readout check
+  honest-empty-tolerant: when RainViewer is unreachable from a headless
+  local-static run (the transient-network class qa_live already tolerates),
+  rainPlayback stays 'idle' and the readout is honestly blank — a PASS, not
+  a regression. The hard rule kept: the readout must never show "just now".
+- Added `docs/plans/recenter/_agentF-report.md` to the 337-collision
+  allowlist: a Phase-2 verification report whose 337/ghost mentions
+  describe the gate ("337 never adjacent to ghost/confirmed",
+  "check_337_collision.py exit 0"), not a conflation in shipped copy —
+  same class as the wave briefs / 00-master already allowlisted. Without
+  this the 337 gate emitted a false positive on a rule-describing doc that
+  appeared after round 1.
+
+Final qa_live: build site, serve `site/dist` on :8773, run
+`python3 scripts/qa_live.py http://localhost:8773` -> **PASS 93 / FAIL 0**,
+stable across 3+ consecutive runs (honest-empty == PASS preserved).
+`pytest tests/ -q` -> exit 0 (86 passed). `verify_release.py --gates-only`
+-> exit 0 (8 PASS / 0 FAIL). `ruff check` on the modified files -> clean.

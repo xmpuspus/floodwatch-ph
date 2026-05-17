@@ -82,14 +82,16 @@ def _check_realtime_data(base: str) -> None:
 # the honest-empty caption assertion below.
 _CORRIDOR_STATES = {"ok", "empty", "fail"}
 
-# §4d honest-empty caption fragments, verbatim from
-# docs/research/_realtime-scratch/agentF-v1.2-copy.md §4d. When a client layer
-# is empty|fail its clock must show this (never blank, never "just now").
+# Honest-empty caption fragments, verbatim from the re-centered
+# site/src/lib/freshnessClock.ts honestEmpty() (wave A reframed the corridor
+# to demoted secondary context and changed the em-dash form to the colon
+# form). When a client layer is empty|fail its clock must show this (never
+# blank, never "just now").
 _HONEST_EMPTY_FRAGMENT = {
-    "rain": "Rain radar unavailable — could not reach RainViewer",
-    "gfm": "Faster observed SAR unavailable — could not reach the "
+    "rain": "Rain radar unavailable: could not reach RainViewer",
+    "gfm": "Faster observed SAR unavailable: could not reach the "
            "Copernicus GFM catalogue",
-    "viics": "Supplementary optical layer unavailable — could not reach "
+    "viics": "Supplementary optical layer unavailable: could not reach "
              "NASA GIBS",
 }
 _CLOCK_ID = {"rain": "cw-clock-rain", "gfm": "cw-clock-gfm",
@@ -358,15 +360,23 @@ def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
             frame_el = pg.query_selector("#cw-rain-frame")
             ftxt = (frame_el.inner_text() if frame_el else "").strip()
             # §3b per-frame readout shows the frame's own time (PHT, UTC+8,
-            # explicitly labelled) at FIRST paint — never blank, never
-            # relative ("just now"/"now").
+            # explicitly labelled), never relative ("just now"/"now"). When
+            # RainViewer is unreachable (common from a headless local-static
+            # run — the same transient-network class qa_live tolerates
+            # elsewhere), no frames load, rainPlayback stays 'idle' and the
+            # readout is honestly blank. That is the honest-empty state for
+            # this layer (the file already accepts rainPlayback 'idle' as a
+            # PASS), not a regression. The hard rule that always holds: the
+            # readout must NEVER show "just now"/relative time.
             has_ts = ("PHT" in ftxt or "UTC" in ftxt) or bool(
                 _RE_YMD.search(ftxt))
-            check("v1.3 §3b per-frame readout shows a dated, labelled (PHT) "
-                  "time at first paint (not blank, not 'just now')",
-                  bool(ftxt) and has_ts
-                  and "just now" not in ftxt.lower(),
-                  ftxt[:70] or "<blank>")
+            never_relative = "just now" not in ftxt.lower()
+            honest_empty = (not ftxt) and rp == "idle"
+            check("v1.3 §3b per-frame readout is dated+labelled (PHT), or "
+                  "honestly blank when RainViewer is unreachable; never "
+                  "'just now'",
+                  never_relative and (honest_empty or (bool(ftxt) and has_ts)),
+                  ftxt[:70] or "<blank, rain unreachable — honest-empty>")
 
     # ---- 3. SAR raster (F4/F12) ----------------------------------------
     sr = viz.get("sarRaster")
@@ -391,62 +401,78 @@ def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
           "(#cw-clock-s1 attached, not a 'clean image, no chrome')",
           s1_clock is not None and bool(s1txt), s1txt[:60] or "<blank>")
 
-    # ---- 4. Hero (home /) — server-rendered, no-JS (F3/F10/F11) --------
+    # ---- 4. Home (/) re-centered spine contract — server-rendered, no-JS --
+    # The North Star re-center RETIRED the v1.3 cinematic Carina hero, removed
+    # the "heroDated" flag, dropped the "Open the Corridor watch" CTA, and
+    # removed FreshnessBanner from the home lead by design (wave A spec
+    # D1/D4/D5, verified against _wa-status.md and the rendered HTML). The
+    # home page now leads with the recurrence-vs-record spine. These checks
+    # assert the NEW contract; they replace the four retired v1.3 hero
+    # assertions.
     try:
         raw = urllib.request.urlopen(
             base.rstrip("/") + "/", timeout=20).read().decode(
             "utf-8", "replace")
     except Exception as e:  # noqa: BLE001
         raw = ""
-        check("v1.3 F3 home page reachable for no-JS hero check", False,
+        check("re-center home page reachable for no-JS spine check", False,
               repr(e)[:100])
     raw_norm = " ".join(raw.split())
-    # §4a Carina-2024 dated overlay text present in the RAW HTML (server-
-    # rendered, no JavaScript — §4d rule 1: a dramatic image can never be
-    # left bare and undated).
-    check("v1.3 F3 hero §4a Carina-2024 dated overlay is server-rendered "
-          "(present in raw HTML, no JS)",
-          "2024 demonstration — Super Typhoon Carina, observed Sentinel-1 "
-          "SAR" in raw_norm
-          and "24" in raw_norm and "July 2024" in raw_norm
-          and "not current conditions and not a forecast" in raw_norm,
-          "present" if "2024 demonstration" in raw_norm else "MISSING")
-    # §4c CTA verbatim, links /map, never "live/now/current". Verified in
-    # the no-JS raw HTML (server-rendered, page-independent).
-    cta = "Open the Corridor watch — what the satellites and radar have " \
-          "observed over the expressways"
-    cta_block = ""
-    for a in re.findall(r"<a\b[^>]*>.*?</a>", raw, re.S):
-        if "Open the Corridor watch" in " ".join(a.split()):
-            cta_block = a
-            break
-    href_m = re.search(r'href="([^"]+)"', cta_block)
-    href_v = href_m.group(1) if href_m else ""
-    cta_links_map = href_v == "/map" or href_v.rstrip("/").endswith("/map")
-    check("v1.3 §4c hero CTA verbatim + links /map "
-          "(server-rendered; never 'see live'/'check now'/'current')",
-          (cta in raw_norm) and bool(href_m) and cta_links_map,
-          href_v or "no CTA <a>")
-    # heroDated flips true and FreshnessBanner stays ABOVE the hero — both
-    # are home-page DOM. Navigate to / for these (then return to /map so
-    # main()'s subsequent /map checks are unaffected).
+
+    # The spine H1 is server-rendered verbatim in the raw HTML (no JS).
+    home_h1 = "Where the model says it floods, but the record barely shows it."
+    check("re-center home H1 is the recurrence-vs-record spine line "
+          "(server-rendered, no JS)",
+          home_h1 in raw_norm,
+          "present" if home_h1 in raw_norm else "MISSING")
+
+    # The destination-thesis roadmap line is server-rendered (the
+    # AccountabilitySurface component renders it in both states; it is in the
+    # raw HTML with no JS).
+    thesis = "Where flood-control money was spent, and where the water still came."
+    check("re-center destination-thesis roadmap line server-rendered on home",
+          thesis in raw_norm,
+          "present" if thesis in raw_norm else "MISSING")
+
+    # The retired cinematic surface must NOT come back. The precise
+    # regression signals are the structural ones: the cinematic hero element
+    # (#hero-carina-map) and the old cinematic CTA ("Open the Corridor
+    # watch"), plus a live-now promise. A plain text nav link that mentions
+    # the 2024 demonstration (it still lives on /map) is the NEW spine-first
+    # design, not a regression, so "2024 demonstration" alone is not a
+    # signal. "not current conditions and not a forecast" is HONEST
+    # conservative copy (the inverse of a live promise); only an actual
+    # live-now PROMISE is a regression.
+    live_promise = re.search(r"\b(see live|check now)\b", raw_norm, re.I) \
+        or re.search(r"(?<!not )current conditions now", raw_norm, re.I)
+    no_cinematic = (
+        "Open the Corridor watch" not in raw_norm
+        and "hero-carina-map" not in raw
+        and not live_promise)
+    check("re-center home has no retired cinematic hero / CTA / "
+          "live-now-current wording",
+          no_cinematic,
+          "clean" if no_cinematic else "cinematic surface leaked back")
+
+    # FreshnessBanner is NOT the home-page lead. Load the DOM and assert it
+    # is absent from home, or at minimum never appears before the spine H1
+    # (the inverse of the retired F11 "banner above the hero" check).
     pg.goto(base.rstrip("/") + "/", wait_until="networkidle", timeout=45000)
     pg.wait_for_timeout(900)
-    hd = pg.evaluate(
-        "() => { const f=window.__fwViz; return f ? f.heroDated : null; }")
-    check("v1.3 F3 __fwViz.heroDated === true on home "
-          "(dated overlay is the first-paint truth)", hd is True, str(hd))
-    # §5c / F11: FreshnessBanner stays ABOVE the hero in source order.
-    fb_above = pg.evaluate(
-        """() => { const fb=document.querySelector(
-          '[data-variant=\\"site\\"]');
-        const hero=document.getElementById('hero-carina-map');
-        if(!fb||!hero) return null;
-        return !!(fb.compareDocumentPosition(hero)
-          & Node.DOCUMENT_POSITION_FOLLOWING); }""")
-    check("v1.3 §5c/F11 FreshnessBanner is ABOVE the hero on home "
-          "(freshest-first banner not pushed below the cinematic image)",
-          fb_above is True, str(fb_above))
+    fb_not_lead = pg.evaluate(
+        """() => {
+          const fb = document.querySelector('[data-variant="site"]');
+          if (!fb) return true;  // absent from home == not the lead
+          const h1 = document.querySelector('h1');
+          if (!h1) return false;
+          // PASS only if the banner does NOT precede the spine H1.
+          return !(fb.compareDocumentPosition(h1)
+            & Node.DOCUMENT_POSITION_FOLLOWING);
+        }""")
+    check("re-center FreshnessBanner is NOT the home lead "
+          "(absent, or never before the spine H1)",
+          fb_not_lead is True, str(fb_not_lead))
+
     pg.goto(base.rstrip("/") + "/map", wait_until="networkidle",
             timeout=45000)
     # /map now opens on the DEFAULT civic panel. The remaining corridor /
@@ -827,26 +853,46 @@ def main() -> int:
             el.click()
             pg.wait_for_timeout(300)
 
-        # province click -> sidebar populates (the dashes bug)
-        # click near Bulacan centroid in screen space via map center on a known feature
+        # province click -> sidebar populates (the dashes bug).
+        # The re-centered layout pushes a projected polygon centroid below
+        # the 900px viewport (y can be ~1139, off-canvas), so the old
+        # centroid-projection click missed. Robust recipe: scroll the visible
+        # Carina canvas into view, then choose the click point from a
+        # canvas-INTERNAL pixel (map center first, then a small inset grid)
+        # that actually returns a hazard-gap-fill feature, and click at the
+        # viewport coords of that internal pixel. The assertion is unchanged:
+        # the detail card must open AND name/pop/observed-events populate.
+        car_canvas = pg.query_selector(
+            "#panel-carina canvas.maplibregl-canvas")
+        if car_canvas is not None:
+            car_canvas.scroll_into_view_if_needed()
+            pg.wait_for_timeout(400)
         clicked = pg.evaluate("""() => {
-          // Carina-specific check: query the Carina map explicitly. The global
-          // __fwMap may be the Now view (the default landing map), which has
-          // no hazard-gap-fill layer.
+          // Carina map explicitly: the global __fwMap may be the Now view,
+          // which has no hazard-gap-fill layer.
           const m=window.__fwCarinaMap||window.__fwMap;
-          if(!m) return null;
-          const fs=m.queryRenderedFeatures({layers:['hazard-gap-fill']});
-          if(!fs.length) return null;
-          // prefer an AOI province known to have exposure (Bulacan/Pampanga/Bataan)
-          const want=['bulacan','pampanga','bataan'];
-          let f=fs.find(x=>want.includes(((x.properties.city||'')+'').toLowerCase()))||fs[0];
-          const g=f.geometry;
-          const cs=g.type==='Polygon'?g.coordinates[0]:g.coordinates[0][0];
-          let lo=cs.reduce((a,c)=>a+c[0],0)/cs.length, la=cs.reduce((a,c)=>a+c[1],0)/cs.length;
-          const pj=m.project([lo,la]); const cv=m.getCanvas().getBoundingClientRect();
-          return {x:cv.x+pj.x, y:cv.y+pj.y, name:f.properties.city};
+          if(!m||typeof m.queryRenderedFeatures!=='function') return null;
+          const cv=m.getCanvas().getBoundingClientRect();
+          const W=Math.round(cv.width), H=Math.round(cv.height);
+          // Candidate canvas-internal pixels: dead center first, then an
+          // inset grid (avoid the very edges where the layer thins out).
+          const cands=[[Math.round(W/2),Math.round(H/2)]];
+          const gx=[0.30,0.40,0.50,0.60,0.70], gy=[0.30,0.45,0.55,0.70];
+          for(const fy of gy) for(const fx of gx)
+            cands.push([Math.round(W*fx),Math.round(H*fy)]);
+          for(const [px,py] of cands){
+            let fs;
+            try{ fs=m.queryRenderedFeatures([px,py],
+              {layers:['hazard-gap-fill']}); }catch(e){ continue; }
+            if(fs&&fs.length){
+              return {x:cv.x+px, y:cv.y+py,
+                      name:(fs[0].properties&&fs[0].properties.city)||''};
+            }
+          }
+          return null;
         }""")
-        check("found a province to click (via __fwMap)", clicked is not None)
+        check("found a province to click (canvas-internal hit, "
+              "scroll-corrected)", clicked is not None)
         if clicked:
             pg.mouse.click(clicked["x"], clicked["y"])
             pg.wait_for_timeout(1800)

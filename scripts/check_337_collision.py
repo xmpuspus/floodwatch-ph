@@ -43,6 +43,11 @@ ALLOWLIST = {
     REPO / "docs" / "plans" / "recenter" / "_wbd-status.md",
     REPO / "docs" / "plans" / "recenter" / "_wa-status.md",
     REPO / "docs" / "plans" / "recenter" / "_wbi-status.md",
+    # Phase-2 verification report: its 337/ghost mentions are the gate
+    # itself being described and verified ("337 never adjacent to
+    # ghost/confirmed", "check_337_collision.py exit 0"), not a conflation
+    # in shipped copy. Same class as the wave briefs / 00-master above.
+    REPO / "docs" / "plans" / "recenter" / "_agentF-report.md",
 }
 
 # Word-boundaried so a place name like the Baguio "Holy Ghost" barangay
