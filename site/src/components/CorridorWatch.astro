@@ -25,9 +25,14 @@
 // PERF: fetches NOTHING at import. init() runs only when the parent toggles
 // [data-now-active="true"].
 
-// Static build time -- the §4b global-ticker "Site rebuilt {rebuiltUTC} UTC"
-// must reflect the build, not the client clock.
-const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
+// Static build time, displayed in Philippine time (PHT, UTC+8) with an
+// explicit label -- the §4b global-ticker "Site rebuilt {rebuiltUTC}" must
+// reflect the build, not the client clock.
+const REBUILT_UTC =
+  new Date(Date.now() + 8 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 16)
+    .replace("T", " ") + " PHT";
 ---
 
 <div id="now-root" data-now-active="false" data-rebuilt-utc={REBUILT_UTC}>
@@ -614,7 +619,7 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     const gpmEl = $("cw-clock-gpm");
     if (gpmEl) {
       gpmEl.textContent = rnMeta?.as_of
-        ? `Rainfall context: GPM IMERG accumulation as of ${rnMeta.as_of} UTC. ` +
+        ? `Rainfall context: GPM IMERG accumulation as of ${fmtAcqUTC(rnMeta.as_of)}. ` +
           `Satellite rainfall estimate, not a gauge reading and not a forecast.`
         : "Rainfall context (GPM IMERG accumulation) is unavailable for the most recent window.";
     }
@@ -1115,10 +1120,16 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
   // paint. "forecast/nowcast/predicted/next" never appears on this surface.
   // Honest-empty: if the frame manifest fails, the control stays hidden and
   // the v1.2 single-frame caption/clock (already painted above) stands.
+  // Frame time in Philippine time (PHT, UTC+8) with an explicit label.
   function fmtFrameUtc(iso: string): string {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return d.toISOString().slice(0, 16).replace("T", " ");
+    return (
+      new Date(d.getTime() + 8 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 16)
+        .replace("T", " ") + " PHT"
+    );
   }
 
   async function wireRainPlayback(): Promise<void> {
@@ -1145,7 +1156,7 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     if (capEl) {
       capEl.textContent =
         `Observed rain radar, last ${frames.length} frames ` +
-        `${fmtFrameUtc(first.frameUtc)} → ${fmtFrameUtc(last.frameUtc)} UTC — ` +
+        `${fmtFrameUtc(first.frameUtc)} → ${fmtFrameUtc(last.frameUtc)} — ` +
         `PAGASA via RainViewer, ~10-min source, observed not a forecast.`;
       capEl.classList.remove("hidden");
     }
@@ -1158,7 +1169,7 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     const paintFrame = (): void => {
       const f = frames[idx];
       if (frameEl) {
-        frameEl.textContent = `Frame ${fmtFrameUtc(f.frameUtc)} UTC — observed`;
+        frameEl.textContent = `Frame ${fmtFrameUtc(f.frameUtc)} — observed`;
         frameEl.classList.remove("hidden");
       }
       const src = map.getSource("cw-rain");

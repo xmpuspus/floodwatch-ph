@@ -201,6 +201,7 @@
     type EvidenceBundle,
     type LayerResult,
   } from "../lib/areaLookup";
+  import { fmtPHT } from "../lib/freshnessClock";
 
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
 
@@ -254,7 +255,7 @@
 
   function row(title: string, sub: string, r: LayerResult, extra = ""): string {
     const asOf = r.asOf
-      ? `<span class="text-[11px] font-mono text-ink-500 whitespace-nowrap tabular-nums">as of ${r.asOf}</span>`
+      ? `<span class="text-[11px] font-mono text-ink-500 whitespace-nowrap tabular-nums">as of ${fmtPHT(r.asOf)}</span>`
       : "";
     // Progressive disclosure: the summary is the scannable row (name, status,
     // date); the honest detail and caveat live in the collapsible body so the

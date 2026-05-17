@@ -18,6 +18,7 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import distance from "@turf/distance";
 import gazetteer from "../data/gazetteer.json";
+import { fmtPHT } from "./freshnessClock";
 
 export type GazEntry = {
   name: string;
@@ -406,7 +407,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
       rainfall = {
         state: flag === "none" ? "near" : "intersects",
         asOf: rmeta.as_of ?? null,
-        detail: `Nearest prone-area GPM IMERG sample (~${best.km.toFixed(1)} km): ${r24.toFixed(0)} mm/24h, ${r72.toFixed(0)} mm/72h, context band "${flag}". Satellite rainfall accumulation as of ${rmeta.as_of} UTC, already-fallen rain, not a gauge reading and not a forecast.`,
+        detail: `Nearest prone-area GPM IMERG sample (~${best.km.toFixed(1)} km): ${r24.toFixed(0)} mm/24h, ${r72.toFixed(0)} mm/72h, context band "${flag}". Satellite rainfall accumulation as of ${fmtPHT(rmeta.as_of)}, already-fallen rain, not a gauge reading and not a forecast.`,
       };
     }
   }

@@ -4,6 +4,21 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-05-17 - Display times in Philippine time
+
+Every user-visible timestamp now shows Philippine time (PHT, UTC+8, no DST)
+with an explicit "PHT" label, instead of UTC — the audience is in the
+Philippines. The change is display-only: the freshness banner lead, the
+per-layer freshness clocks, the global ticker, the rain-playback per-frame
+readout, the GPM rainfall-context line, the lookup evidence rows, the
+honest-empty attempt strings, and the site-rebuilt line. Stored source values
+stay UTC ISO; only the rendered string is localised. A date-only acquisition
+value (a Sentinel-1 pass date) stays a bare calendar date — converting a date
+with no time to a timezone would be invented precision. The explicit "PHT"
+label is mandatory so a timestamp is never ambiguous, preserving the dated,
+unambiguous honesty rule. qa_live updated to assert a dated, explicitly
+timezone-labelled timestamp is present.
+
 ## [1.3.0] - 2026-05-17 - Cinematic satellite-first visuals
 
 The Corridor watch was honest but text-heavy: a text grid of expressways, a

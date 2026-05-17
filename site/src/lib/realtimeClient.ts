@@ -80,8 +80,16 @@ export type RainPlaybackResult = RainFramesResult | RealtimeFailure;
 // Fixed Luzon bbox: lon 120..122, lat 14..18. No user input ever.
 const LUZON_BBOX = "120,14,122,18";
 
+// The §4d honest-empty attempt time, in Philippine time (PHT, UTC+8) with an
+// explicit label so it is never ambiguous (the stored layer times stay UTC
+// ISO; only displayed strings are localised).
 function attemptStamp(): string {
-  return new Date().toISOString().slice(0, 16).replace("T", " ");
+  return (
+    new Date(Date.now() + 8 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 16)
+      .replace("T", " ") + " PHT"
+  );
 }
 
 async function getJSON(url: string, signal?: AbortSignal): Promise<any> {

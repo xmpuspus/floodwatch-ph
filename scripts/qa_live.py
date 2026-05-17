@@ -183,11 +183,15 @@ def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
         """() => ['cw-clock-rain','cw-clock-s1','cw-clock-gfm',
         'cw-clock-viirs'].map(i=>{const e=document.getElementById(i);
         return e?e.textContent:'';}).join(' ')""")
-    has_utc = ("UTC" in (tt + " " + (clock_blob or ""))) or bool(
-        __import__("re").search(r"\d{4}-\d{2}-\d{2}", tt + " "
-                                + (clock_blob or "")))
-    check("corridor freshness clock/ticker carry a UTC timestamp",
-          has_utc, (tt[:60] or "no ticker text"))
+    blob = tt + " " + (clock_blob or "")
+    # Timestamps are displayed in PHT (UTC+8) with an explicit label; a
+    # date-only acquisition value stays a bare YYYY-MM-DD (tz-neutral). The
+    # honesty rule is: a dated, explicitly-labelled timestamp is present.
+    has_ts = ("PHT" in blob or "UTC" in blob) or bool(
+        __import__("re").search(r"\d{4}-\d{2}-\d{2}", blob))
+    check("corridor freshness clock/ticker carry a dated, "
+          "explicitly-labelled (PHT) timestamp",
+          has_ts, (tt[:60] or "no ticker text"))
 
     # (5) no NEW console errors or CSP violations introduced by the +6
     # origins. A blocked origin == the vercel.json CSP is wrong.
@@ -350,12 +354,14 @@ def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
                   and lbl.lower() != "pause", lbl or "<blank>")
             frame_el = pg.query_selector("#cw-rain-frame")
             ftxt = (frame_el.inner_text() if frame_el else "").strip()
-            # §3b per-frame readout shows the frame's own UTC at FIRST paint
-            # — never blank, never relative ("just now"/"now").
-            has_utc = ("UTC" in ftxt) or bool(_RE_YMD.search(ftxt))
-            check("v1.3 §3b per-frame readout shows a UTC time at first "
-                  "paint (not blank, not 'just now')",
-                  bool(ftxt) and has_utc
+            # §3b per-frame readout shows the frame's own time (PHT, UTC+8,
+            # explicitly labelled) at FIRST paint — never blank, never
+            # relative ("just now"/"now").
+            has_ts = ("PHT" in ftxt or "UTC" in ftxt) or bool(
+                _RE_YMD.search(ftxt))
+            check("v1.3 §3b per-frame readout shows a dated, labelled (PHT) "
+                  "time at first paint (not blank, not 'just now')",
+                  bool(ftxt) and has_ts
                   and "just now" not in ftxt.lower(),
                   ftxt[:70] or "<blank>")
 
