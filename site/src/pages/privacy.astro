@@ -24,6 +24,7 @@ import Base from "../layouts/Base.astro";
       <li>Owner names, resident names, phone numbers, tax-declaration data, or anything coupling a location to a natural person.</li>
       <li>Any PII property key in any published GeoJSON. The CI gate <code>scripts/check_no_pii.py</code> asserts this on every release.</li>
       <li>Any record of an area or route a user looks up. The lookup is offline and in-browser; FloodWatch receives nothing.</li>
+      <li>Any new outbound user data via the Corridor watch layers. The added map-tile sources receive only fixed nationwide tile coordinates, never your lookup query.</li>
     </ul>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
       Population counts in <code>barangay_exposure.json</code> (filename kept for compatibility; v1.0 units are provinces) are rounded to the nearest 10. At province scale individual household data cannot be reverse-engineered.
@@ -69,6 +70,17 @@ import Base from "../layouts/Base.astro";
     </p>
     <p class="text-base text-ink-700 leading-relaxed">
       The "is this area flood-prone?" lookup runs <strong>entirely in your browser</strong> against a bundled offline place-name index (a static gazetteer shipped with the site). The text you type is matched locally and tested against the flood-evidence polygons with in-browser point-in-polygon. Your query is <strong>never transmitted to any server, never logged, and never republished</strong>. It is your own input about your own area of interest; under RA 10173 it is not collected or processed by FloodWatch because it never leaves your device.
+    </p>
+    <p class="text-base text-ink-700 leading-relaxed mt-3">
+      The "Corridor watch" view loads a few map-tile layers directly from public meteorological and government sources. These requests carry no information about what you searched &mdash; every visitor's browser fetches the same fixed nationwide tiles, and the area lookup still runs entirely in your browser and is never transmitted.
+    </p>
+    <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1 mt-3">
+      <li><strong>RainViewer (api.rainviewer.com, *.rainviewer.com, tilecache.rainviewer.com):</strong> ground-radar rain tiles relayed from PAGASA. The request contains no information about what you searched &mdash; the same map for every visitor.</li>
+      <li><strong>NASA GIBS (gibs.earthdata.nasa.gov):</strong> NASA's near-real-time optical flood imagery tiles. The request contains no information about what you searched &mdash; the same map for every visitor.</li>
+      <li><strong>EODC STAC / titiler (stac.eodc.eu, titiler.services.eodc.eu):</strong> the Copernicus EMS Global Flood Monitoring satellite flood-extent tile index and tile server. The request contains no information about what you searched &mdash; the same map for every visitor.</li>
+    </ul>
+    <p class="text-base text-ink-700 leading-relaxed mt-3">
+      None of these layers receive, see, or could infer the place or route you looked up. The lookup stays in-browser; these are read-only map tiles, identical bytes for every visitor.
     </p>
 
     <p class="text-[11px] text-ink-500 mt-12 pt-6 border-t border-ink-300/30">

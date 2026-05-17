@@ -11,7 +11,7 @@ keep working unchanged.
 The most recent **usable observed** Sentinel-1 SAR pass over the Greater Metro
 Manila + Central Luzon corridor, run through the same validated detection
 method as `event/flood_extent.py`. Sentinel-1 revisit over the Philippines is
-~6–12 days.
+~6 days (Sentinel-1A + Sentinel-1C, restored ~May 2025), with ~24 h product latency.
 
 **It is OBSERVED, NOT a forecast, NOT live.** `_meta.as_of` is the satellite
 acquisition date; the data is lagged by days. Render it as
@@ -115,3 +115,21 @@ blank map presented as "no flooding".
 - `permanent_water_masked` is **always `true`**.
 - New `_meta` keys may be added later; consumers must not assume the set is
   closed. The keys in this doc will not be removed or change type.
+
+## v1.2 client-fetched layers (no GeoJSON, no cron)
+
+The three Corridor watch layers added in v1.2 are **not** files in this schema.
+They are fetched in the browser at view time against fixed nationwide tiles —
+no cron, no server, no user input in any request, and the lookup query never
+leaves the browser. They are documented here only so consumers know these
+layers are client-side and never enter the `flood_latest.geojson` chain.
+
+| layer | source endpoint | tile scope | input | latency class | honest-label class |
+|---|---|---|---|---|---|
+| RainViewer rain radar | `api.rainviewer.com` (+ `*.rainviewer.com`, `tilecache.rainviewer.com`) | fixed nationwide XYZ tiles | none (same tiles for every visitor) | nowcast (~10-min source) | Tier 1, ground-radar observation, not a forecast |
+| Copernicus EMS GFM SAR | `stac.eodc.eu` + `titiler.services.eodc.eu` | fixed bbox STAC search → XYZ | none | near-real-time (delivered within ~8 h of the pass) | Tier 2, observed Sentinel-1 flood extent, not a forecast |
+| NASA VIIRS NRT optical | `gibs.earthdata.nasa.gov` | fixed nationwide WMTS → XYZ | none | near-real-time (same-day, cloud-permitting) | Tier 3, supplementary, cloud-limited, default OFF |
+
+These carry no `scan_status`; each renders its own per-layer freshness clock
+(ticking age, acquisition timestamp, source, latency class) and an honest
+unavailable state on fetch failure — never a blank map, never "just now".

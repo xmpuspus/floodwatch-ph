@@ -72,6 +72,118 @@ def _check_realtime_data(base: str) -> None:
                   True, "site shows truthful no-data message")
 
 
+# v1.2 Corridor watch: the three NEW client-fetched layers (RainViewer rain
+# radar, Copernicus GFM SAR, NASA VIIRS NRT) report into
+# window.__fwCorridor = {rain, gfm, viics: 'ok'|'empty'|'fail'}. As with the
+# v1.1.0 scan_status HONEST_EMPTY contract, "empty" and "fail" are HONEST
+# states (the layer truthfully says it could not reach its source), not QA
+# failures — any of the three values is a PASS. The integrity guarantee for
+# these layers is NOT a cron gate (they have no server-emitted GeoJSON); it is
+# the honest-empty caption assertion below.
+_CORRIDOR_STATES = {"ok", "empty", "fail"}
+
+# §4d honest-empty caption fragments, verbatim from
+# docs/research/_realtime-scratch/agentF-v1.2-copy.md §4d. When a client layer
+# is empty|fail its clock must show this (never blank, never "just now").
+_HONEST_EMPTY_FRAGMENT = {
+    "rain": "Rain radar unavailable — could not reach RainViewer",
+    "gfm": "Faster observed SAR unavailable — could not reach the "
+           "Copernicus GFM catalogue",
+    "viics": "Supplementary optical layer unavailable — could not reach "
+             "NASA GIBS",
+}
+_CLOCK_ID = {"rain": "cw-clock-rain", "gfm": "cw-clock-gfm",
+             "viics": "cw-clock-viirs"}
+
+
+def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
+    """v1.2 Corridor watch surface checks (additive). The surface is the
+    default Now panel on /map; the page was already navigated + __fwReady
+    awaited by the caller, so the client layers have had time to resolve."""
+    html = pg.content()
+
+    # (1) headline + gloss + all four guardrail blocks render, and the
+    # Block-3 PAGASA/MMDA/DRRMO redirect is co-located with the corridor
+    # visual (inside #now-root, adjacent to #now-expressway-grid).
+    head = pg.query_selector("#cw-headline")
+    gloss = pg.query_selector("#cw-gloss")
+    check("corridor headline+gloss render",
+          head is not None and gloss is not None
+          and "Corridor watch" in (head.inner_text() if head else "")
+          and "not a forecast" in (gloss.inner_text().lower()
+                                   if gloss else ""),
+          (head.inner_text() if head else "no headline"))
+    block3 = ("For live conditions, warnings, and routing during an active "
+              "flood, use PAGASA")
+    check("corridor Block-1 observed-evidence guardrail present",
+          "not a forecast and not a safety instruction" in html.lower()
+          or "observed and modeled evidence" in html.lower())
+    check("corridor Block-2 evidence-framing guardrail present",
+          "a thin record is not proof of safety" in html.lower()
+          or "these are observations and a model" in html.lower())
+    co = pg.evaluate(
+        """(t) => { const r=document.getElementById('now-root');
+        const g=document.getElementById('now-expressway-grid');
+        return !!(r && g && r.contains(g) && r.textContent.includes(t)); }""",
+        block3)
+    check("corridor Block-3 PAGASA/MMDA/DRRMO redirect co-located with "
+          "the expressway visual (HARD GATE)", bool(co))
+    check("corridor Block-4 public-records disclaimer present",
+          "patterns may have legitimate explanations" in html.lower())
+
+    # (2) window.__fwCorridor exists; each of rain/gfm/viics is a known
+    # state. ok|empty|fail are ALL a PASS (honest-empty contract).
+    cs = pg.evaluate("() => window.__fwCorridor || null")
+    check("__fwCorridor exists", isinstance(cs, dict) and cs is not None,
+          str(cs))
+    if isinstance(cs, dict):
+        for k in ("rain", "gfm", "viics"):
+            v = cs.get(k)
+            check(f"__fwCorridor.{k} is a known state "
+                  f"(ok|empty|fail all PASS — honest-empty contract)",
+                  v in _CORRIDOR_STATES, str(v))
+
+        # (3) for any empty|fail layer, its honest-empty caption is present,
+        # NOT blank and NOT "just now".
+        for k in ("rain", "gfm", "viics"):
+            if cs.get(k) in ("empty", "fail"):
+                el = pg.query_selector("#" + _CLOCK_ID[k])
+                txt = (el.inner_text() if el else "").strip()
+                frag = _HONEST_EMPTY_FRAGMENT[k]
+                check(f"corridor {k} honest-empty caption present "
+                      f"(not blank, not 'just now')",
+                      bool(txt) and "just now" not in txt.lower()
+                      and frag in txt, txt[:90] or "<blank>")
+
+    # (4) freshness clock + global ticker render and carry a UTC timestamp.
+    ticker = pg.query_selector("#cw-global-ticker")
+    tt = (ticker.inner_text() if ticker else "").strip()
+    check("corridor global ticker renders", bool(tt), tt[:80])
+    clock_blob = pg.evaluate(
+        """() => ['cw-clock-rain','cw-clock-s1','cw-clock-gfm',
+        'cw-clock-viirs'].map(i=>{const e=document.getElementById(i);
+        return e?e.textContent:'';}).join(' ')""")
+    has_utc = ("UTC" in (tt + " " + (clock_blob or ""))) or bool(
+        __import__("re").search(r"\d{4}-\d{2}-\d{2}", tt + " "
+                                + (clock_blob or "")))
+    check("corridor freshness clock/ticker carry a UTC timestamp",
+          has_utc, (tt[:60] or "no ticker text"))
+
+    # (5) no NEW console errors or CSP violations introduced by the +6
+    # origins. A blocked origin == the vercel.json CSP is wrong.
+    csp_hits = [e for e in csp_errs
+                if ("content-security-policy" in e.lower()
+                    or "refused to connect" in e.lower()
+                    or "violates the following content security" in e.lower())]
+    check("corridor: no CSP violation / refused-to-connect "
+          "(the +6 origins are open)",
+          len(csp_hits) == 0, "; ".join(csp_hits[:3]))
+
+    # (6) __fwReady still flips true (the corridor map paints).
+    ready = pg.evaluate("() => window.__fwReady === true")
+    check("corridor map __fwReady still true (map paints)", bool(ready))
+
+
 def _check_lookup_page(pg, base: str) -> None:
     """Agent G is adding /lookup in parallel. Skip gracefully if it 404s so
     this QA does not break before G/D land; the orchestrator confirms later."""
@@ -121,6 +233,23 @@ def main() -> int:
             ready = False
         check("map __fwReady (tiles+overlays painted)", ready)
         pg.wait_for_timeout(2500)
+
+        # ---- v1.2 Corridor watch surface (default Now panel on /map) ----
+        # Give the three client-fetched layers their full timeout budget
+        # (RainViewer 8 s, GFM/VIIRS 10 s) to resolve to ok|empty|fail
+        # before asserting the honest-empty captions.
+        try:
+            pg.wait_for_function(
+                "() => window.__fwCorridor "
+                "&& ['rain','gfm','viics'].every(k => "
+                "['ok','empty','fail'].includes(window.__fwCorridor[k]) "
+                "&& window.__fwCorridor[k] !== 'fail')",
+                timeout=14000)
+        except Exception:
+            # 'fail' is still an honest PASS state; do not block on it. The
+            # per-layer checks below assert the honest-empty caption instead.
+            pass
+        _check_corridor_watch(pg, BASE, errs)
 
         loading = pg.query_selector("#map-loading")
         check("map-loading overlay hidden",

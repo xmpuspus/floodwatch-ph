@@ -141,6 +141,43 @@ def _alias(args: argparse.Namespace, site: Path, target_url: str,
     _run(_vercel_base(args) + ["alias", "set", target_url, domain], site, dry=dry)
 
 
+_ASTRO_JS_RE = re.compile(r'/_astro/[A-Za-z0-9._-]+\.js')
+
+
+def _verify_bundle_fresh(base: str, markers: tuple[str, ...]) -> tuple[bool, str]:
+    """Confirm the SERVED bundle is the new code, not a stale Vercel cache.
+
+    HTTP 200 and the JS readiness flags both still passed on the stale bundle
+    in the v1.1.0 incident — the only reliable tell was the content of the
+    hashed _astro script actually served. So fetch the live HTML and its
+    _astro JS and require a marker unique to the new code to be present. A
+    miss means `vercel build` shipped a cached old bundle; fail so the caller
+    rolls back and pages instead of declaring a stale deploy good.
+    """
+    try:
+        html = urllib.request.urlopen(base, timeout=30).read().decode(
+            "utf-8", "replace")
+    except Exception as e:  # noqa: BLE001
+        return False, f"could not fetch live HTML for bundle check: {e!r}"
+    scripts = sorted(set(_ASTRO_JS_RE.findall(html)))
+    if not scripts:
+        return False, "no _astro/*.js in served HTML (unexpected build output)"
+    haystack = html
+    for path in scripts[:12]:
+        try:
+            haystack += urllib.request.urlopen(
+                base + path, timeout=30).read().decode("utf-8", "replace")
+        except Exception:  # noqa: BLE001
+            continue
+    missing = [m for m in markers if m not in haystack]
+    if missing:
+        return False, (
+            f"served bundle is STALE: marker(s) {missing!r} absent from the "
+            f"live HTML + {len(scripts)} _astro script(s). vercel build "
+            f"shipped a cached old bundle.")
+    return True, f"served bundle fresh ({len(scripts)} _astro scripts checked)"
+
+
 def _verify_live(domain: str, dry: bool) -> tuple[bool, str]:
     if dry:
         return True, "dry-run"
@@ -151,6 +188,13 @@ def _verify_live(domain: str, dry: bool) -> tuple[bool, str]:
         return False, f"alias unreachable: {e!r}"
     if code != 200:
         return False, f"alias HTTP {code}"
+    # Stale-cache detection (v1.1.0 incident): a marker unique to the current
+    # code must be in the actually-served bundle, not just HTTP 200 / a
+    # readiness flag that predates the change.
+    fresh_ok, fresh_detail = _verify_bundle_fresh(base, ("__fwCorridor",))
+    print(f"  bundle freshness: {fresh_detail}")
+    if not fresh_ok:
+        return False, fresh_detail
     res = subprocess.run(
         [sys.executable, str(REPO / "scripts" / "qa_live.py"), base],
         text=True, capture_output=True,

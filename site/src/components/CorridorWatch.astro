@@ -1,0 +1,982 @@
+---
+// CorridorWatch -- the v1.2 D2-B tiered observation surface.
+//
+// An observation LOG of what the satellites and radar have observed over the
+// expressways, organized by how fresh each observation is (KIND, never
+// priority). Nothing here is live; nothing is a forecast. Every user-visible
+// string is the Agent-F v1.2 copy spec VERBATIM.
+//
+// Carries, unchanged from the v1.1.0 NowView:
+//   - the three cron layers (flood_latest = HERO, road_flood_exposure,
+//     current_risk) with the locked z-order: context -> roads -> flood LAST
+//   - the scan_status honest-empty path (no_usable_pass / degenerate /
+//     low_confidence) -- reused verbatim, no new wording for the cron layers
+//   - the __fwMap/__fwReady contract exposed SYNCHRONOUSLY + the
+//     isStyleLoaded() once-guarded poll (this surface starts in a display:none
+//     tab; edge-triggered load/idle/styledata after an await can be missed)
+//
+// Adds (v1.2):
+//   - three client-fetched layers (RainViewer / GFM / VIIRS) via
+//     realtimeClient.ts -- honest-empty on any failure, never blank
+//   - the per-layer freshness clock + global ticker via freshnessClock.ts
+//   - all FOUR guardrail blocks; Block 3 (PAGASA/MMDA/DRRMO redirect) is
+//     co-located with the expressway visual -- a HARD SHIP GATE
+//
+// PERF: fetches NOTHING at import. init() runs only when the parent toggles
+// [data-now-active="true"].
+
+// Static build time -- the §4b global-ticker "Site rebuilt {rebuiltUTC} UTC"
+// must reflect the build, not the client clock.
+const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
+---
+
+<div id="now-root" data-now-active="false" data-rebuilt-utc={REBUILT_UTC}>
+  <!-- §1 D1-A headline + mandatory observation gloss (same visual block).
+       "Corridor watch" is never styled red, never pulsing, never a siren
+       icon; if the gloss cannot render the headline falls back to plain
+       "Expressway observation log" (handled in the script). -->
+  <section class="max-w-6xl mx-auto px-6 mb-4">
+    <div class="border border-ink-300/40 bg-white">
+      <div class="px-5 py-4 border-b border-ink-300/30">
+        <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
+          expressway observation log
+        </p>
+        <h2 id="cw-headline" class="text-2xl text-ink-900 leading-tight font-semibold">
+          Corridor watch
+        </h2>
+        <p id="cw-gloss" class="text-sm text-ink-700 mt-1.5 leading-relaxed">
+          What the satellites and radar have observed over the expressways —
+          the most recent observed passes, not a live feed and not a forecast.
+        </p>
+        <p class="text-sm text-ink-900 mt-3 leading-relaxed font-medium">
+          Did the latest satellite pass see water on the expressways?
+        </p>
+        <p id="now-expressway-line" class="text-sm text-ink-700 mt-1.5 leading-relaxed">
+          Checking the most recent observed pass...
+        </p>
+      </div>
+      <div
+        id="now-expressway-grid"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-px bg-ink-300/30"
+      >
+      </div>
+      <!-- §6 Block 3 -- Mandatory PAGASA/MMDA/DRRMO redirect, co-located with
+           the expressway visual. HARD GATE, verbatim. -->
+      <div class="px-5 py-3 border-t border-ink-300/30">
+        <div
+          class="border border-accent-coral/40 bg-accent-coral/5 rounded-md px-4 py-3 text-[13px] text-ink-900 leading-relaxed"
+          role="note"
+        >
+          <strong>Not a forecast.</strong> For live conditions, warnings, and
+          routing during an active flood, use PAGASA
+          (<a href="https://bagong.pagasa.dost.gov.ph" class="text-accent-steel no-underline">bagong.pagasa.dost.gov.ph</a>),
+          MMDA Flood Control, and your LGU DRRMO. FloodWatch is complementary to
+          and never a replacement for these and Project NOAH / Google Flood Hub.
+        </div>
+        <p class="text-[12px] text-ink-500 leading-relaxed mt-2.5">
+          Observed, lagged by the Sentinel-1 revisit (~6-day revisit, ~24 h product latency). Not a
+          forecast and not a routing instruction. Want to check a specific place
+          or corridor?
+          <a href="/lookup" class="no-underline text-accent-steel">Use the evidence lookup</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- §4b Global freshness ticker (header strip). Neutral, informational,
+       never "live". Recomputed every 30 s by freshnessClock.startClockTicker. -->
+  <section class="max-w-6xl mx-auto px-6 mb-3">
+    <div class="bg-paper border border-ink-300/30 px-4 py-2.5">
+      <p
+        id="cw-global-ticker"
+        class="text-[12px] text-ink-700 font-mono leading-relaxed"
+        role="status"
+        aria-live="off"
+      >
+        Layers refresh independently — see each layer's own clock.
+      </p>
+    </div>
+  </section>
+
+  <!-- §2 D2-B tiers. Headers describe KIND, never priority. No tier says
+       primary / main / best / most reliable / the answer. -->
+  <section class="max-w-6xl mx-auto px-6 mb-3 space-y-3">
+
+    <!-- Tier 1 -->
+    <div class="bg-paper border border-ink-300/30 p-4">
+      <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
+        Freshest observation
+      </p>
+      <p class="text-[12px] text-ink-700 leading-relaxed mb-3">
+        Ground-radar rainfall, refreshed every few minutes. Shows where rain has
+        most recently been falling, not where roads are flooded.
+      </p>
+      <label class="flex items-center gap-1.5 cursor-pointer text-xs mb-2">
+        <input id="cw-toggle-rain" type="checkbox" class="accent-accent-steel" />
+        <span class="text-ink-700">Rain radar (RainViewer / PAGASA)</span>
+        <span id="cw-rain-disabled" class="hidden text-[11px] text-ink-500 italic"></span>
+      </label>
+      <div
+        id="cw-clock-rain"
+        class="text-[11px] text-ink-600 leading-snug border-l-2 border-ink-300/40 pl-2.5"
+      >
+        <p class="cw-clock-name font-medium text-ink-700"></p>
+        <p>
+          <span class="fw-clock-dot" style="display:none;width:0.5rem;height:0.5rem;border-radius:9999px;background:#d97757;margin-right:0.35rem;vertical-align:baseline;"></span>
+          <span class="fw-clock-age"></span>
+        </p>
+        <p class="cw-clock-src font-mono text-ink-500"></p>
+        <p class="cw-clock-caption text-ink-600 mt-1"></p>
+      </div>
+    </div>
+
+    <!-- Tier 2 -->
+    <div class="bg-paper border border-ink-300/30 p-4">
+      <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
+        Dated ground truth
+      </p>
+      <p class="text-[12px] text-ink-700 leading-relaxed mb-3">
+        Radar satellite flood extent from the most recent usable passes. This is
+        the observed-water layer; each pass is hours to days old by the time it
+        lands.
+      </p>
+      <div class="flex flex-wrap gap-4 text-xs mb-3">
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input id="now-toggle-flood" type="checkbox" checked class="accent-accent-flood" />
+          <span class="text-ink-700">Observed flood extent (latest Sentinel-1 pass)</span>
+        </label>
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input id="cw-toggle-gfm" type="checkbox" class="accent-accent-flood" />
+          <span class="text-ink-700">Faster observed SAR (Copernicus GFM)</span>
+          <span id="cw-gfm-disabled" class="hidden text-[11px] text-ink-500 italic"></span>
+        </label>
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input id="now-toggle-roads" type="checkbox" checked class="accent-ink-700" />
+          <span class="text-ink-700">Monitored expressways</span>
+        </label>
+      </div>
+      <div
+        id="cw-clock-s1"
+        class="text-[11px] text-ink-600 leading-snug border-l-2 border-ink-300/40 pl-2.5 mb-2"
+      >
+        <p class="cw-clock-name font-medium text-ink-700"></p>
+        <p>
+          <span class="fw-clock-dot" style="display:none;width:0.5rem;height:0.5rem;border-radius:9999px;background:#d97757;margin-right:0.35rem;vertical-align:baseline;"></span>
+          <span class="fw-clock-age"></span>
+        </p>
+        <p class="cw-clock-src font-mono text-ink-500"></p>
+        <p class="cw-clock-caption text-ink-600 mt-1"></p>
+      </div>
+      <div
+        id="cw-clock-gfm"
+        class="text-[11px] text-ink-600 leading-snug border-l-2 border-ink-300/40 pl-2.5"
+      >
+        <p class="cw-clock-name font-medium text-ink-700"></p>
+        <p>
+          <span class="fw-clock-dot" style="display:none;width:0.5rem;height:0.5rem;border-radius:9999px;background:#d97757;margin-right:0.35rem;vertical-align:baseline;"></span>
+          <span class="fw-clock-age"></span>
+        </p>
+        <p class="cw-clock-src font-mono text-ink-500"></p>
+        <p class="cw-clock-caption text-ink-600 mt-1"></p>
+        <p class="cw-clock-licence text-[10px] text-ink-500 mt-1 italic"></p>
+      </div>
+    </div>
+
+    <!-- Tier 3 -->
+    <div class="bg-paper border border-ink-300/30 p-4">
+      <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
+        Supplementary, cloud-limited
+      </p>
+      <p class="text-[12px] text-ink-700 leading-relaxed mb-3">
+        Optical satellite flat-water signal, off by default. Typhoon cloud
+        usually blanks it; it never overrides the radar layer.
+      </p>
+      <label class="flex items-center gap-1.5 cursor-pointer text-xs mb-2">
+        <input id="cw-toggle-viirs" type="checkbox" class="accent-accent-coral" />
+        <span class="text-ink-700">Supplementary optical flood (NASA VIIRS)</span>
+        <span id="cw-viirs-disabled" class="hidden text-[11px] text-ink-500 italic"></span>
+      </label>
+      <div
+        id="cw-clock-viirs"
+        class="text-[11px] text-ink-600 leading-snug border-l-2 border-ink-300/40 pl-2.5"
+      >
+        <p class="cw-clock-name font-medium text-ink-700"></p>
+        <p>
+          <span class="fw-clock-dot" style="display:none;width:0.5rem;height:0.5rem;border-radius:9999px;background:#d97757;margin-right:0.35rem;vertical-align:baseline;"></span>
+          <span class="fw-clock-age"></span>
+        </p>
+        <p class="cw-clock-src font-mono text-ink-500"></p>
+        <p class="cw-clock-caption text-ink-600 mt-1"></p>
+      </div>
+    </div>
+
+    <!-- Context flag (NOT a tier) -->
+    <div class="bg-paper border border-ink-300/30 p-4">
+      <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
+        Rainfall accumulation context
+      </p>
+      <p class="text-[12px] text-ink-700 leading-relaxed mb-3">
+        Rainfall accumulation context — dated, processed once a day. Context for
+        the radar-revisit gap, not a score and not a forecast.
+      </p>
+      <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+        <input id="now-toggle-rain" type="checkbox" class="accent-accent-coral" />
+        <span class="text-ink-700">Rainfall accumulation (GPM IMERG)</span>
+      </label>
+      <p id="cw-clock-gpm" class="text-[11px] text-ink-600 leading-snug border-l-2 border-ink-300/40 pl-2.5 mt-2"></p>
+    </div>
+  </section>
+
+  <!-- Honest status strip for the observed pass itself (cron, unchanged) -->
+  <section class="max-w-6xl mx-auto px-6 mb-3">
+    <div
+      id="now-scan-status"
+      class="border-l-4 border-ink-300/50 bg-paper-alt px-4 py-3 text-sm text-ink-900 leading-relaxed"
+      role="status"
+      aria-live="polite"
+    >
+      Loading the most recent observed Sentinel-1 pass...
+    </div>
+  </section>
+
+  <div class="grid md:grid-cols-[1fr_340px] gap-4 px-6 max-w-6xl mx-auto">
+    <div class="relative">
+      <div id="now-map" class="w-full h-[600px] rounded-md border border-ink-300/30 bg-ink-300/10">
+        <div id="now-map-loading" class="absolute inset-0 flex items-center justify-center text-sm text-ink-500">
+          Corridor watch loads when you open it.
+        </div>
+      </div>
+
+      <div class="absolute bottom-3 left-3 bg-white/95 border border-ink-300/40 rounded p-3 text-xs shadow-sm max-w-[230px]">
+        <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">observed flood (SAR)</div>
+        <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700 mb-2">
+          <span class="inline-block w-3 h-3 rounded-sm" style="background:#1391d4;opacity:0.66"></span><span>open water, latest pass</span>
+        </div>
+        <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">expressways</div>
+        <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700 mb-2">
+          <span class="inline-block w-3 h-1.5 rounded-sm" style="background:#a8431e"></span><span>flooded</span>
+          <span class="inline-block w-3 h-1.5 rounded-sm" style="background:#d97757"></span><span>near water (30 m)</span>
+          <span class="inline-block w-3 h-1.5 rounded-sm" style="background:#3a6ea5"></span><span>no overlap this pass</span>
+          <span class="inline-block w-3 h-1.5 rounded-sm" style="background:#8e98ac"></span><span>pass not usable</span>
+        </div>
+        <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">rainfall context (24 h)</div>
+        <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700">
+          <span class="inline-block w-3 h-3 rounded-full" style="background:#c0392b"></span><span>red, &ge;120 mm/24h</span>
+          <span class="inline-block w-3 h-3 rounded-full" style="background:#d97757"></span><span>orange, &ge;60 mm/24h</span>
+          <span class="inline-block w-3 h-3 rounded-full" style="background:#e3b341"></span><span>yellow, &ge;30 mm/24h</span>
+        </div>
+        <p class="text-[9px] text-ink-500 mt-2 leading-snug">
+          Rainfall labels are PAGASA advisory colours mapped onto GPM IMERG
+          24 h accumulation (already-fallen rain). Context only, not a PAGASA
+          product and not a flood forecast.
+        </p>
+      </div>
+
+      <div class="absolute bottom-1 right-2 bg-white/85 px-1.5 py-0.5 text-[9px] text-ink-500 rounded-sm border border-ink-300/30 leading-tight">
+        &copy; OpenStreetMap contributors. SAR: Copernicus/Sentinel-1. Rain: RainViewer / PAGASA, NASA GPM IMERG. NRT optical: NASA GIBS.
+      </div>
+    </div>
+
+    <aside class="border border-ink-300/40 bg-white text-sm p-5">
+      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">what corridor watch is</p>
+      <p class="text-ink-700 leading-relaxed text-[13px]">
+        An observation log of what the satellites and radar have observed over
+        Greater Metro Manila and the SLEX/NLEX corridor, organized by how fresh
+        each observation is. Every layer is as-of-dated below. Nothing here is
+        live and nothing here is a forecast.
+      </p>
+      <dl class="mt-4 space-y-2 text-[12px]">
+        <div class="flex justify-between gap-3 border-t border-ink-300/30 pt-2">
+          <dt class="text-ink-500">Observed SAR pass</dt>
+          <dd id="now-asof-sar" class="font-mono text-ink-900 text-right">--</dd>
+        </div>
+        <div class="flex justify-between gap-3 border-t border-ink-300/30 pt-2">
+          <dt class="text-ink-500">Expressway join</dt>
+          <dd id="now-asof-roads" class="font-mono text-ink-900 text-right">--</dd>
+        </div>
+        <div class="flex justify-between gap-3 border-t border-ink-300/30 pt-2">
+          <dt class="text-ink-500">Rainfall context</dt>
+          <dd id="now-asof-rain" class="font-mono text-ink-900 text-right">--</dd>
+        </div>
+      </dl>
+      <!-- §6 Block 4 -- Public-records disclaimer, footer, verbatim. -->
+      <p class="text-[11px] text-ink-500 italic mt-4 leading-relaxed">
+        Observed flood extent derived from public satellite data. Patterns may
+        have legitimate explanations; figures warrant independent verification.
+      </p>
+    </aside>
+  </div>
+</div>
+
+<script>
+  import maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+  import {
+    fetchRainViewer,
+    fetchGFM,
+    fetchVIIRS,
+    type RealtimeResult,
+  } from "../lib/realtimeClient";
+  import {
+    layerCaption,
+    honestEmpty,
+    isStale,
+    tickingAge,
+    fmtAcqUTC,
+    globalTicker,
+    freshestOf,
+    DISABLED_TOGGLE_TEXT,
+    type LayerCadenceKey,
+    type LatencyClassLabel,
+  } from "../lib/freshnessClock";
+
+  const $ = (id: string) => document.getElementById(id);
+  const DATA = "/data";
+
+  async function getJSON(url: string): Promise<any | null> {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch {
+      return null;
+    }
+  }
+
+  let started = false;
+  let map: any = null;
+
+  // window flag for the QA harness: did each client layer end ok/empty/fail.
+  const corridorState: Record<string, "ok" | "empty" | "fail"> = {
+    rain: "fail",
+    gfm: "fail",
+    viics: "fail",
+  };
+  (window as any).__fwCorridor = corridorState;
+
+  function scanReason(meta: any): string {
+    const note = meta?.note;
+    if (typeof note === "string" && note) return note;
+    const s = meta?.scan_status;
+    if (s === "degenerate_threshold") return "no reliable water/land separation in the Otsu valley";
+    if (s === "low_confidence") return "detected area exceeded the plausibility cap (likely speckle, not flood)";
+    if (s === "no_usable_pass") return "no Sentinel-1 acquisition with enough area coverage in the lookback window";
+    return "the satellite pass was not usable";
+  }
+
+  // expressway names originate from the cron road-exposure GeoJSON (OSM-sourced
+  // road names, gated by gate_realtime.py). Escape before the innerHTML join
+  // so an externally-influenced name can never inject markup. label/cls are
+  // built from numbers and fixed class strings only.
+  function escHtml(v: string): string {
+    return v.replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ] as string,
+    );
+  }
+
+  function expresswayCard(name: string, s: any): string {
+    const flooded = s?.flooded ?? 0;
+    const near = s?.near ?? 0;
+    const unknown = s?.unknown ?? 0;
+    let label: string;
+    let cls: string;
+    if (unknown > 0 && flooded === 0 && near === 0) {
+      label = "pass not usable";
+      cls = "text-ink-500";
+    } else if (flooded > 0) {
+      label = `${flooded} segment${flooded === 1 ? "" : "s"} flooded`;
+      cls = "text-accent-coral-dark font-semibold";
+    } else if (near > 0) {
+      label = `${near} near water`;
+      cls = "text-accent-coral";
+    } else {
+      label = "no overlap this pass";
+      cls = "text-ink-700";
+    }
+    return `<div class="bg-white p-3">
+      <div class="text-[11px] font-mono uppercase tracking-wider text-ink-900">${escHtml(name)}</div>
+      <div class="text-[12px] mt-1 ${cls}">${label}</div>
+    </div>`;
+  }
+
+  // ---- per-layer freshness clock paint (§4a) ------------------------------
+  function paintClock(
+    rootId: string,
+    layerName: string,
+    acquiredIso: string | null,
+    source: string,
+    latencyClass: LatencyClassLabel,
+    cadence: LayerCadenceKey,
+    caption: string,
+    licence?: string,
+  ): void {
+    const root = $(rootId);
+    if (!root) return;
+    const cap = layerCaption({ layerName, acquiredIso, source, latencyClass });
+    const nameEl = root.querySelector<HTMLElement>(".cw-clock-name");
+    const ageEl = root.querySelector<HTMLElement>(".fw-clock-age");
+    const dotEl = root.querySelector<HTMLElement>(".fw-clock-dot");
+    const srcEl = root.querySelector<HTMLElement>(".cw-clock-src");
+    const capEl = root.querySelector<HTMLElement>(".cw-clock-caption");
+    const licEl = root.querySelector<HTMLElement>(".cw-clock-licence");
+    if (nameEl) nameEl.textContent = cap.line1;
+    if (ageEl) ageEl.textContent = cap.line2;
+    if (srcEl) srcEl.textContent = cap.line3;
+    if (capEl) capEl.textContent = caption;
+    if (licEl && licence) licEl.textContent = licence;
+    if (dotEl) {
+      const stale = isStale(cadence, acquiredIso);
+      dotEl.style.display = stale ? "inline-block" : "none";
+      dotEl.setAttribute("title", stale ? "this layer may be behind" : "");
+    }
+    // store the cadence + iso for the 30 s re-tick
+    root.setAttribute("data-fw-cadence", cadence);
+    root.setAttribute("data-fw-acq", acquiredIso ?? "");
+  }
+
+  function paintClockEmpty(rootId: string, emptyMsg: string): void {
+    const root = $(rootId);
+    if (!root) return;
+    const nameEl = root.querySelector<HTMLElement>(".cw-clock-name");
+    const ageEl = root.querySelector<HTMLElement>(".fw-clock-age");
+    const dotEl = root.querySelector<HTMLElement>(".fw-clock-dot");
+    const srcEl = root.querySelector<HTMLElement>(".cw-clock-src");
+    const capEl = root.querySelector<HTMLElement>(".cw-clock-caption");
+    if (nameEl) nameEl.textContent = "";
+    if (ageEl) ageEl.textContent = "";
+    if (srcEl) srcEl.textContent = "";
+    if (dotEl) dotEl.style.display = "none";
+    if (capEl) capEl.textContent = emptyMsg;
+    root.removeAttribute("data-fw-acq");
+  }
+
+  function disableToggle(toggleId: string, labelId: string): void {
+    const t = $(toggleId) as HTMLInputElement | null;
+    if (t) {
+      t.checked = false;
+      t.disabled = true;
+    }
+    const lab = $(labelId);
+    if (lab) {
+      lab.textContent = " " + DISABLED_TOGGLE_TEXT;
+      lab.classList.remove("hidden");
+    }
+  }
+
+  // ---- §1 headline fallback: if the gloss cannot render, the headline must
+  // fall back to plain "Expressway observation log", never "Corridor watch"
+  // bare. (Defensive: the gloss is server-rendered, but if its node is gone
+  // we never leave "watch" without its gloss.)
+  function ensureGloss(): void {
+    const gloss = $("cw-gloss");
+    const headline = $("cw-headline");
+    if (headline && (!gloss || !gloss.textContent || !gloss.textContent.trim())) {
+      headline.textContent = "Expressway observation log";
+    }
+  }
+
+  async function init(): Promise<void> {
+    ensureGloss();
+    const loadingEl = $("now-map-loading");
+
+    const [flood, roads, rain] = await Promise.all([
+      getJSON(`${DATA}/flood_latest.geojson`),
+      getJSON(`${DATA}/road_flood_exposure.geojson`),
+      getJSON(`${DATA}/current_risk.geojson`),
+    ]);
+
+    const fMeta = flood?._meta ?? null;
+    const rdMeta = roads?._meta ?? null;
+    const rnMeta = rain?._meta ?? null;
+
+    const sarAsOf = fMeta?.as_of ?? null;
+    const sarStatus = fMeta?.scan_status ?? "unknown";
+    if ($("now-asof-sar"))
+      $("now-asof-sar")!.textContent = sarAsOf
+        ? `${sarAsOf}${sarStatus === "ok" ? "" : " (withheld)"}`
+        : "no usable pass";
+    if ($("now-asof-roads"))
+      $("now-asof-roads")!.textContent = rdMeta?.as_of ?? "no usable pass";
+    if ($("now-asof-rain"))
+      $("now-asof-rain")!.textContent = rnMeta?.as_of ?? "unavailable";
+
+    // ---- honest scan-status strip (cron path, UNCHANGED from v1.1.0) ----
+    const statusEl = $("now-scan-status");
+    if (statusEl) {
+      if (sarStatus === "ok" && Array.isArray(flood?.features) && flood.features.length > 0) {
+        statusEl.textContent =
+          `Showing the observed Sentinel-1 SAR flood extent from the ${sarAsOf} pass ` +
+          `(${fMeta?.feature_count ?? flood.features.length} polygons). ` +
+          "This is the most recent observed pass, not live and not a forecast.";
+        statusEl.className =
+          "border-l-4 border-accent-flood bg-paper-alt px-4 py-3 text-sm text-ink-900 leading-relaxed";
+      } else if (sarStatus === "no_usable_pass") {
+        statusEl.textContent =
+          "The most recent Sentinel-1 pass over Metro Manila was not usable: " +
+          `${scanReason(fMeta)}. No observed extent is shown. This is not a clear-conditions signal.`;
+        statusEl.className =
+          "border-l-4 border-accent-coral-dark bg-paper-alt px-4 py-3 text-sm text-ink-900 leading-relaxed";
+      } else {
+        statusEl.textContent =
+          `The last Sentinel-1 pass${sarAsOf ? ` (${sarAsOf})` : ""} was not usable: ` +
+          `${scanReason(fMeta)}. No observed extent is shown. This is not a clear-conditions signal.`;
+        statusEl.className =
+          "border-l-4 border-accent-coral-dark bg-paper-alt px-4 py-3 text-sm text-ink-900 leading-relaxed";
+      }
+    }
+
+    // ---- expressway callout (the motivating question, cron path) ----
+    const exLine = $("now-expressway-line");
+    const exGrid = $("now-expressway-grid");
+    const summary = rdMeta?.expressway_summary ?? {};
+    const names = Object.keys(summary);
+    let totalFlooded = 0;
+    for (const n of names) totalFlooded += summary[n]?.flooded ?? 0;
+    if (exLine) {
+      if (sarStatus !== "ok") {
+        exLine.textContent =
+          "The most recent Sentinel-1 pass was not usable, so expressway " +
+          "exposure could not be computed for this window. This is not a " +
+          "clear-conditions signal. Use MMDA Flood Control and PAGASA for live road conditions.";
+      } else if (totalFlooded === 0) {
+        exLine.textContent =
+          `No monitored expressway segments intersect the most recent observed ` +
+          `flood extent (as of ${rdMeta?.as_of ?? sarAsOf}). This is the truthful ` +
+          `current state of the latest pass, not an all-clear: the satellite ` +
+          `revisit is ~6 days with ~24 h product latency and conditions change between passes.`;
+      } else {
+        exLine.textContent =
+          `${totalFlooded} monitored expressway segment${totalFlooded === 1 ? "" : "s"} ` +
+          `intersected observed water on the ${rdMeta?.as_of ?? sarAsOf} pass. ` +
+          `Observed, not a forecast or routing instruction.`;
+      }
+    }
+    if (exGrid) {
+      const order = ["SLEX", "NLEX", "Skyway", "CAVITEX", "NAIAX", "CALAX", "SCTEX", "TPLEX", "C5", "EDSA", "Commonwealth Ave"];
+      const ordered = order.filter((n) => n in summary).concat(names.filter((n) => !order.includes(n)));
+      exGrid.innerHTML = ordered.map((n) => expresswayCard(n, summary[n])).join("");
+    }
+
+    // ---- GPM rainfall-accumulation context flag clock (role unchanged) ----
+    const gpmEl = $("cw-clock-gpm");
+    if (gpmEl) {
+      gpmEl.textContent = rnMeta?.as_of
+        ? `Rainfall context: GPM IMERG accumulation as of ${rnMeta.as_of} UTC. ` +
+          `Satellite rainfall estimate, not a gauge reading and not a forecast.`
+        : "Rainfall context (GPM IMERG accumulation) is unavailable for the most recent window.";
+    }
+
+    // ---- map ----
+    map = new maplibregl.Map({
+      container: "now-map",
+      style: {
+        version: 8,
+        sources: {
+          osm: {
+            type: "raster",
+            tiles: [
+              "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            ],
+            tileSize: 256,
+            attribution: "&copy; OpenStreetMap contributors",
+          },
+        },
+        layers: [{ id: "osm", type: "raster", source: "osm" }],
+      },
+      center: [120.98, 14.6] as [number, number],
+      zoom: 8.4,
+    });
+    // Expose the map handle SYNCHRONOUSLY -- this surface starts in a
+    // display:none tab, so MapLibre will not fire load until the panel is
+    // shown + resized. The locked __fwMap contract must point here (the
+    // default landing tab), not the hidden Carina MapView.
+    (window as any).__fwMap = map;
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    // The body runs AFTER `await Promise.all([...])` above, so on the live CDN
+    // the map load can fire DURING the await and be missed by an
+    // edge-triggered hook. Poll isStyleLoaded() instead (cannot miss a
+    // transition); a once-guard makes the body run exactly once.
+    const onStyleReady = (): void => {
+      if (loadingEl) loadingEl.style.display = "none";
+
+      // ---- CONTEXT first (bottom): rainfall, subtle ----
+      if (rain && Array.isArray(rain.features) && rain.features.length > 0) {
+        map.addSource("now-rain", { type: "geojson", data: rain });
+        map.addLayer({
+          id: "now-rain-dots",
+          type: "circle",
+          source: "now-rain",
+          layout: { visibility: "none" },
+          filter: ["!=", ["get", "context_flag"], "none"],
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 2.5, 11, 5],
+            "circle-color": [
+              "match",
+              ["get", "context_flag"],
+              "red", "#c0392b",
+              "orange", "#d97757",
+              "yellow", "#e3b341",
+              "#e3b341",
+            ],
+            "circle-opacity": 0.55,
+            "circle-stroke-color": "#ffffff",
+            "circle-stroke-width": 0.5,
+          },
+        });
+      }
+
+      // ---- VIIRS supplementary optical (Tier 3) -- below SAR, default off,
+      // it never overrides the radar layer (added before roads/flood) ----
+      map.addSource("cw-viirs", {
+        type: "raster",
+        tiles: ["https://example.invalid/{z}/{x}/{y}.png"],
+        tileSize: 256,
+      });
+      map.addLayer({
+        id: "cw-viirs-raster",
+        type: "raster",
+        source: "cw-viirs",
+        layout: { visibility: "none" },
+        paint: { "raster-opacity": 0.55 },
+      });
+
+      // ---- GFM faster-observed SAR (Tier 2) -- below the hero S1 extent ----
+      map.addSource("cw-gfm", {
+        type: "raster",
+        tiles: ["https://example.invalid/{z}/{x}/{y}.png"],
+        tileSize: 256,
+      });
+      map.addLayer({
+        id: "cw-gfm-raster",
+        type: "raster",
+        source: "cw-gfm",
+        layout: { visibility: "none" },
+        paint: { "raster-opacity": 0.6 },
+      });
+
+      // ---- RainViewer rain radar (Tier 1) ----
+      map.addSource("cw-rain", {
+        type: "raster",
+        tiles: ["https://example.invalid/{z}/{x}/{y}.png"],
+        tileSize: 256,
+      });
+      map.addLayer({
+        id: "cw-rain-raster",
+        type: "raster",
+        source: "cw-rain",
+        layout: { visibility: "none" },
+        paint: { "raster-opacity": 0.6 },
+      });
+
+      // ---- ROADS in the middle ----
+      if (roads && Array.isArray(roads.features) && roads.features.length > 0) {
+        map.addSource("now-roads", { type: "geojson", data: roads });
+        map.addLayer({
+          id: "now-roads-line",
+          type: "line",
+          source: "now-roads",
+          paint: {
+            "line-color": [
+              "match",
+              ["get", "exposure"],
+              "flooded", "#a8431e",
+              "near", "#d97757",
+              "clear", "#3a6ea5",
+              "#8e98ac",
+            ],
+            "line-width": [
+              "match",
+              ["get", "exposure"],
+              "flooded", 3.0,
+              "near", 2.2,
+              1.0,
+            ],
+            "line-opacity": [
+              "match",
+              ["get", "exposure"],
+              "clear", 0.35,
+              "unknown", 0.3,
+              0.9,
+            ],
+          },
+        });
+        map.on("click", "now-roads-line", (e: any) => {
+          const f = e.features?.[0];
+          if (!f) return;
+          const p = f.properties || {};
+          new maplibregl.Popup({ closeButton: true })
+            .setLngLat(e.lngLat)
+            .setHTML(
+              `<div style="padding:8px 10px;font-size:12px;max-width:220px">
+                 <strong>${p.road_name || "Road"}</strong><br/>
+                 exposure: ${p.exposure || "unknown"}<br/>
+                 ${
+                   p.exposure === "flooded"
+                     ? `${Number(p.flooded_length_m || 0).toFixed(0)} m under observed water`
+                     : "observed, not a forecast"
+                 }
+               </div>`,
+            )
+            .addTo(map);
+        });
+        map.on("mouseenter", "now-roads-line", () => { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", "now-roads-line", () => { map.getCanvas().style.cursor = ""; });
+      }
+
+      // ---- OBSERVED FLOOD on TOP (the hero, locked z-order) ----
+      const hasFlood =
+        sarStatus === "ok" && Array.isArray(flood?.features) && flood.features.length > 0;
+      map.addSource("now-flood", {
+        type: "geojson",
+        data: hasFlood ? flood : { type: "FeatureCollection", features: [] },
+      });
+      map.addLayer({
+        id: "now-flood-fill",
+        type: "fill",
+        source: "now-flood",
+        paint: { "fill-color": "#1391d4", "fill-opacity": 0.6, "fill-antialias": true },
+      });
+      map.addLayer({
+        id: "now-flood-line",
+        type: "line",
+        source: "now-flood",
+        paint: { "line-color": "#063a63", "line-width": 1.1, "line-opacity": 0.7 },
+      });
+
+      map.fitBounds([[120.4, 14.0], [121.55, 15.4]], { padding: 24, animate: false, maxZoom: 10 });
+      (window as any).__fwNowReady = true;
+      (window as any).__fwMap = map;
+      map.once("idle", () => {
+        (window as any).__fwReady = true;
+      });
+
+      // ---- client layers: fetch, wire, freshness clock, honest-empty ----
+      void wireClientLayers(sarAsOf);
+    };
+
+    let done = false;
+    const runOnce = (): void => {
+      if (done) return;
+      done = true;
+      onStyleReady();
+    };
+    let tries = 0;
+    const poll = (): void => {
+      if (done) return;
+      if (map.isStyleLoaded()) {
+        runOnce();
+      } else if (tries++ < 200) {
+        setTimeout(poll, 50);
+      } else {
+        runOnce();
+      }
+    };
+    poll();
+
+    // ---- toggles (cron layers) ----
+    $("now-toggle-flood")?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      for (const id of ["now-flood-fill", "now-flood-line"])
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
+    });
+    $("now-toggle-roads")?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      if (map.getLayer("now-roads-line")) map.setLayoutProperty("now-roads-line", "visibility", vis);
+    });
+    $("now-toggle-rain")?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      if (map.getLayer("now-rain-dots")) map.setLayoutProperty("now-rain-dots", "visibility", vis);
+    });
+  }
+
+  // ---- client-fetched layers (RainViewer / GFM / VIIRS) ------------------
+  const tickerLayers: { name: string; acquiredIso: string | null }[] = [];
+
+  function setRasterTiles(sourceId: string, url: string): void {
+    const src = map.getSource(sourceId);
+    if (src && typeof src.setTiles === "function") src.setTiles([url]);
+  }
+
+  function wireToggle(toggleId: string, layerId: string): void {
+    $(toggleId)?.addEventListener("change", (e) => {
+      const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
+      if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", vis);
+    });
+  }
+
+  async function wireClientLayers(sarAsOf: string | null): Promise<void> {
+    // Tier 1 -- RainViewer
+    const rv: RealtimeResult = await fetchRainViewer();
+    if (rv.ok) {
+      corridorState.rain = "ok";
+      setRasterTiles("cw-rain", rv.tileUrl);
+      wireToggle("cw-toggle-rain", "cw-rain-raster");
+      paintClock(
+        "cw-clock-rain",
+        "Rain radar",
+        rv.acquiredUtc,
+        "RainViewer / PAGASA",
+        "nowcast (~10-min source)",
+        "rainviewer",
+        `Rain radar: PAGASA national radar via RainViewer — last frame ${fmtAcqUTC(rv.acquiredUtc)}, ` +
+          `updated ${tickingAge(rv.acquiredUtc).replace(/^updated /, "").replace(/^last pass /, "")} ago. ` +
+          `Ground-radar observation, not a forecast. Source: RainViewer / PAGASA.`,
+      );
+      tickerLayers.push({ name: "Rain radar", acquiredIso: rv.acquiredUtc });
+    } else {
+      corridorState.rain = "empty";
+      disableToggle("cw-toggle-rain", "cw-rain-disabled");
+      paintClockEmpty("cw-clock-rain", honestEmpty("rainviewer", rv.attemptUtc));
+    }
+
+    // Tier 2 -- Copernicus GFM faster-observed SAR
+    const gfm: RealtimeResult = await fetchGFM();
+    if (gfm.ok) {
+      corridorState.gfm = "ok";
+      setRasterTiles("cw-gfm", gfm.tileUrl);
+      wireToggle("cw-toggle-gfm", "cw-gfm-raster");
+      paintClock(
+        "cw-clock-gfm",
+        "Faster observed SAR flood",
+        gfm.acquiredUtc,
+        "Copernicus EMS GFM",
+        "near-real-time (delivered within ~8 h of the pass)",
+        "sentinel1",
+        `Faster observed SAR flood: Copernicus EMS Global Flood Monitoring, Sentinel-1 ` +
+          `pass ${fmtAcqUTC(gfm.acquiredUtc)}, delivered within about 8 hours of acquisition. ` +
+          `20 m, all-weather radar. Observed, not a forecast; blank where no recent Sentinel-1 ` +
+          `pass exists.`,
+        `Licence: Copernicus EMS / GFM Product User Manual, CC BY 4.0. The EODC STAC ` +
+          `catalogue's \`license: proprietary\` field is a catalogue default, not the ` +
+          `governing Copernicus EMS policy.`,
+      );
+      tickerLayers.push({ name: "Faster observed SAR flood", acquiredIso: gfm.acquiredUtc });
+    } else {
+      corridorState.gfm = "empty";
+      disableToggle("cw-toggle-gfm", "cw-gfm-disabled");
+      paintClockEmpty("cw-clock-gfm", honestEmpty("gfm", gfm.attemptUtc));
+    }
+
+    // Tier 3 -- NASA VIIRS NRT optical (default OFF)
+    const vi: RealtimeResult = await fetchVIIRS();
+    if (vi.ok) {
+      corridorState.viics = "ok";
+      setRasterTiles("cw-viirs", vi.tileUrl);
+      wireToggle("cw-toggle-viirs", "cw-viirs-raster");
+      paintClock(
+        "cw-clock-viirs",
+        "Supplementary observed flat-water signal",
+        vi.acquiredUtc,
+        "NASA LANCE VIIRS",
+        "near-real-time (same-day, cloud-permitting)",
+        "viirs",
+        `Supplementary observed flat-water signal: NASA LANCE VIIRS near-real-time ` +
+          `flood, ${fmtAcqUTC(vi.acquiredUtc)} one-day composite. Optical, about 250 m, ` +
+          `cloud-limited — typhoon cloud often blanks it. Not the primary layer, not live, ` +
+          `not a forecast.`,
+      );
+      tickerLayers.push({ name: "Supplementary observed flat-water signal", acquiredIso: vi.acquiredUtc });
+    } else {
+      corridorState.viics = "empty";
+      disableToggle("cw-toggle-viirs", "cw-viirs-disabled");
+      paintClockEmpty("cw-clock-viirs", honestEmpty("viirs", vi.attemptUtc));
+    }
+
+    // Existing Track A Sentinel-1 layer caption (Tier 2, corrected wording).
+    paintClock(
+      "cw-clock-s1",
+      "Latest usable Sentinel-1 SAR pass",
+      sarAsOf ? `${sarAsOf}T00:00:00Z` : null,
+      "Copernicus / Sentinel-1",
+      "daily build of the latest pass (~6-day revisit, ~24 h product latency)",
+      "sentinel1",
+      `Latest usable Sentinel-1 SAR pass: ${sarAsOf ?? "acquisition time unavailable"}. ` +
+        `Sentinel-1A + Sentinel-1C, ~6-day revisit, ~24 h product latency. Dated ground ` +
+        `truth — not live, not a forecast.`,
+    );
+    if (sarAsOf) tickerLayers.push({ name: "Latest usable Sentinel-1 SAR pass", acquiredIso: `${sarAsOf}T00:00:00Z` });
+
+    startTicker();
+  }
+
+  // ---- §4b global ticker + 30 s re-tick of every layer clock ------------
+  function startTicker(): void {
+    const root = $("now-root");
+    const rebuiltUtc = root?.getAttribute("data-rebuilt-utc") ?? "an unknown time";
+    const tickerEl = $("cw-global-ticker");
+    const clockRoots = ["cw-clock-rain", "cw-clock-s1", "cw-clock-gfm", "cw-clock-viirs"];
+
+    const paint = (): void => {
+      const now = Date.now();
+      for (const id of clockRoots) {
+        const r = $(id);
+        if (!r) continue;
+        const acq = r.getAttribute("data-fw-acq");
+        const cad = r.getAttribute("data-fw-cadence") as LayerCadenceKey | null;
+        if (!acq || !cad) continue;
+        const ageEl = r.querySelector<HTMLElement>(".fw-clock-age");
+        const dotEl = r.querySelector<HTMLElement>(".fw-clock-dot");
+        if (ageEl) {
+          const cap = layerCaption({
+            layerName: "",
+            acquiredIso: acq,
+            source: "",
+            latencyClass: "nowcast (~10-min source)",
+            nowMs: now,
+          });
+          ageEl.textContent = cap.line2;
+        }
+        if (dotEl) {
+          const stale = isStale(cad, acq, now);
+          dotEl.style.display = stale ? "inline-block" : "none";
+        }
+      }
+      if (tickerEl) {
+        const fresh = freshestOf(tickerLayers);
+        tickerEl.textContent = globalTicker({
+          freshLayer: fresh?.name ?? null,
+          freshAcquiredIso: fresh?.acquiredIso ?? null,
+          rebuiltUtc,
+          nowMs: now,
+        });
+      }
+    };
+    paint();
+    window.setInterval(paint, 30000);
+  }
+
+  // Lazy activation: the parent flips data-now-active to "true" the first
+  // time the tab is opened. Resize on re-show (MapLibre needs a kick after
+  // display:none).
+  function maybeStart(): void {
+    const root = $("now-root");
+    if (!root) return;
+    if (root.getAttribute("data-now-active") !== "true") return;
+    if (!started) {
+      started = true;
+      init().catch((err) => {
+        console.error("FloodWatch Corridor watch init error:", err);
+        const el = $("now-map");
+        if (el)
+          el.innerHTML =
+            '<div class="p-6 text-sm text-ink-500">Could not load the Corridor watch data. No query was sent anywhere.</div>';
+      });
+    } else if (map) {
+      setTimeout(() => map.resize(), 60);
+    }
+  }
+
+  const rootEl = $("now-root");
+  if (rootEl) {
+    new MutationObserver(maybeStart).observe(rootEl, {
+      attributes: true,
+      attributeFilter: ["data-now-active"],
+    });
+    maybeStart();
+  }
+</script>

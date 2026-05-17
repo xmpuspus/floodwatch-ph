@@ -10,6 +10,12 @@ This script runs BEFORE any deploy. The audit flagged the old loop as a
 Critical reliability gap: a failed Earth-Engine run could write an empty or
 garbage file and the site would ship it silently. This gate stops that.
 
+v1.2 NOTE: the three NEW Corridor watch layers (RainViewer rain radar,
+Copernicus GFM SAR, NASA VIIRS NRT) are fetched CLIENT-SIDE in the browser at
+page-view and emit NO server GeoJSON, so they intentionally bypass this
+pre-deploy cron gate. Their integrity is enforced at runtime by qa_live.py's
+__fwCorridor honest-empty assertions, not here. No logic change to this gate.
+
 THE CENTRAL DISTINCTION
 -----------------------
 There are two very different "empty" states and the gate must not conflate

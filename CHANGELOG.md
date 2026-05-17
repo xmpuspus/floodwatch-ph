@@ -4,6 +4,53 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-17 - Corridor watch: tiered observation surface, faster radar layers
+
+v1.2.0 restructures the Now view into a "Corridor watch" — an observation
+log of what the satellites and radar have observed over the expressways,
+organized by how fresh each observation is rather than by importance.
+Everything stays observed and dated; nothing is a forecast and nothing is
+live. The public data chain stays 100% open with no paid dependencies and no
+new server, function, or proxy; the recurrence classifier sha256 is still
+b7c702532f92c43f and the permanent-water and event-disjoint CI gates are
+unchanged.
+
+### Added
+
+- **Corridor watch surface.** A tiered view under the "Corridor watch"
+  headline and its observation gloss: freshest observation (ground-radar
+  rain), dated ground truth (the observed Sentinel-1 flood extent plus a
+  faster Copernicus GFM SAR layer), and a supplementary cloud-limited
+  optical layer that is off by default. Tier labels describe the kind of
+  observation, not its priority; the observed-flood layer keeps its hero
+  z-order.
+- **Three client-fetched layers.** RainViewer ground-radar rain (PAGASA
+  relay), Copernicus EMS GFM faster-observed Sentinel-1 flood extent via the
+  EODC STAC catalogue, and NASA LANCE VIIRS near-real-time optical flood
+  (default off). Each is fetched in the browser at view time against fixed
+  nationwide tiles — no cron, no server, and the lookup query still never
+  leaves the browser.
+- **Per-layer freshness clock.** Every layer carries its own ticking age,
+  acquisition timestamp, source, and latency class, plus a global ticker
+  that names the freshest layer and its absolute time. Neutral grey by
+  default; an amber dot only when a layer is staler than its own cadence;
+  never red, never pulsing. A failed fetch shows an honest unavailable state,
+  never a blank map and never "just now".
+
+### Changed
+
+- **Sentinel-1 revisit figure corrected everywhere.** The earlier "~6 to 12
+  days" revisit figure was replaced with the accurate "~6-day revisit
+  (Sentinel-1A + Sentinel-1C, restored ~May 2025), ~24 h product latency"
+  across every public and shipped surface.
+- **Privacy page.** Documents the added Corridor watch tile sources and
+  reaffirms that none of them receive the lookup query.
+
+### Notes
+
+- GloFAS and riverine forecasting remain deliberately out of scope and are
+  recorded as document-as-future; FloodWatch never forecasts.
+
 ## [1.1.0] - 2026-05-16 - near-real-time observed layers, area/route lookup
 
 v1.1.0 adds a near-real-time "Now" view next to the kept v1.0 Carina-2024

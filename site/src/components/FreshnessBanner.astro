@@ -3,7 +3,7 @@
 //
 // THE CORE FIX (product-audit Critical): nothing on this site is live. The
 // Carina demo is 22 months old; the "Now" layers are the most recent
-// OBSERVED satellite pass, lagged by the Sentinel-1 revisit (~6-12 days).
+// OBSERVED satellite pass, lagged by the Sentinel-1 revisit (~6-day revisit, ~24 h product latency).
 // During active flooding a non-technical visitor must not read any of it as
 // current. This banner states, in plain language, exactly what is shown and
 // its as-of date, pulled DYNAMICALLY from each data file's _meta at load.
@@ -102,7 +102,7 @@ const { variant = "site" } = Astro.props;
     if (s1Status === "ok" && s1AsOf) {
       latestLine =
         `Latest Sentinel-1 SAR acquisition over the area: ${s1AsOf} ` +
-        `(revisit ~6 to 12 days; this is the most recent observed pass, not live).`;
+        `(~6-day revisit, ~24 h product latency; this is the most recent observed pass, not live).`;
     } else if (s1Status === "no_usable_pass" || s1Status === "unknown") {
       latestLine =
         "The most recent Sentinel-1 pass over Metro Manila was not usable. " +
@@ -136,7 +136,7 @@ const { variant = "site" } = Astro.props;
         "This map shows a 2024 historical demonstration (Super Typhoon Carina, July to August 2024), not current conditions.";
       detEl.textContent =
         "The Sentinel-1 SAR passes shown are the demo's 2024-07 and 2024-08 Carina acquisitions. " +
-        "Sentinel-1 revisit is ~6 to 12 days; this is observed satellite data for that window, not a live feed and not a forecast. " +
+        "Sentinel-1 has a ~6-day revisit (Sentinel-1A + Sentinel-1C, restored ~May 2025) with ~24 h product latency; this is observed satellite data for that window, not a live feed and not a forecast. " +
         "For the most recent observed pass and rainfall context, open the Now view. " +
         latestLine;
     } else {
