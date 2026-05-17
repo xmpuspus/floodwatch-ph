@@ -8,3 +8,11 @@ joblib==1.5.2
 scipy==1.13.1
 # Track A near-real-time S1 layer (event/flood_latest.py) — EE client.
 earthengine-api==1.7.26
+# Flood-control accountability layer (pipeline/flood_control.py): BetterGovPH
+# DPWH ingest, parquet read, point-in-polygon cross-reference. Pinned to the
+# versions that produced the committed snapshot numbers; CI runs offline from
+# pipeline/_dpwh_flood_control_cache.parquet so no network is needed.
+pandas==3.0.3
+pyarrow==24.0.0
+shapely==2.1.2
+huggingface-hub==1.8.0

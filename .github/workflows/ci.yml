@@ -85,7 +85,13 @@ jobs:
         run: python scripts/check_event_disjoint.py
       - name: No-PII / barangay-aggregate gate (decision 5)
         run: python scripts/check_no_pii.py
-      - name: site/data mirror gate (decision 4)
+      - name: Accountability governance gate (un-strippable disclaimer)
+        run: python scripts/check_accountability_governance.py
+      - name: 337 / ghost collision gate
+        run: python scripts/check_337_collision.py
+      - name: AI-fingerprint copy gate (no-ai-jargon.md)
+        run: python scripts/check_ai_fingerprints.py
+      - name: Full release gate runner (gates 1-9)
         run: python scripts/verify_release.py --gates-only
 
   tests:

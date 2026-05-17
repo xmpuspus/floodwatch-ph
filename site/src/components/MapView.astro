@@ -671,7 +671,7 @@ const sliderDates: string[] = carina.event_dates;
       return (
         "Satellite basemap: NASA GIBS true-colour, " +
         dateUtc +
-        " — daily mosaic, one pass per day, not live. True-colour is " +
+        ". Daily mosaic, one pass per day, not live. True-colour is " +
         "optical: typhoon cloud often hides the ground on the very dates " +
         "flooding matters. It is a backdrop, not the observed-water layer."
       );
@@ -686,7 +686,7 @@ const sliderDates: string[] = carina.event_dates;
       vizFlags.satelliteBasemap = "unavailable";
       if (bmToggle) bmToggle.disabled = true;
       if (bmDisabled) {
-        bmDisabled.textContent = " unavailable — see caption";
+        bmDisabled.textContent = " unavailable, see caption";
         bmDisabled.classList.remove("hidden");
       }
     } else {

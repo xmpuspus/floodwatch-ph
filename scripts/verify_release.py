@@ -10,6 +10,9 @@ Gates:
   4. site/src/data/events.json byte-identical to event/events.json (decision 4)
   5. requirements.txt fully pinned (all non-comment lines use ==)
   6. recurrence_clf_v1.joblib sha256 prefix (print only; Makefile hash-verify owns hard-fail)
+  7. Accountability governance (check_accountability_governance.py)
+  8. 337 / ghost collision (check_337_collision.py)
+  9. AI-fingerprint copy (check_ai_fingerprints.py)
 
 `--gates-only` runs the same gates; the flag is accepted for CI compatibility.
 
@@ -93,6 +96,18 @@ def gate_requirements_pinned() -> bool:
     return len(unpinned) == 0
 
 
+def gate_accountability_governance() -> bool:
+    return _run_check(REPO / "scripts" / "check_accountability_governance.py")
+
+
+def gate_337_collision() -> bool:
+    return _run_check(REPO / "scripts" / "check_337_collision.py")
+
+
+def gate_ai_fingerprints() -> bool:
+    return _run_check(REPO / "scripts" / "check_ai_fingerprints.py")
+
+
 def gate_clf_hash() -> tuple[bool | None, str]:
     """Print the clf sha256; return (None, detail) — Makefile hash-verify owns hard-fail."""
     clf = REPO / "model" / "recurrence_clf_v1.joblib"
@@ -162,6 +177,24 @@ def main(argv: list[str] | None = None) -> int:
     # Gate 6: clf hash (informational)
     skip6, detail6 = gate_clf_hash()
     _gate(6, "recurrence_clf_v1.joblib sha256", skip6, detail6)
+
+    # Gate 7: accountability governance (un-strippable disclaimer)
+    print("\nRunning gate 7 — accountability governance...")
+    ok7 = gate_accountability_governance()
+    record(ok7)
+    _gate(7, "accountability disclaimer + aggregation-only intact", ok7)
+
+    # Gate 8: 337 / ghost collision
+    print("\nRunning gate 8 — 337 / ghost collision...")
+    ok8 = gate_337_collision()
+    record(ok8)
+    _gate(8, "no 337/ghost conflation in shipped copy or data", ok8)
+
+    # Gate 9: AI-fingerprint copy
+    print("\nRunning gate 9 — AI-fingerprint copy...")
+    ok9 = gate_ai_fingerprints()
+    record(ok9)
+    _gate(9, "no AI-fingerprint language in shipped copy", ok9)
 
     print("\n" + "=" * 40)
     print(f"FloodWatch.PH gate summary: {passes} PASS / {fails} FAIL")

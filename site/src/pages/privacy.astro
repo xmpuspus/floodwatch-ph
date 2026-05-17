@@ -72,12 +72,12 @@ import Base from "../layouts/Base.astro";
       The "is this area flood-prone?" lookup runs <strong>entirely in your browser</strong> against a bundled offline place-name index (a static gazetteer shipped with the site). The text you type is matched locally and tested against the flood-evidence polygons with in-browser point-in-polygon. Your query is <strong>never transmitted to any server, never logged, and never republished</strong>. It is your own input about your own area of interest; under RA 10173 it is not collected or processed by FloodWatch because it never leaves your device.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
-      The "Corridor watch" view loads a few map-tile layers directly from public meteorological and government sources. These requests carry no information about what you searched &mdash; every visitor's browser fetches the same fixed nationwide tiles, and the area lookup still runs entirely in your browser and is never transmitted.
+      The rainfall and expressway context view loads a few map-tile layers directly from public meteorological and government sources. These requests carry no information about what you searched: every visitor's browser fetches the same fixed nationwide tiles, and the area lookup still runs entirely in your browser and is never transmitted.
     </p>
     <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1 mt-3">
-      <li><strong>RainViewer (api.rainviewer.com, *.rainviewer.com, tilecache.rainviewer.com):</strong> ground-radar rain tiles relayed from PAGASA. The request contains no information about what you searched &mdash; the same map for every visitor.</li>
-      <li><strong>NASA GIBS (gibs.earthdata.nasa.gov):</strong> NASA's near-real-time optical flood imagery tiles. The request contains no information about what you searched &mdash; the same map for every visitor.</li>
-      <li><strong>EODC STAC / titiler (stac.eodc.eu, titiler.services.eodc.eu):</strong> the Copernicus EMS Global Flood Monitoring satellite flood-extent tile index and tile server. The request contains no information about what you searched &mdash; the same map for every visitor.</li>
+      <li><strong>RainViewer (api.rainviewer.com, *.rainviewer.com, tilecache.rainviewer.com):</strong> ground-radar rain tiles relayed from PAGASA. The request contains no information about what you searched: the same map for every visitor.</li>
+      <li><strong>NASA GIBS (gibs.earthdata.nasa.gov):</strong> NASA's near-real-time optical flood imagery tiles. The request contains no information about what you searched: the same map for every visitor.</li>
+      <li><strong>EODC STAC / titiler (stac.eodc.eu, titiler.services.eodc.eu):</strong> the Copernicus EMS Global Flood Monitoring satellite flood-extent tile index and tile server. The request contains no information about what you searched: the same map for every visitor.</li>
     </ul>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
       None of these layers receive, see, or could infer the place or route you looked up. The lookup stays in-browser; these are read-only map tiles, identical bytes for every visitor.

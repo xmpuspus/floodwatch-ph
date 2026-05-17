@@ -121,16 +121,16 @@ export function globalTicker(args: {
   const now = args.nowMs ?? Date.now();
   if (!args.freshLayer || !args.freshAcquiredIso) {
     return (
-      `Freshest layer: acquisition time unavailable. ` +
-      `Site rebuilt ${args.rebuiltUtc}. Layers refresh independently — see each ` +
+      `Most recent context layer: acquisition time unavailable. ` +
+      `Site rebuilt ${args.rebuiltUtc}. Layers refresh independently; see each ` +
       `layer's own clock.`
     );
   }
   const age = tickingAge(args.freshAcquiredIso, now).replace(/^updated /, "").replace(/^last pass /, "");
   const acq = fmtAcqUTC(args.freshAcquiredIso);
   return (
-    `Freshest layer: ${args.freshLayer} — updated ${age} ago (${acq}). ` +
-    `Site rebuilt ${args.rebuiltUtc}. Layers refresh independently — see each ` +
+    `Most recent context layer: ${args.freshLayer}, updated ${age} ago (${acq}). ` +
+    `Site rebuilt ${args.rebuiltUtc}. Layers refresh independently; see each ` +
     `layer's own clock.`
   );
 }
@@ -160,26 +160,26 @@ export function honestEmpty(
 ): string {
   if (layer === "rainviewer") {
     return (
-      `Rain radar unavailable — could not reach RainViewer (${attemptUtc} ` +
+      `Rain radar unavailable: could not reach RainViewer (${attemptUtc} ` +
       `attempt). Other layers unaffected.`
     );
   }
   if (layer === "gfm") {
     return (
-      `Faster observed SAR unavailable — could not reach the Copernicus GFM ` +
+      `Faster observed SAR unavailable: could not reach the Copernicus GFM ` +
       `catalogue (${attemptUtc} attempt). Other layers unaffected.`
     );
   }
   return (
-    `Supplementary optical layer unavailable — could not reach NASA GIBS ` +
+    `Supplementary optical layer unavailable: could not reach NASA GIBS ` +
     `(${attemptUtc} attempt). Other layers unaffected.`
   );
 }
 
 // Section 4d: disabled toggle text when a client layer failed (verbatim).
-export const DISABLED_TOGGLE_TEXT = "unavailable — see caption";
+export const DISABLED_TOGGLE_TEXT = "unavailable, see caption";
 
-// Section 4d: missing timestamp string (verbatim — never "just now").
+// Section 4d: missing timestamp string (verbatim, never "just now").
 export const MISSING_TIMESTAMP_TEXT = "acquisition time unavailable";
 
 // ---- small client init: recompute the ticking captions every 30 s ---------
