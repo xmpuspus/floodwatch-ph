@@ -97,9 +97,11 @@ _CLOCK_ID = {"rain": "cw-clock-rain", "gfm": "cw-clock-gfm",
 
 
 def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
-    """v1.2 Corridor watch surface checks (additive). The surface is the
-    default Now panel on /map; the page was already navigated + __fwReady
-    awaited by the caller, so the client layers have had time to resolve."""
+    """v1.2 Corridor watch surface checks (additive). After the North Star
+    re-center the corridor lives on the tab-2 "Now" panel of /map (the civic
+    hazard-gap view is the default); the caller has navigated, awaited
+    __fwReady on the default panel, then opened the Now tab, so the client
+    layers have had time to resolve."""
     html = pg.content()
 
     # (1) headline + gloss + all four guardrail blocks render, and the
@@ -235,11 +237,12 @@ _RE_YMD = __import__("re").compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
 
 
 def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
-    """v1.3 cinematic-visual surface checks (additive). Runs on the default
-    Now panel (CorridorWatch) of /map -- already navigated, __fwReady awaited,
-    and the v1.3 wiring (wireSatelliteBasemap / wireRainPlayback) given its
-    fetch-timeout budget by the caller. Mirrors the v1.2 honest-empty
-    contract: ok|off|unavailable and idle|playing|static are ALL PASS."""
+    """v1.3 cinematic-visual surface checks (additive). Runs on the tab-2
+    Now panel (CorridorWatch) of /map -- the caller has navigated, awaited
+    __fwReady on the default civic panel, opened the Now tab, and given the
+    v1.3 wiring (wireSatelliteBasemap / wireRainPlayback) its fetch-timeout
+    budget. Mirrors the v1.2 honest-empty contract: ok|off|unavailable and
+    idle|playing|static are ALL PASS."""
     import re
     import urllib.request
 
@@ -446,6 +449,13 @@ def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
           fb_above is True, str(fb_above))
     pg.goto(base.rstrip("/") + "/map", wait_until="networkidle",
             timeout=45000)
+    # /map now opens on the DEFAULT civic panel. The remaining corridor /
+    # guardrail / CSP checks below need the realtime Now view, so re-open
+    # tab 2 after the round-trip to /.
+    nt = pg.query_selector("#view-now")
+    if nt is not None:
+        nt.click()
+        pg.wait_for_timeout(1200)
     pg.wait_for_timeout(800)
 
     # ---- 5. Guardrail HARD GATE non-regression (§5 / F6/F11) ----------
@@ -551,6 +561,97 @@ def _check_lookup_page(pg, base: str) -> None:
               f"skipped: {repr(e)[:80]}")
 
 
+# The destination thesis, verbatim from AccountabilitySurface.astro (THESIS).
+# It is server-rendered on the home accountability section in BOTH states:
+# as the honest in-progress roadmap H2 when the JSON is absent, and as the
+# heading above the aggregates when it is present.
+_ACCT_THESIS = ("Where flood-control money was spent, and where the water "
+                "still came.")
+# The disclaimer is baked into _meta by the governance module; its opening
+# clause is stable and is what the client renders into the disclaimer block.
+_ACCT_DISCLAIMER_FRAGMENT = ("Statistical indicators derived from public "
+                             "data. Patterns may have legitimate explanations")
+
+
+def _check_accountability_surface(pg, base: str) -> None:
+    """The home accountability section is the wave-B payoff. It must always
+    render the destination thesis (server-rendered, no JS). When
+    /data/flood_control_accountability.json is present the client replaces
+    the roadmap body with aggregates: the un-strippable disclaimer text plus
+    at least one by_province aggregate sentence. When the JSON is absent the
+    honest in-progress roadmap line stands and that is a PASS (honest-empty
+    contract, same as the realtime layers)."""
+    import json
+    import urllib.request
+
+    pg.goto(base.rstrip("/") + "/", wait_until="networkidle", timeout=45000)
+    # Give the client fetch + innerHTML swap time to run.
+    pg.wait_for_timeout(1500)
+
+    sec = pg.query_selector(".fw-acct[data-variant='home']") \
+        or pg.query_selector(".fw-acct")
+    check("home accountability section present", sec is not None)
+    if sec is None:
+        return
+
+    # The thesis is server-rendered in both states (data-thesis attribute +
+    # the H2). Whitespace-normalised, the same robustness the corridor
+    # Block-3 check uses.
+    sec_txt = " ".join((sec.inner_text() or "").split())
+    thesis_attr = sec.get_attribute("data-thesis") or ""
+    check("accountability destination thesis rendered "
+          "(server-rendered, both states)",
+          _ACCT_THESIS in sec_txt or _ACCT_THESIS in thesis_attr,
+          sec_txt[:90] or "<blank>")
+
+    # Is the governed JSON actually published?
+    json_present = False
+    by_prov = []
+    try:
+        raw = urllib.request.urlopen(
+            base.rstrip("/") + "/data/flood_control_accountability.json",
+            timeout=20).read()
+        d = json.loads(raw)
+        meta = d.get("_meta", {})
+        if isinstance(meta, dict) and (meta.get("disclaimer") or "").strip():
+            json_present = True
+            by_prov = d.get("by_province") or []
+    except Exception as e:  # noqa: BLE001
+        check("accountability JSON reachable (optional — honest-empty is "
+              "a PASS)", True, f"absent/unreachable: {repr(e)[:70]}")
+
+    if not json_present:
+        # Honest-empty: the server-rendered roadmap line must stand. That is
+        # the truthful "in progress" state and a PASS, never a failure.
+        check("accountability honest-empty roadmap line stands "
+              "(JSON absent — PASS, honest-empty contract)",
+              _ACCT_THESIS in sec_txt or _ACCT_THESIS in thesis_attr,
+              "roadmap line present")
+        return
+
+    # JSON present: the client must have rendered the un-strippable
+    # disclaimer text and at least one by_province aggregate.
+    check("accountability JSON has >=1 by_province aggregate",
+          isinstance(by_prov, list) and len(by_prov) >= 1,
+          f"{len(by_prov)} provinces")
+    check("accountability disclaimer text rendered in the home section "
+          "(un-strippable governance block)",
+          _ACCT_DISCLAIMER_FRAGMENT in sec_txt,
+          "disclaimer present" if _ACCT_DISCLAIMER_FRAGMENT in sec_txt
+          else sec_txt[:90])
+    # At least one aggregate province sentence is rendered. The client lead
+    # sentence carries the conservative "warrants independent investigation"
+    # phrasing; assert that conservative framing is present (no verdict).
+    body = pg.query_selector("#fw-acct-home-body")
+    body_txt = " ".join((body.inner_text() if body else "").split())
+    check("accountability home body renders an aggregate province line "
+          "(conservative 'warrants independent investigation' framing, "
+          "no named project)",
+          "warrants independent investigation" in body_txt.lower()
+          and "flood control" in body_txt.lower(),
+          body_txt[:110] or "<blank>")
+
+
 def main() -> int:
     from playwright.sync_api import sync_playwright
 
@@ -576,6 +677,14 @@ def main() -> int:
             pg.screenshot(path=str(SHOT / f"page{path.replace('/','_') or '_home'}.png"))
 
         # ---- map behavioral flow ----
+        # The North Star re-center flipped the /map default. The DEFAULT,
+        # first-paint panel is now the civic hazard-gap + observed-extent
+        # view (#view-carina aria-selected=true, #panel-carina visible). It
+        # is MapView's Carina map; it paints window.__fwCarinaMap and sets
+        # window.__fwReady on map idle WITHOUT any tab click. The realtime
+        # Corridor "Now" view is now tab 2 (#view-now / #panel-now), opened
+        # by a click, which flips data-now-active and lazily fetches the
+        # rain / GFM / VIIRS layers.
         pg.goto(BASE + "/map", wait_until="networkidle", timeout=45000)
         pg.wait_for_selector("canvas.maplibregl-canvas", timeout=30000)
         try:
@@ -583,10 +692,36 @@ def main() -> int:
             ready = True
         except Exception:
             ready = False
-        check("map __fwReady (tiles+overlays painted)", ready)
+        check("map __fwReady on the DEFAULT civic panel "
+              "(hazard-gap/observed paints with no tab click)", ready)
+
+        # The default panel is the Carina map; assert its handle is the one
+        # that painted (the re-center contract: civic view is the default).
+        car_default = pg.evaluate(
+            "() => !!(window.__fwCarinaMap "
+            "&& document.getElementById('view-carina') "
+            "&& document.getElementById('view-carina')"
+            ".getAttribute('aria-selected') === 'true' "
+            "&& document.getElementById('panel-carina') "
+            "&& !document.getElementById('panel-carina')"
+            ".classList.contains('hidden'))")
+        check("default /map tab is the civic hazard-gap view "
+              "(#view-carina selected, #panel-carina visible, "
+              "__fwCarinaMap painted)", bool(car_default))
         pg.wait_for_timeout(2500)
 
-        # ---- v1.2 Corridor watch surface (default Now panel on /map) ----
+        # ---- realtime Corridor "Now" view is now TAB 2 ----
+        # Open it explicitly (the re-center demoted realtime to a labelled
+        # secondary context surface). The click flips data-now-active so
+        # NowView begins its lazy client fetches.
+        now_tab = pg.query_selector("#view-now")
+        check("realtime 'Now' context tab present (tab 2, not default)",
+              now_tab is not None)
+        if now_tab is not None:
+            now_tab.click()
+            pg.wait_for_timeout(2000)
+
+        # ---- v1.2 Corridor watch surface (now tab-2 'Now' panel) ----
         # Give the three client-fetched layers their full timeout budget
         # (RainViewer 8 s, GFM/VIIRS 10 s) to resolve to ok|empty|fail
         # before asserting the honest-empty captions.
@@ -639,11 +774,13 @@ def main() -> int:
         _check_realtime_data(BASE)
         _check_lookup_page(pg, BASE)
 
-        # The v1.0 Carina time-slider / play / layer toggles moved behind the
-        # "2024 Carina demo" tab in the v1.1 tabbed /map. Switch to it before
-        # the historical-demo behavioral checks (the Now view is the default).
+        # The Carina time-slider / play / layer toggles live on the civic
+        # hazard-gap panel, which is now the DEFAULT tab. The corridor / v1.3
+        # checks above opened the realtime "Now" tab, so switch back to the
+        # default civic panel before the historical-demo behavioral checks.
         carina_tab = pg.query_selector("#view-carina")
-        check("Carina demo tab present", carina_tab is not None)
+        check("civic hazard-gap tab present (the default tab)",
+              carina_tab is not None)
         carina_tab.click()
         pg.wait_for_selector("#date-slider", state="visible", timeout=30000)
         # The Carina map lives in a panel that is display:none at page load, so
@@ -766,6 +903,9 @@ def main() -> int:
                     bad += 1
                     print(f"   broken nav: {href} -> {rr.status}")
         check("all internal nav links resolve (<400)", bad == 0, f"{len(seen)} links")
+
+        # ---- wave-B accountability surface (home) ----
+        _check_accountability_surface(pg, BASE)
 
         # A transient "Failed to fetch" / network error in a headless run
         # against a CDN is harness noise, not a site code defect (it does not
