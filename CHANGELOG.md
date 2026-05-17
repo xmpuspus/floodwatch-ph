@@ -4,6 +4,48 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-17 - Cinematic satellite-first visuals
+
+The Corridor watch was honest but text-heavy: a text grid of expressways, a
+flat basemap, a text-only home. v1.3 turns it into a cinematic satellite-first
+experience while keeping every honest constraint. The whole wave is Agent-F
+honesty-gated (12 ways cinematic pixels could imply "live/forecast/current"
+were enumerated and each given a hard, fail-safe mitigation). Nothing claims
+"live", nothing is a forecast, every imagery layer carries its own
+acquisition date in the same view, and the public data chain, the recurrence
+classifier sha256, and the CSP are unchanged.
+
+### Added
+
+- **NASA GIBS true-colour satellite backdrop** on the Corridor watch and the
+  2024 demo map. Off by default; the visitor opts in. It carries a dated
+  credit chip ("NASA GIBS true-colour, {date} — daily mosaic, one pass per
+  day, not live") and an optical-cloud caveat whenever it is active, sits at
+  the bottom of the layer stack, and the mosaic date is resolved from the
+  GIBS capabilities, never the clock. Fail-safe: if the date cannot resolve,
+  the true-colour basemap does not render at all and the map stays on the
+  plain basemap, so an undated photographic Earth is never shown.
+- **Observed Sentinel-1 / GFM flood rendered as a textured raster** instead
+  of a thin outline, with the explicit "the shaded water is a SAR detection
+  on that pass, not a photograph" frame, the locked hero z-order, and the
+  per-layer freshness clock unchanged.
+- **Visitor-initiated observed-rain playback**: the RainViewer radar.past
+  frames replayed with a per-frame UTC readout and a visible backward reset
+  on wrap. radar.nowcast (forecast) is never used; the loop never
+  extrapolates; it does not autoplay.
+- **Dated 2024 Carina satellite hero on the home page**: the real observed
+  Sentinel-1 Carina extent over Metro Manila with a server-rendered static
+  "2024 demonstration, not current conditions" overlay and a Corridor-watch
+  call to action. The v1.2.1 freshest-first banner stays above it.
+
+### Notes
+
+- qa_live extended with 30 v1.3 checks (the F1 satellite fail-safe, no rain
+  autoplay, dated hero, guardrail non-regression); 86/86 deterministic-green
+  against the live site across consecutive runs.
+- Security re-checked: no new origin (GIBS host already allowed), no secret
+  or user input on the cinematic surface, RA-10173 invariant intact.
+
 ## [1.2.1] - 2026-05-17 - Surface the freshest signal in the site-wide banner
 
 The v1.2.0 site-wide freshness banner still led with the dated Sentinel-1

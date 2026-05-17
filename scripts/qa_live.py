@@ -338,11 +338,16 @@ def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
         else:
             lbl = (play.inner_text() or "").strip()
             # Idle/paused label verbatim, and NOT the playing label "Pause"
-            # (asserts it is not already playing on load).
+            # (asserts it is not already playing on load). The site CSS
+            # uppercases every button label (text-transform); the verbatim
+            # spec string is in the DOM, so compare case-insensitively —
+            # the uppercasing is presentation, not a copy change. Same
+            # rendered-text normalisation as the v1.2 Block-3 check.
             check("v1.3 F2 rain play control label is "
                   "'Play observed rain loop' when idle (NOT 'Pause' — "
                   "not autoplaying)",
-                  lbl == "Play observed rain loop", lbl or "<blank>")
+                  lbl.lower() == "play observed rain loop"
+                  and lbl.lower() != "pause", lbl or "<blank>")
             frame_el = pg.query_selector("#cw-rain-frame")
             ftxt = (frame_el.inner_text() if frame_el else "").strip()
             # §3b per-frame readout shows the frame's own UTC at FIRST paint
