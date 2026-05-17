@@ -30,15 +30,26 @@ const STALE_THRESHOLD_MS: Record<LayerCadenceKey, number> = {
   viirs: 48 * 60 * 60 * 1000,
 };
 
-// Format an acquisition timestamp to "YYYY-MM-DD HH:MM" UTC. ISO date-only
-// stays a date (the source precision is not invented up to a time).
-export function fmtAcqUTC(iso: string | null | undefined): string {
+// Format an acquisition timestamp for display in Philippine time (PHT,
+// UTC+8, no DST), explicitly labelled so it is never ambiguous. The stored
+// source value stays UTC ISO everywhere; only the displayed string is
+// localised. An ISO date-only value stays a calendar date (a pass date is
+// tz-neutral; inventing a PHT clock time on a date-only value would be fake
+// precision). The label is mandatory: an unlabelled local time would
+// regress the "dated, unambiguous" honesty rule.
+export function fmtPHT(iso: string | null | undefined): string {
   if (!iso) return "acquisition time unavailable";
   if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
-  return d.toISOString().slice(0, 16).replace("T", " ");
+  const ph = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+  return ph.toISOString().slice(0, 16).replace("T", " ") + " PHT";
 }
+
+// Back-compat alias: existing call sites used fmtAcqUTC; it now yields
+// PHT-labelled local time via fmtPHT (the " UTC" literal that used to
+// follow it in templates has been removed at each call site).
+export const fmtAcqUTC = fmtPHT;
 
 // Section 4a ticking-age strings (exact). `nowMs` is injectable for tests.
 export function tickingAge(
@@ -94,7 +105,7 @@ export function layerCaption(args: {
   const acq = fmtAcqUTC(args.acquiredIso);
   return {
     line1: args.layerName,
-    line2: `${tickingAge(args.acquiredIso, now)} · acquired ${acq} UTC`,
+    line2: `${tickingAge(args.acquiredIso, now)} · acquired ${acq}`,
     line3: `source: ${args.source} · ${args.latencyClass}`,
   };
 }
@@ -111,15 +122,15 @@ export function globalTicker(args: {
   if (!args.freshLayer || !args.freshAcquiredIso) {
     return (
       `Freshest layer: acquisition time unavailable. ` +
-      `Site rebuilt ${args.rebuiltUtc} UTC. Layers refresh independently — see each ` +
+      `Site rebuilt ${args.rebuiltUtc}. Layers refresh independently — see each ` +
       `layer's own clock.`
     );
   }
   const age = tickingAge(args.freshAcquiredIso, now).replace(/^updated /, "").replace(/^last pass /, "");
   const acq = fmtAcqUTC(args.freshAcquiredIso);
   return (
-    `Freshest layer: ${args.freshLayer} — updated ${age} ago (${acq} UTC). ` +
-    `Site rebuilt ${args.rebuiltUtc} UTC. Layers refresh independently — see each ` +
+    `Freshest layer: ${args.freshLayer} — updated ${age} ago (${acq}). ` +
+    `Site rebuilt ${args.rebuiltUtc}. Layers refresh independently — see each ` +
     `layer's own clock.`
   );
 }
@@ -149,19 +160,19 @@ export function honestEmpty(
 ): string {
   if (layer === "rainviewer") {
     return (
-      `Rain radar unavailable — could not reach RainViewer (${attemptUtc} UTC ` +
+      `Rain radar unavailable — could not reach RainViewer (${attemptUtc} ` +
       `attempt). Other layers unaffected.`
     );
   }
   if (layer === "gfm") {
     return (
       `Faster observed SAR unavailable — could not reach the Copernicus GFM ` +
-      `catalogue (${attemptUtc} UTC attempt). Other layers unaffected.`
+      `catalogue (${attemptUtc} attempt). Other layers unaffected.`
     );
   }
   return (
     `Supplementary optical layer unavailable — could not reach NASA GIBS ` +
-    `(${attemptUtc} UTC attempt). Other layers unaffected.`
+    `(${attemptUtc} attempt). Other layers unaffected.`
   );
 }
 

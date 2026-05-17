@@ -67,15 +67,20 @@ const { variant = "site" } = Astro.props;
     }
   }
 
+  // Display in Philippine time (PHT, UTC+8) with an explicit label. The
+  // stored source value stays UTC; only the displayed string is localised.
+  // ISO date-only stays a calendar date (a pass date is tz-neutral; a fake
+  // PHT clock on a date-only value would be invented precision).
   function fmtUTC(iso: string | null | undefined): string {
     if (!iso) return "an unknown time";
-    // Show the date and, when present, the UTC time, without reformatting
-    // away the source precision. ISO date-only stays a date.
     if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
     return (
-      d.toISOString().slice(0, 16).replace("T", " ") + " UTC"
+      new Date(d.getTime() + 8 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 16)
+        .replace("T", " ") + " PHT"
     );
   }
 
@@ -108,7 +113,11 @@ const { variant = "site" } = Astro.props;
       if (!Number.isFinite(t)) return null;
       return {
         age: agePhrase(t),
-        utc: new Date(t * 1000).toISOString().slice(0, 16).replace("T", " "),
+        utc:
+          new Date(t * 1000 + 8 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 16)
+            .replace("T", " ") + " PHT",
       };
     } catch {
       return null;
@@ -136,7 +145,7 @@ const { variant = "site" } = Astro.props;
     const freshLead =
       rainNow !== null
         ? `Freshest observation: rain radar over the corridor, ` +
-          `${rainNow.age} (${rainNow.utc} UTC, PAGASA via RainViewer). ` +
+          `${rainNow.age} (${rainNow.utc}, PAGASA via RainViewer). ` +
           `Observed, not a forecast. Layers refresh independently, each ` +
           `with its own as-of time; Sentinel-1 flood extent is dated.`
         : null;
