@@ -4,6 +4,22 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-05-17 - Surface the freshest signal in the site-wide banner
+
+The v1.2.0 site-wide freshness banner still led with the dated Sentinel-1
+pass and "nothing here is live", with the minutes-fresh rain radar and the
+per-layer freshness clock below the fold. That under-surfaced the
+near-real-time work. The banner now leads with the freshest observed signal
+and its ticking age, pulled from the same RainViewer manifest the Corridor
+watch uses (CORS-open, already in the CSP, a fixed nationwide request with no
+user input, so the lookup-stays-in-browser invariant is unchanged):
+"Freshest observation: rain radar over the corridor, updated N min ago
+({UTC}, PAGASA via RainViewer). Observed, not a forecast." The dated
+Sentinel-1 flood extent is kept as secondary context. No "live" claim; the
+PAGASA / MMDA / DRRMO redirect is unchanged; the Carina historical-demo
+banner is unchanged. Falls back to the honest dated framing if the rain
+manifest does not resolve (freshness is never fabricated).
+
 ## [1.2.0] - 2026-05-17 - Corridor watch: tiered observation surface, faster radar layers
 
 v1.2.0 restructures the Now view into a "Corridor watch" — an observation
