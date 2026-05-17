@@ -119,7 +119,7 @@ look up a specific id the user already holds. Friction is intentional.
     "<project_id>": {
       "title": "",                         // str, project description verbatim from source
       "allocation_php": 0,                  // int or null if not parseable
-      "status": "completed",                // one of: completed | ongoing | not_started | unknown
+      "status": "completed",                // one of: completed | ongoing | not_started | terminated | unknown
       "geolocation_confidence": 1.0,        // 1.0 source coords; 0.6 province-centroid fallback
       "province": "Bulacan",                // resolved hazard_gap 'city', or null if unresolved
       "region": "Region III (Central Luzon)", // resolved hazard_gap 'province', or null
@@ -135,7 +135,9 @@ Notes for the UI:
 
 - `projects` is an object keyed by the source `project_id` string. There is no
   ordered list. The UI must not build a "top flagged" list from this.
-- `status` is normalized to `completed`, `ongoing`, `not_started`, or `unknown`.
+- `status` is normalized to `completed`, `ongoing`, `not_started`,
+  `terminated`, or `unknown`. The raw DPWH value "For Procurement" maps to
+  `not_started`; "Terminated" maps to `terminated`.
 - `geolocation_confidence` is `1.0` when the project carried usable source
   coordinates, `0.6` when the location was filled from the province-centroid
   fallback, derived from the hazard_gap province polygon the project text

@@ -94,11 +94,17 @@ def test_membership_truth_table(category, title, expected):
         ("Completed", "completed"),
         ("100% complete", "completed"),
         ("finished", "completed"),
+        ("On-Going", "ongoing"),
         ("On-going", "ongoing"),
         ("in progress", "ongoing"),
         ("Under Construction", "ongoing"),
-        ("for implementation", "not_started"),
+        ("Not Yet Started", "not_started"),
+        ("not started", "not_started"),
+        ("For Procurement", "not_started"),
         ("procurement", "not_started"),
+        ("for implementation", "not_started"),
+        ("pending", "not_started"),
+        ("Terminated", "terminated"),
         ("some unknown value", "unknown"),
         (None, "unknown"),
     ],
@@ -108,21 +114,21 @@ def test_status_normalization(raw, expected):
     assert a.normalize_status(raw) == expected
 
 
-def test_status_normalization_substring_precedence_is_documented():
-    """BaseAdapter.normalize_status returns the first canonical class whose
-    variant list has a substring match, iterating completed -> ongoing ->
-    not_started. "not yet started" contains "started", an ongoing variant,
-    so it normalizes to ongoing, not not_started. This is the adapter's
-    actual behavior; the test pins it so a future change is a conscious one.
-    A separate latent-bug note records the misclassification for the data
-    owner (out of this gate's scope to fix)."""
+def test_not_yet_started_does_not_leak_into_ongoing():
+    """The raw DPWH value "Not Yet Started" lowercases to "not yet started",
+    which contains the substring "started" (an ongoing variant). The status
+    map orders not_started before ongoing so the negated form wins. Real
+    "On-Going" must still map to ongoing (no not_started variant is a
+    substring of "on-going") and "Completed" stays completed (checked
+    first). This encodes the requirement, not the prior buggy behavior."""
     a = FloodControlAdapter()
-    # Any value containing "started" matches the ongoing variant first.
-    assert a.normalize_status("Not Yet Started") == "ongoing"
-    assert a.normalize_status("not started") == "ongoing"
-    # The not_started class is only reached by its non-"started" variants.
-    assert a.normalize_status("for implementation") == "not_started"
-    assert a.normalize_status("pending") == "not_started"
+    assert a.normalize_status("Not Yet Started") == "not_started"
+    assert a.normalize_status("not started") == "not_started"
+    assert a.normalize_status("For Procurement") == "not_started"
+    # Real ongoing and completed values are unaffected by the reorder.
+    assert a.normalize_status("On-Going") == "ongoing"
+    assert a.normalize_status("Completed") == "completed"
+    assert a.normalize_status("Terminated") == "terminated"
 
 
 # ---------------------------------------------------------------------------

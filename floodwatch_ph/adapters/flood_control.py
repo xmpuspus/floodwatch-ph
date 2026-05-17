@@ -63,10 +63,25 @@ DPWH_COLUMNS: dict[str, list[str]] = {
     "province": ["province"],
 }
 
+# Order matters: normalize_status returns the first canonical whose any
+# variant is a substring of the lowered raw value. "Not Yet Started"
+# lowercases to "not yet started", which contains the substring "started",
+# so not_started MUST be checked before ongoing or it would wrongly match
+# ongoing. completed is checked first ("completed" is unambiguous).
+# terminated is its own canonical so the 929 DPWH-terminated rows are
+# labelled accurately rather than falling through to "unknown".
 _STATUS_MAP: dict[str, list[str]] = {
     "completed": ["completed", "complete", "finished", "done", "100"],
+    "not_started": [
+        "not yet started",
+        "not started",
+        "for procurement",
+        "procurement",
+        "for implementation",
+        "pending",
+    ],
+    "terminated": ["terminated", "cancelled", "canceled", "stopped"],
     "ongoing": ["ongoing", "on-going", "on going", "in progress", "started", "under construction"],
-    "not_started": ["not yet started", "not started", "for implementation", "pending", "procurement"],
 }
 
 # Description-keyword set used only to rescue rows whose category is

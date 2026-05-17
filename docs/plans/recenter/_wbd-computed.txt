@@ -83,25 +83,6 @@
   Zamboanga Del Norte: n=224 alloc=13275990814 rec=0.544 passes=0 warrants=False
   Zamboanga Del Sur: n=336 alloc=13118369154 rec=0.799 passes=0 warrants=True
   Zamboanga Sibugay: n=204 alloc=10143814826 rec=0.803 passes=0 warrants=True
-governance OK 36711 1740510212408
-population: DPWH category 'Flood Control and Drainage' plus unclassified-category projects w...
-=== by_type ===
-  flood control: n=34602 alloc=1644862926542
-  drainage: n=1428 alloc=43389237110
-  flood mitigation: n=193 alloc=16019111570
-  slope protection: n=177 alloc=11198578895
-  revetment: n=106 alloc=9166513854
-  dike: n=55 alloc=4339027973
-  river control: n=49 alloc=4285619626
-  bank protection: n=41 alloc=3204477655
-  seawall: n=47 alloc=3005340304
-  pumping station: n=11 alloc=981718961
-  river wall: n=2 alloc=57659918
-=== by_tranche ===
-  <₱10M: n=6919 alloc=39755742603
-  ₱10-50M: n=17986 alloc=588954562318
-  ₱50-100M: n=8414 alloc=702747719424
-  ₱100-500M: n=2469 alloc=387961267343
-  >₱500M: n=26 alloc=21090920721
-provinces warranting investigation: 45/82
-observed_flood_passes>0: ['Pampanga', 'Tarlac']
+n_projects: 36711 total_allocation_php: 1740510212408
+status distribution (by-id): {'completed': 28736, 'ongoing': 6879, 'terminated': 146, 'not_started': 950}
+total in dist: 36711

@@ -16,7 +16,8 @@ Status: done. Pipeline runs to completion; governance check passes.
 - `floodwatch_ph/adapters/flood_control.py` — `FloodControlAdapter`: cache ->
   curl 3-retry+backoff -> hf_hub_download -> datasets; flood-control filter
   (category "Flood Control and Drainage" + title-keyword fallback); status
-  normalization to completed/ongoing/not_started; geolocation_confidence.
+  normalization to completed/ongoing/not_started/terminated;
+  geolocation_confidence.
 - `pipeline/flood_control.py` — point-in-polygon vs hazard_gap 82 province
   polygons, intersection vs flood_carina_2024 dated S1 passes, emits the two
   governed JSON files.
@@ -62,6 +63,32 @@ rows in the subset. These numbers differ from the feasibility doc's ~9,855 /
 ₱545B planning estimate; they are computed from the live BetterGovPH data,
 per compute-before-narrating. Agent-WA and metrics.ts must interpolate these,
 not hardcode them.
+
+Status-normalization defect correction: `normalize_status` returns the first
+canonical class whose any variant is a substring of the lowered raw value.
+The raw DPWH value "Not Yet Started" lowercases to "not yet started", which
+contains "started" (an `ongoing` variant), so it was matching `ongoing`
+before `not_started` was ever checked. `_STATUS_MAP` is now ordered
+completed -> not_started -> terminated -> ongoing, with `not_started`
+variants covering "not yet started", "not started", "for procurement",
+"procurement", "for implementation", "pending". A `terminated` canonical was
+added so the DPWH-terminated rows are labelled accurately instead of falling
+to `unknown`. No `not_started` variant is a substring of "on-going", so real
+"On-Going" still maps to `ongoing`; "Completed" is checked first.
+n_projects and total_allocation_php are unchanged by this fix (only the
+status label moves for the affected rows).
+
+Corrected by-id status distribution (total 36,711):
+- completed: 28,736
+- ongoing: 6,879
+- not_started: 950 (was published as `ongoing` before the fix)
+- terminated: 146 (was `unknown` before the fix)
+
+Tests: `tests/test_flood_control_adapter.py` status assertions rewritten to
+encode the requirement ("Not Yet Started" -> not_started, "For Procurement"
+-> not_started, "Terminated" -> terminated, real "On-Going" -> ongoing). The
+prior test that pinned the buggy `ongoing` behavior was replaced.
+`pytest tests/ -q` => 92 passed.
 
 ## Governance verification (passed)
 
