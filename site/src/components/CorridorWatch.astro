@@ -632,10 +632,17 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
 
       // ---- VIIRS supplementary optical (Tier 3) -- below SAR, default off,
       // it never overrides the radar layer (added before roads/flood) ----
+      // maxzoom = the provider's real top tile level so MapLibre OVERZOOMS
+      // (scales those tiles up) past it instead of requesting unsupported
+      // zooms — RainViewer/GIBS return a "Zoom Level Not Supported"
+      // placeholder PNG (not a 404) for out-of-range z, which would
+      // otherwise paint over the map.
       map.addSource("cw-viirs", {
         type: "raster",
         tiles: ["https://example.invalid/{z}/{x}/{y}.png"],
         tileSize: 256,
+        minzoom: 0,
+        maxzoom: 8, // GIBS GoogleMapsCompatible_Level8
       });
       map.addLayer({
         id: "cw-viirs-raster",
@@ -650,6 +657,8 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
         type: "raster",
         tiles: ["https://example.invalid/{z}/{x}/{y}.png"],
         tileSize: 256,
+        minzoom: 0,
+        maxzoom: 12, // EODC titiler COG overviews
       });
       map.addLayer({
         id: "cw-gfm-raster",
@@ -664,6 +673,11 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
         type: "raster",
         tiles: ["https://example.invalid/{z}/{x}/{y}.png"],
         tileSize: 256,
+        minzoom: 0,
+        // RainViewer free tilecache serves real radar only to z7; z>=8
+        // returns a "Zoom Level Not Supported" placeholder PNG (verified
+        // empirically). Cap at 7 so MapLibre overzooms real tiles instead.
+        maxzoom: 7,
       });
       map.addLayer({
         id: "cw-rain-raster",

@@ -79,9 +79,10 @@ def main() -> int:
             b = p.chromium.launch()
             pg = b.new_context(viewport={"width": 1320, "height": 900}).new_page()
 
-            # Beat 1: the Now view (default) — most recent observed Sentinel-1
-            # pass, monitored expressways and rainfall context, with the
-            # freshness banner stating it is observed and dated, not live.
+            # Beat 1: the Corridor watch (default /map) — the tiered
+            # observation log of what the satellites and radar have observed
+            # over the expressways, headline + gloss stating it is observed
+            # and dated, not live and not a forecast.
             pg.goto(f"http://127.0.0.1:{PORT}/map", wait_until="networkidle")
             pg.wait_for_selector("canvas.maplibregl-canvas", timeout=30000)
             try:
@@ -90,6 +91,17 @@ def main() -> int:
             except Exception:  # noqa: BLE001
                 pass
             pg.wait_for_timeout(6000)  # tiles + overlays first paint settle
+            focus(pg, "#now-map")
+            grab(pg, 16, 300)
+
+            # Beat 1b: realtime conditions — enable the RainViewer rain
+            # heartbeat layer and let the per-layer freshness clocks tick.
+            # Honest: the layer renders its own as-of time (or the
+            # honest-empty state); nothing claims "live".
+            rt = pg.query_selector("#cw-toggle-rain")
+            if rt and not rt.is_checked():
+                rt.click()
+            pg.wait_for_timeout(3800)  # rain tiles fetch + 30s-clock first tick
             focus(pg, "#now-map")
             grab(pg, 16, 300)
 
