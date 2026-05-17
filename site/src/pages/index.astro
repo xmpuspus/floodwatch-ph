@@ -7,6 +7,172 @@ const M = METRICS;
 <Base title="FloodWatch.PH - observed flood extent from public satellite data" pathname="/">
   <FreshnessBanner variant="site" />
 
+  <!-- §4 Satellite hero, option (a): the real DATED Sentinel-1 Carina 2024
+       observed extent over Metro Manila. The §4a overlay text + §4c CTA are
+       SERVER-RENDERED static text, present at first paint with NO JavaScript
+       (§4d rule 1) -- the dark satellite-toned panel is a styled tone, never
+       a bare undated photographic image. The non-interactive MapLibre Carina
+       render is progressive enhancement layered BEHIND; if it never loads the
+       dated text + CTA still stand. Rendered BELOW the FreshnessBanner, never
+       above it (§4d rule 4 / §5c). Dark + deep, never red, never pulsing,
+       never an alert affordance (§7). -->
+  <section class="max-w-6xl mx-auto px-6 pt-6 pb-2">
+    <div class="relative overflow-hidden rounded-md border border-ink-900/60 bg-ink-900">
+      <div
+        id="hero-carina-map"
+        class="absolute inset-0 z-0"
+        aria-hidden="true"
+        style="filter:saturate(1.05) contrast(1.05);"
+      >
+      </div>
+      <div
+        class="absolute inset-0 z-10"
+        aria-hidden="true"
+        style="background:linear-gradient(180deg,rgba(8,18,32,0.55) 0%,rgba(8,18,32,0.30) 45%,rgba(8,18,32,0.82) 100%);"
+      >
+      </div>
+      <div class="relative z-20 px-6 py-12 md:px-12 md:py-20 min-h-[340px] flex flex-col justify-end">
+        <p class="text-[11px] uppercase tracking-[0.2em] text-white/55 font-mono mb-3">
+          Sentinel-1 SAR &middot; observed flood extent
+        </p>
+        <h1 class="text-3xl md:text-5xl leading-[1.05] text-white font-semibold tracking-tight max-w-3xl">
+          Where the water actually went.
+        </h1>
+        <p class="mt-5 text-sm md:text-[15px] text-white/85 leading-relaxed max-w-2xl">
+          2024 demonstration — Super Typhoon Carina, observed Sentinel-1 SAR
+          flood extent, Metro Manila, 24–25 July 2024. A dated historical
+          observation, not current conditions and not a forecast.
+        </p>
+        <div class="mt-7">
+          <a
+            href="/map"
+            class="inline-flex items-center px-5 py-2.5 text-sm font-medium no-underline border border-white/50 text-white hover:bg-white hover:text-ink-900 transition-colors"
+          >
+            Open the Corridor watch — what the satellites and radar have observed over the expressways
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // §4 progressive enhancement only. The dated overlay text + CTA above are
+    // already server-rendered and present with no JS (§4d rule 1); this just
+    // paints the real Carina 2024 extent BEHIND them as a non-interactive,
+    // explicitly-dated visual. Degrades silently to the dark panel on any
+    // failure -- never a blank, never an undated dramatic image.
+    import maplibregl from "maplibre-gl";
+    import "maplibre-gl/dist/maplibre-gl.css";
+
+    // The §4a dated overlay text + §4c CTA are server-rendered and ALWAYS
+    // present (no-JS, §4d rule 1) -- so the hero is "dated" from first paint
+    // regardless of whether the visual enhancement below loads.
+    {
+      const flags =
+        (window as any).__fwViz ??
+        ((window as any).__fwViz = {
+          satelliteBasemap: "off",
+          rainPlayback: "idle",
+          sarRaster: "off",
+          heroDated: false,
+        });
+      flags.heroDated = true;
+    }
+
+    const host = document.getElementById("hero-carina-map");
+    if (host) {
+      try {
+        const heroMap = new maplibregl.Map({
+          container: "hero-carina-map",
+          interactive: false,
+          attributionControl: false,
+          style: {
+            version: 8,
+            sources: {
+              osmDark: {
+                type: "raster",
+                tiles: [
+                  "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                ],
+                tileSize: 256,
+                attribution: "&copy; OpenStreetMap contributors",
+              },
+            },
+            layers: [
+              {
+                id: "osmDark",
+                type: "raster",
+                source: "osmDark",
+                // Dark satellite tone from real tiles -- §7a allowed wow.
+                // Never red, never pulsing (§7b).
+                paint: { "raster-brightness-max": 0.55, "raster-saturation": -0.2 },
+              },
+            ],
+          },
+          center: [120.95, 14.85],
+          zoom: 8.2,
+        });
+        (window as any).__fwHeroMap = heroMap;
+
+        const paintCarina = async (): Promise<void> => {
+          try {
+            const r = await fetch("/data/flood_carina_2024.geojson");
+            if (!r.ok) return;
+            const fc = await r.json();
+            if (!fc || !Array.isArray(fc.features) || fc.features.length === 0)
+              return;
+            if (heroMap.getSource("hero-flood")) return;
+            heroMap.addSource("hero-flood", { type: "geojson", data: fc });
+            heroMap.addLayer({
+              id: "hero-flood-glow",
+              type: "fill",
+              source: "hero-flood",
+              paint: { "fill-color": "#5ec8f5", "fill-opacity": 0.3, "fill-antialias": true },
+            });
+            heroMap.addLayer({
+              id: "hero-flood-fill",
+              type: "fill",
+              source: "hero-flood",
+              paint: { "fill-color": "#1391d4", "fill-opacity": 0.6, "fill-antialias": true },
+            });
+            heroMap.addLayer({
+              id: "hero-flood-line",
+              type: "line",
+              source: "hero-flood",
+              paint: { "line-color": "#063a63", "line-width": 1, "line-blur": 1.4, "line-opacity": 0.65 },
+            });
+            heroMap.fitBounds([[120.5, 14.4], [121.4, 15.3]], {
+              padding: 10,
+              animate: false,
+              maxZoom: 10,
+            });
+          } catch {
+            // Silent: the dated overlay text + CTA already stand.
+          }
+        };
+
+        let done = false;
+        const once = (): void => {
+          if (done) return;
+          done = true;
+          void paintCarina();
+        };
+        let tries = 0;
+        const poll = (): void => {
+          if (done) return;
+          if (heroMap.isStyleLoaded()) once();
+          else if (tries++ < 120) setTimeout(poll, 50);
+          else once();
+        };
+        poll();
+      } catch {
+        // MapLibre unavailable -- the server-rendered dated hero stands.
+      }
+    }
+  </script>
+
   <section class="max-w-5xl mx-auto px-6 pt-14 pb-8">
     <div class="grid md:grid-cols-[1.4fr_1fr] gap-10 items-end">
       <div>

@@ -239,6 +239,35 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     </div>
   </section>
 
+  <!-- §1d satellite backdrop control + §3 observed-rain playback. A backdrop
+       is NOT an observed layer and NOT a tier (§5b): it sits here as a map
+       control, OFF by default, and is never named the freshest layer in the
+       ticker. The rain loop is visitor-initiated only (§3d rule 6 / F9). -->
+  <section class="max-w-6xl mx-auto px-6 mb-3">
+    <div class="bg-paper border border-ink-300/30 px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+        <input id="cw-toggle-basemap" type="checkbox" class="accent-accent-steel" disabled />
+        <span class="text-ink-700">Satellite backdrop (NASA GIBS true-colour, dated daily mosaic)</span>
+        <span id="cw-basemap-disabled" class="hidden text-[11px] text-ink-500 italic"></span>
+      </label>
+      <div class="flex items-center gap-3">
+        <button
+          id="cw-rain-play"
+          type="button"
+          class="inline-flex items-center px-3 py-1.5 text-xs font-mono uppercase tracking-wider border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          disabled
+        >
+          Play observed rain loop
+        </button>
+        <span id="cw-rain-frame" class="hidden text-[11px] text-ink-700 font-mono"></span>
+      </div>
+      <p
+        id="cw-rain-playback-cap"
+        class="hidden basis-full text-[11px] text-ink-600 leading-relaxed"
+      ></p>
+    </div>
+  </section>
+
   <div class="grid md:grid-cols-[1fr_340px] gap-4 px-6 max-w-6xl mx-auto">
     <div class="relative">
       <div id="now-map" class="w-full h-[600px] rounded-md border border-ink-300/30 bg-ink-300/10">
@@ -272,8 +301,16 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
         </p>
       </div>
 
-      <div class="absolute bottom-1 right-2 bg-white/85 px-1.5 py-0.5 text-[9px] text-ink-500 rounded-sm border border-ink-300/30 leading-tight">
-        &copy; OpenStreetMap contributors. SAR: Copernicus/Sentinel-1. Rain: RainViewer / PAGASA, NASA GPM IMERG. NRT optical: NASA GIBS.
+      <!-- §1a/1b/1c persistent dated basemap caption. The satellite lines
+           (cw-basemap-cap) render in this SOLID bg-white/85 chip, never on the
+           photographic tiles, and only while GIBS tiles are actually drawn
+           (F7). When OSM is active they are removed and the chip reverts to
+           the v1.2 source line unchanged. -->
+      <div class="absolute bottom-1 right-2 bg-white/85 px-1.5 py-0.5 text-[9px] text-ink-500 rounded-sm border border-ink-300/30 leading-tight max-w-[340px]">
+        <span id="cw-basemap-cap" class="hidden block text-ink-600 mb-0.5"></span>
+        <span id="cw-credit-src"
+          >&copy; OpenStreetMap contributors. SAR: Copernicus/Sentinel-1. Rain: RainViewer / PAGASA, NASA GPM IMERG. NRT optical: NASA GIBS.</span
+        >
       </div>
     </div>
 
@@ -313,9 +350,12 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
   import "maplibre-gl/dist/maplibre-gl.css";
   import {
     fetchRainViewer,
+    fetchRainViewerFrames,
     fetchGFM,
     fetchVIIRS,
+    fetchGibsTrueColor,
     type RealtimeResult,
+    type RainFrame,
   } from "../lib/realtimeClient";
   import {
     layerCaption,
@@ -353,6 +393,17 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     viics: "fail",
   };
   (window as any).__fwCorridor = corridorState;
+
+  // window flag for the QA harness: state of the v1.3 cinematic surfaces.
+  // Exposed SYNCHRONOUSLY (this surface starts in a display:none tab); the
+  // wiring below mutates it in place. satelliteBasemap is 'unavailable' until
+  // the GIBS date resolves -- F1: 'unavailable' means we stayed on OSM.
+  (window as any).__fwViz = {
+    satelliteBasemap: "off",
+    rainPlayback: "idle",
+    sarRaster: "off",
+    heroDated: false,
+  };
 
   function scanReason(meta: any): string {
     const note = meta?.note;
@@ -604,6 +655,29 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     const onStyleReady = (): void => {
       if (loadingEl) loadingEl.style.display = "none";
 
+      // ---- §1 SATELLITE BASEMAP at the very BOTTOM of the stack ----
+      // Added FIRST so every observed layer (context -> roads -> flood) draws
+      // ABOVE it; the locked z-order is unchanged (§1e rule 4). Default
+      // visibility:none -- OFF by default (§1d / F1); the map opens on OSM.
+      // maxzoom = the GIBS true-colour real top level so MapLibre OVERZOOMS
+      // past it instead of requesting unsupported tiles. Tiles + the real
+      // maxzoom are set only after the date resolves (F1 fail-safe); until
+      // then this stays a never-shown placeholder source.
+      map.addSource("cw-basemap", {
+        type: "raster",
+        tiles: ["https://example.invalid/{z}/{x}/{y}.jpg"],
+        tileSize: 256,
+        minzoom: 0,
+        maxzoom: 9,
+      });
+      map.addLayer({
+        id: "cw-basemap-raster",
+        type: "raster",
+        source: "cw-basemap",
+        layout: { visibility: "none" },
+        paint: { "raster-opacity": 1 },
+      });
+
       // ---- CONTEXT first (bottom): rainfall, subtle ----
       if (rain && Array.isArray(rain.features) && rain.features.length > 0) {
         map.addSource("now-rain", { type: "geojson", data: rain });
@@ -743,23 +817,37 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
       }
 
       // ---- OBSERVED FLOOD on TOP (the hero, locked z-order) ----
+      // v1.3 §2: rendered as a filled/textured water mass (glow + solid +
+      // outline) rather than a thin vector. There is no GFM/titiler COG for
+      // the Track-A cron extent, so the spec's "style the existing extent as a
+      // filled glowing layer" path applies. Order/source/as-of-clock are
+      // UNCHANGED -- rasterising changes appearance only (§2c rule 2). The
+      // verbatim "the shaded water is a SAR detection on that pass, not a
+      // photograph" sentence is appended to the S1 caption below (§2c rule 1).
       const hasFlood =
         sarStatus === "ok" && Array.isArray(flood?.features) && flood.features.length > 0;
+      (window as any).__fwViz.sarRaster = hasFlood ? "on" : "off";
       map.addSource("now-flood", {
         type: "geojson",
         data: hasFlood ? flood : { type: "FeatureCollection", features: [] },
       });
       map.addLayer({
+        id: "now-flood-glow",
+        type: "fill",
+        source: "now-flood",
+        paint: { "fill-color": "#5ec8f5", "fill-opacity": 0.32, "fill-antialias": true },
+      });
+      map.addLayer({
         id: "now-flood-fill",
         type: "fill",
         source: "now-flood",
-        paint: { "fill-color": "#1391d4", "fill-opacity": 0.6, "fill-antialias": true },
+        paint: { "fill-color": "#1391d4", "fill-opacity": 0.62, "fill-antialias": true },
       });
       map.addLayer({
         id: "now-flood-line",
         type: "line",
         source: "now-flood",
-        paint: { "line-color": "#063a63", "line-width": 1.1, "line-opacity": 0.7 },
+        paint: { "line-color": "#063a63", "line-width": 1.1, "line-blur": 1.6, "line-opacity": 0.7 },
       });
 
       map.fitBounds([[120.4, 14.0], [121.55, 15.4]], { padding: 24, animate: false, maxZoom: 10 });
@@ -795,7 +883,7 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
     // ---- toggles (cron layers) ----
     $("now-toggle-flood")?.addEventListener("change", (e) => {
       const vis = (e.target as HTMLInputElement).checked ? "visible" : "none";
-      for (const id of ["now-flood-fill", "now-flood-line"])
+      for (const id of ["now-flood-glow", "now-flood-fill", "now-flood-line"])
         if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis);
     });
     $("now-toggle-roads")?.addEventListener("change", (e) => {
@@ -861,10 +949,13 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
         "Copernicus EMS GFM",
         "near-real-time (delivered within ~8 h of the pass)",
         "sentinel1",
+        // §2a verbatim, with the appended raster sentence (§2c rule 1): the
+        // GFM extent renders as a filled titiler raster.
         `Faster observed SAR flood: Copernicus EMS Global Flood Monitoring, Sentinel-1 ` +
           `pass ${fmtAcqUTC(gfm.acquiredUtc)}, delivered within about 8 hours of acquisition. ` +
           `20 m, all-weather radar. Observed, not a forecast; blank where no recent Sentinel-1 ` +
-          `pass exists.`,
+          `pass exists. The shaded water is a radar backscatter-low detection on that pass, ` +
+          `not a photograph of the flood.`,
         `Licence: Copernicus EMS / GFM Product User Manual, CC BY 4.0. The EODC STAC ` +
           `catalogue's \`license: proprietary\` field is a catalogue default, not the ` +
           `governing Copernicus EMS policy.`,
@@ -909,13 +1000,207 @@ const REBUILT_UTC = new Date().toISOString().slice(0, 16).replace("T", " ");
       "Copernicus / Sentinel-1",
       "daily build of the latest pass (~6-day revisit, ~24 h product latency)",
       "sentinel1",
+      // §2b verbatim, with the appended raster sentence (§2c rule 1): the
+      // Track-A extent is now rendered as a filled/textured water mass.
       `Latest usable Sentinel-1 SAR pass: ${sarAsOf ?? "acquisition time unavailable"}. ` +
         `Sentinel-1A + Sentinel-1C, ~6-day revisit, ~24 h product latency. Dated ground ` +
-        `truth — not live, not a forecast.`,
+        `truth — not live, not a forecast. The shaded water is a SAR detection on that ` +
+        `single pass, not a photograph and not a continuous view.`,
     );
     if (sarAsOf) tickerLayers.push({ name: "Latest usable Sentinel-1 SAR pass", acquiredIso: `${sarAsOf}T00:00:00Z` });
 
+    // v1.3 cinematic surfaces. NOT pushed into tickerLayers: a daily mosaic is
+    // never the "freshest layer" (§5b); the rain LOOP reuses the existing
+    // newest-frame clock and ticker entry already set above.
+    void wireSatelliteBasemap();
+    void wireRainPlayback();
+
     startTicker();
+  }
+
+  // ---- §1 satellite basemap (NASA GIBS true-colour) ----------------------
+  //
+  // F1 fail-safe, non-negotiable: the toggle is enabled and the basemap can be
+  // drawn ONLY if {basemapDateUTC} resolved from the GIBS capabilities. If it
+  // did not, the toggle stays disabled, no true-colour tiles are ever set, the
+  // map stays on OSM, and __fwViz.satelliteBasemap = 'unavailable'. A dated
+  // mosaic is never shown without its visible date in the same viewport.
+  function setBasemapCaption(dateUtc: string): void {
+    const capEl = $("cw-basemap-cap");
+    const srcEl = $("cw-credit-src");
+    if (capEl) {
+      // §1a + §1b verbatim, on their own line ABOVE the source line.
+      capEl.textContent =
+        `Satellite basemap: NASA GIBS true-colour, ${dateUtc} — daily mosaic, ` +
+        `one pass per day, not live. True-colour is optical: typhoon cloud ` +
+        `often hides the ground on the very dates flooding matters. It is a ` +
+        `backdrop, not the observed-water layer.`;
+      capEl.classList.remove("hidden");
+    }
+    if (srcEl) {
+      // §1c verbatim source line -- the "Satellite imagery courtesy NASA
+      // EOSDIS GIBS" clause appears only while GIBS tiles are drawn.
+      srcEl.textContent =
+        "© OpenStreetMap contributors. Satellite imagery courtesy NASA " +
+        "EOSDIS GIBS / Worldview / LANCE. SAR: Copernicus / Sentinel-1. " +
+        "Rain: RainViewer / PAGASA, NASA GPM IMERG. NRT optical: NASA GIBS.";
+    }
+  }
+
+  function clearBasemapCaption(): void {
+    const capEl = $("cw-basemap-cap");
+    const srcEl = $("cw-credit-src");
+    if (capEl) {
+      capEl.textContent = "";
+      capEl.classList.add("hidden");
+    }
+    if (srcEl) {
+      // Revert to the v1.2 chip text unchanged when OSM is active again.
+      srcEl.textContent =
+        "© OpenStreetMap contributors. SAR: Copernicus/Sentinel-1. Rain: " +
+        "RainViewer / PAGASA, NASA GPM IMERG. NRT optical: NASA GIBS.";
+    }
+  }
+
+  async function wireSatelliteBasemap(): Promise<void> {
+    const toggle = $("cw-toggle-basemap") as HTMLInputElement | null;
+    const bm = await fetchGibsTrueColor();
+    if (!bm.ok) {
+      // F1: date unresolvable -> never render true-colour, stay on OSM.
+      (window as any).__fwViz.satelliteBasemap = "unavailable";
+      if (toggle) toggle.disabled = true;
+      const lab = $("cw-basemap-disabled");
+      if (lab) {
+        lab.textContent = " unavailable — see caption";
+        lab.classList.remove("hidden");
+      }
+      return;
+    }
+    // Date resolved: set the real tiles + the provider's real maxzoom so
+    // MapLibre overzooms (no "Zoom Level Not Supported" placeholder).
+    // maxzoom is fixed at the addSource level (9) -- the provider's real top
+    // level, verified to match GoogleMapsCompatible_Level9, so MapLibre
+    // overzooms past it instead of requesting unsupported tiles.
+    const src = map.getSource("cw-basemap");
+    if (src && typeof src.setTiles === "function") src.setTiles([bm.tileUrl]);
+    if (toggle) {
+      toggle.disabled = false;
+      toggle.addEventListener("change", (e) => {
+        const on = (e.target as HTMLInputElement).checked;
+        if (map.getLayer("cw-basemap-raster"))
+          map.setLayoutProperty(
+            "cw-basemap-raster",
+            "visibility",
+            on ? "visible" : "none",
+          );
+        if (on) {
+          setBasemapCaption(bm.basemapDateUtc);
+          (window as any).__fwViz.satelliteBasemap = "on";
+        } else {
+          clearBasemapCaption();
+          (window as any).__fwViz.satelliteBasemap = "off";
+        }
+      });
+    }
+    // Stays OFF + OSM at first paint (§1d / F1). __fwViz already 'off'.
+  }
+
+  // ---- §3 animated observed-rain playback (radar.past ONLY) --------------
+  //
+  // §3d hard rules: only radar.past frames; no autoplay (visitor presses
+  // play); no synthetic/extrapolated frame; the loop wraps from the LAST
+  // observed frame back to the FIRST with a VISIBLE backward jump in the
+  // per-frame UTC readout so it can never read as marching into a forecast;
+  // the readout shows the frame's own UTC at all times incl. paused + first
+  // paint. "forecast/nowcast/predicted/next" never appears on this surface.
+  // Honest-empty: if the frame manifest fails, the control stays hidden and
+  // the v1.2 single-frame caption/clock (already painted above) stands.
+  function fmtFrameUtc(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toISOString().slice(0, 16).replace("T", " ");
+  }
+
+  async function wireRainPlayback(): Promise<void> {
+    const btn = $("cw-rain-play") as HTMLButtonElement | null;
+    const frameEl = $("cw-rain-frame");
+    const capEl = $("cw-rain-playback-cap");
+    if (!btn) return;
+
+    const res = await fetchRainViewerFrames();
+    if (!res.ok || res.frames.length < 2) {
+      // §3c static fallback: single frame / unsupported -> control hidden,
+      // the v1.2 single-frame RainViewer caption (already on cw-clock-rain)
+      // stands unchanged. __fwViz stays 'idle' (no loop available).
+      (window as any).__fwViz.rainPlayback = "static";
+      btn.classList.add("hidden");
+      return;
+    }
+
+    const frames: RainFrame[] = res.frames;
+    const first = frames[0];
+    const last = frames[frames.length - 1];
+
+    // §3a persistent caption under the control (verbatim).
+    if (capEl) {
+      capEl.textContent =
+        `Observed rain radar, last ${frames.length} frames ` +
+        `${fmtFrameUtc(first.frameUtc)} → ${fmtFrameUtc(last.frameUtc)} UTC — ` +
+        `PAGASA via RainViewer, ~10-min source, observed not a forecast.`;
+      capEl.classList.remove("hidden");
+    }
+
+    let idx = 0;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    // §3b verbatim readout, the frame's OWN UTC, never blank, never relative,
+    // shown at first paint + while paused + every frame as it plays.
+    const paintFrame = (): void => {
+      const f = frames[idx];
+      if (frameEl) {
+        frameEl.textContent = `Frame ${fmtFrameUtc(f.frameUtc)} UTC — observed`;
+        frameEl.classList.remove("hidden");
+      }
+      const src = map.getSource("cw-rain");
+      if (src && typeof src.setTiles === "function") src.setTiles([f.tileUrl]);
+      // Make the rain raster visible while looping even if the Tier-1 toggle
+      // is unchecked -- the loop IS the rain view here.
+      if (map.getLayer("cw-rain-raster"))
+        map.setLayoutProperty("cw-rain-raster", "visibility", "visible");
+      const rainToggle = $("cw-toggle-rain") as HTMLInputElement | null;
+      if (rainToggle) rainToggle.checked = true;
+    };
+
+    // First paint: show frame 0's own UTC immediately, paused (no autoplay).
+    paintFrame();
+
+    const stop = (): void => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      btn.textContent = "Play observed rain loop";
+      (window as any).__fwViz.rainPlayback = "idle";
+    };
+
+    const step = (): void => {
+      const wrapped = idx >= frames.length - 1;
+      // §3d rule 3: wrap from the LAST observed frame back to the FIRST with
+      // a visible backward reset -- never a forward continuation.
+      idx = wrapped ? 0 : idx + 1;
+      paintFrame();
+    };
+
+    btn.addEventListener("click", () => {
+      if (timer) {
+        stop();
+        return;
+      }
+      btn.textContent = "Pause";
+      (window as any).__fwViz.rainPlayback = "playing";
+      // ~900 ms/frame: observed history replayed at a readable pace.
+      timer = setInterval(step, 900);
+    });
   }
 
   // ---- §4b global ticker + 30 s re-tick of every layer clock ------------

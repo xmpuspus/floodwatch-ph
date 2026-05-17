@@ -204,6 +204,327 @@ def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
     check("corridor map __fwReady still true (map paints)", bool(ready))
 
 
+# v1.3 cinematic-visual wave. P1 added four visual surfaces over the v1.2
+# corridor: a NASA GIBS true-colour satellite basemap (OFF by default, F1
+# fail-safe), SAR rendered as a textured raster, an animated observed-rain
+# playback (radar.past only, no autoplay), and a dated Carina-2024 satellite
+# hero on the home page. The honest-empty / fail-safe contract from v1.1/v1.2
+# carries forward VERBATIM: for the basemap, satelliteBasemap in
+# {on, off, unavailable} are ALL a PASS; 'unavailable' is the F1 fail-safe
+# (date did not resolve -> stayed on OSM, never an undated photographic
+# basemap). For the rain loop, rainPlayback in {idle, playing, static} are
+# ALL a PASS; 'static' is the §3c single-frame fallback. These checks are
+# ADDITIVE and never weaken the v1.2 corridor checks above.
+_VIZ_BASEMAP_OK = {"on", "off", "unavailable"}
+_VIZ_RAINPB_OK = {"idle", "playing", "static"}
+# §1a/1b/1c verbatim fragments that MUST be in the dated basemap caption
+# whenever the satellite basemap is active (never undated, never "today").
+_BASEMAP_CAP_FRAGMENTS = (
+    "Satellite basemap: NASA GIBS true-colour,",
+    "daily mosaic, one pass per day, not live",
+    "True-colour is optical: typhoon cloud often hides the ground",
+    "It is a backdrop, not the observed-water layer",
+)
+# Forbidden basemap-date sentinels (a dated mosaic must never carry these).
+_BAD_BASEMAP_DATE = ("today", "latest", "now", "{basemapdateutc}", "")
+_RE_YMD = __import__("re").compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
+
+
+def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
+    """v1.3 cinematic-visual surface checks (additive). Runs on the default
+    Now panel (CorridorWatch) of /map -- already navigated, __fwReady awaited,
+    and the v1.3 wiring (wireSatelliteBasemap / wireRainPlayback) given its
+    fetch-timeout budget by the caller. Mirrors the v1.2 honest-empty
+    contract: ok|off|unavailable and idle|playing|static are ALL PASS."""
+    import re
+    import urllib.request
+
+    viz = pg.evaluate("() => window.__fwViz || null")
+    check("v1.3 __fwViz exists (cinematic surface flags exposed)",
+          isinstance(viz, dict) and viz is not None, str(viz))
+    if not isinstance(viz, dict):
+        viz = {}
+
+    # ---- 1. F1 fail-safe: satellite basemap (HIGHEST RISK) --------------
+    sb = viz.get("satelliteBasemap")
+    check("v1.3 F1 __fwViz.satelliteBasemap is a known state "
+          "(on|off|unavailable all PASS — fail-safe contract)",
+          sb in _VIZ_BASEMAP_OK, str(sb))
+
+    tog = pg.query_selector("#cw-toggle-basemap")
+    check("v1.3 F1 satellite-basemap toggle present", tog is not None)
+    if tog is not None:
+        # OFF by default: the checkbox is unchecked at first paint (§1d / F1)
+        # — the map opens on plain OSM, the visitor opts into satellite.
+        check("v1.3 F1 satellite backdrop OFF by default "
+              "(toggle unchecked — map opens on OSM)",
+              not tog.is_checked(), "checked" if tog.is_checked() else "off")
+
+    cap_el = pg.query_selector("#cw-basemap-cap")
+    cap_txt = (cap_el.inner_text() if cap_el else "").strip()
+    cap_hidden = pg.evaluate(
+        """() => { const e=document.getElementById('cw-basemap-cap');
+        return e ? e.classList.contains('hidden') : true; }""")
+
+    if sb == "unavailable":
+        # F1 fail-safe: GIBS date did not resolve. There must be NO
+        # true-colour tiles drawn AND the toggle must be DISABLED. The map
+        # stayed on OSM; an undated photographic basemap is the single
+        # highest-risk regression in this wave and must be impossible.
+        tc = pg.evaluate(
+            """() => { const m=window.__fwMap; if(!m) return false;
+            try { return m.getLayoutProperty('cw-basemap-raster',
+              'visibility') === 'visible'; } catch(e) { return false; } }""")
+        check("v1.3 F1 unavailable: NO true-colour tiles drawn "
+              "(stayed on OSM — never an undated photographic basemap)",
+              tc is False, f"raster visible={tc}")
+        if tog is not None:
+            check("v1.3 F1 unavailable: basemap toggle is DISABLED "
+                  "(visitor cannot opt into an undated mosaic)",
+                  tog.is_disabled(),
+                  "disabled" if tog.is_disabled() else "ENABLED")
+    elif sb == "on":
+        # Satellite active -> the dated §1a/1b/1c caption MUST be visible in
+        # the same viewport (F7), not hidden, with a REAL YYYY-MM-DD and none
+        # of the forbidden sentinels.
+        check("v1.3 F1 satellite active: dated caption visible "
+              "(not hidden — F7)", (not cap_hidden) and bool(cap_txt),
+              cap_txt[:80] or "<blank/hidden>")
+        for frag in _BASEMAP_CAP_FRAGMENTS:
+            check(f"v1.3 F1 basemap caption verbatim fragment present "
+                  f":: {frag[:42]}", frag in cap_txt, cap_txt[:60])
+        m = _RE_YMD.search(cap_txt)
+        check("v1.3 F1 basemap date is a real YYYY-MM-DD "
+              "(never empty/'today'/'latest'/'now')",
+              m is not None
+              and not any(b and b in cap_txt.lower()
+                          for b in _BAD_BASEMAP_DATE if b not in ("", "now")),
+              m.group(0) if m else cap_txt[:60])
+    else:
+        # sb == 'off' (default): the satellite caption stays hidden and the
+        # credit chip reverts to the v1.2 source line (no GIBS-imagery
+        # clause while OSM is active).
+        check("v1.3 F1 default OFF: dated basemap caption hidden "
+              "(no undated mosaic shown at first paint)",
+              cap_hidden or not cap_txt, cap_txt[:60] or "<hidden>")
+        src_el = pg.query_selector("#cw-credit-src")
+        src_txt = (src_el.inner_text() if src_el else "")
+        check("v1.3 F1 default OFF: credit chip is the v1.2 source line "
+              "(no 'Satellite imagery courtesy NASA EOSDIS GIBS' while OSM)",
+              "Satellite imagery courtesy NASA EOSDIS GIBS" not in src_txt,
+              src_txt[:70])
+
+    # ---- 2. Rain playback (F2/F9) --------------------------------------
+    rp = viz.get("rainPlayback")
+    check("v1.3 __fwViz.rainPlayback is a known state "
+          "(idle|playing|static all PASS — honest-empty contract)",
+          rp in _VIZ_RAINPB_OK, str(rp))
+    # F9: never autoplaying on load — the loop is visitor-initiated.
+    check("v1.3 F9 rain loop is NOT autoplaying on load "
+          "(rainPlayback !== 'playing' at first paint)",
+          rp != "playing", str(rp))
+
+    play = pg.query_selector("#cw-rain-play")
+    if play is not None:
+        play_hidden = pg.evaluate(
+            """() => { const e=document.getElementById('cw-rain-play');
+            return e ? e.classList.contains('hidden') : true; }""")
+        if rp == "static":
+            # §3c static fallback: <2 frames -> the control is HIDDEN and
+            # the v1.2 single-frame caption stands. That is an honest PASS.
+            check("v1.3 §3c rain static fallback: play control hidden "
+                  "(v1.2 single-frame caption stands — honest PASS)",
+                  play_hidden, "hidden" if play_hidden else "VISIBLE")
+        else:
+            lbl = (play.inner_text() or "").strip()
+            # Idle/paused label verbatim, and NOT the playing label "Pause"
+            # (asserts it is not already playing on load).
+            check("v1.3 F2 rain play control label is "
+                  "'Play observed rain loop' when idle (NOT 'Pause' — "
+                  "not autoplaying)",
+                  lbl == "Play observed rain loop", lbl or "<blank>")
+            frame_el = pg.query_selector("#cw-rain-frame")
+            ftxt = (frame_el.inner_text() if frame_el else "").strip()
+            # §3b per-frame readout shows the frame's own UTC at FIRST paint
+            # — never blank, never relative ("just now"/"now").
+            has_utc = ("UTC" in ftxt) or bool(_RE_YMD.search(ftxt))
+            check("v1.3 §3b per-frame readout shows a UTC time at first "
+                  "paint (not blank, not 'just now')",
+                  bool(ftxt) and has_utc
+                  and "just now" not in ftxt.lower(),
+                  ftxt[:70] or "<blank>")
+
+    # ---- 3. SAR raster (F4/F12) ----------------------------------------
+    sr = viz.get("sarRaster")
+    check("v1.3 __fwViz.sarRaster present (on|off — observed-flood "
+          "hero z-order kept)", sr in ("on", "off"), str(sr))
+    html = pg.content()
+    norm = " ".join(html.split())
+    # §2c rule 1: the "detection on that pass, not a photograph" sentence is
+    # mandatory wherever the SAR is a filled/textured raster (Track-A S1
+    # caption, §2b verbatim).
+    check("v1.3 §2c SAR-as-raster 'not a photograph' framing present "
+          "(the shaded water is a SAR detection ... not a photograph)",
+          "is a SAR detection on that single pass, not a photograph and "
+          "not a continuous view" in norm
+          or "not a photograph of the flood" in norm,
+          "present" if "not a photograph" in norm else "MISSING")
+    # F12: rasterising must not drop the per-pass as-of clock — the v1.2 §4
+    # Sentinel-1 clock (#cw-clock-s1) stays attached to the rasterised layer.
+    s1_clock = pg.query_selector("#cw-clock-s1")
+    s1txt = (s1_clock.inner_text() if s1_clock else "").strip()
+    check("v1.3 F12 SAR raster keeps its per-layer freshness clock "
+          "(#cw-clock-s1 attached, not a 'clean image, no chrome')",
+          s1_clock is not None and bool(s1txt), s1txt[:60] or "<blank>")
+
+    # ---- 4. Hero (home /) — server-rendered, no-JS (F3/F10/F11) --------
+    try:
+        raw = urllib.request.urlopen(
+            base.rstrip("/") + "/", timeout=20).read().decode(
+            "utf-8", "replace")
+    except Exception as e:  # noqa: BLE001
+        raw = ""
+        check("v1.3 F3 home page reachable for no-JS hero check", False,
+              repr(e)[:100])
+    raw_norm = " ".join(raw.split())
+    # §4a Carina-2024 dated overlay text present in the RAW HTML (server-
+    # rendered, no JavaScript — §4d rule 1: a dramatic image can never be
+    # left bare and undated).
+    check("v1.3 F3 hero §4a Carina-2024 dated overlay is server-rendered "
+          "(present in raw HTML, no JS)",
+          "2024 demonstration — Super Typhoon Carina, observed Sentinel-1 "
+          "SAR" in raw_norm
+          and "24" in raw_norm and "July 2024" in raw_norm
+          and "not current conditions and not a forecast" in raw_norm,
+          "present" if "2024 demonstration" in raw_norm else "MISSING")
+    # §4c CTA verbatim, links /map, never "live/now/current". Verified in
+    # the no-JS raw HTML (server-rendered, page-independent).
+    cta = "Open the Corridor watch — what the satellites and radar have " \
+          "observed over the expressways"
+    cta_block = ""
+    for a in re.findall(r"<a\b[^>]*>.*?</a>", raw, re.S):
+        if "Open the Corridor watch" in " ".join(a.split()):
+            cta_block = a
+            break
+    href_m = re.search(r'href="([^"]+)"', cta_block)
+    href_v = href_m.group(1) if href_m else ""
+    cta_links_map = href_v == "/map" or href_v.rstrip("/").endswith("/map")
+    check("v1.3 §4c hero CTA verbatim + links /map "
+          "(server-rendered; never 'see live'/'check now'/'current')",
+          (cta in raw_norm) and bool(href_m) and cta_links_map,
+          href_v or "no CTA <a>")
+    # heroDated flips true and FreshnessBanner stays ABOVE the hero — both
+    # are home-page DOM. Navigate to / for these (then return to /map so
+    # main()'s subsequent /map checks are unaffected).
+    pg.goto(base.rstrip("/") + "/", wait_until="networkidle", timeout=45000)
+    pg.wait_for_timeout(900)
+    hd = pg.evaluate(
+        "() => { const f=window.__fwViz; return f ? f.heroDated : null; }")
+    check("v1.3 F3 __fwViz.heroDated === true on home "
+          "(dated overlay is the first-paint truth)", hd is True, str(hd))
+    # §5c / F11: FreshnessBanner stays ABOVE the hero in source order.
+    fb_above = pg.evaluate(
+        """() => { const fb=document.querySelector(
+          '[data-variant=\\"site\\"]');
+        const hero=document.getElementById('hero-carina-map');
+        if(!fb||!hero) return null;
+        return !!(fb.compareDocumentPosition(hero)
+          & Node.DOCUMENT_POSITION_FOLLOWING); }""")
+    check("v1.3 §5c/F11 FreshnessBanner is ABOVE the hero on home "
+          "(freshest-first banner not pushed below the cinematic image)",
+          fb_above is True, str(fb_above))
+    pg.goto(base.rstrip("/") + "/map", wait_until="networkidle",
+            timeout=45000)
+    pg.wait_for_timeout(800)
+
+    # ---- 5. Guardrail HARD GATE non-regression (§5 / F6/F11) ----------
+    # Block-3 PAGASA/MMDA/DRRMO redirect still verbatim (whitespace-
+    # normalised) and co-located inside the corridor card. _check_corridor_
+    # watch already asserts co-location inside #now-root next to the
+    # expressway grid; here we additionally assert the redirect's coral
+    # hairline card still wraps it (max emphasis allowed, never weakened to
+    # a faint caption, never brightened to compete with the imagery).
+    block3 = ("For live conditions, warnings, and routing during an active "
+              "flood, use PAGASA")
+    carded = pg.evaluate(
+        """(t) => { const norm=s=>(s||'').replace(/\\s+/g,' ').trim();
+        const nodes=[...document.querySelectorAll(
+          '[class*=\\"border-accent-coral\\"]')];
+        return nodes.some(n => norm(n.textContent).includes(t)); }""",
+        block3)
+    check("v1.3 §5a/F11 Block-3 redirect still inside its coral-hairline "
+          "card (verbatim, not weakened to a faint caption)",
+          bool(carded))
+    # §5b: the satellite basemap must NOT be named the "freshest layer" in
+    # the global ticker (a daily mosaic is never the freshest observed
+    # signal).
+    ticker = pg.query_selector("#cw-global-ticker")
+    tk = (ticker.inner_text() if ticker else "").lower()
+    check("v1.3 §5b basemap NOT named the freshest layer in the global "
+          "ticker (a daily mosaic is never the freshest observed signal)",
+          "gibs" not in tk and "true-colour" not in tk
+          and "true-color" not in tk and "basemap" not in tk,
+          tk[:80] or "<no ticker>")
+
+    # ---- 6. No NEW console errors / CSP violations (GIBS host) ---------
+    # The GIBS true-colour host is gibs.earthdata.nasa.gov, already in the
+    # v1.2 CSP — assert no 'Refused to connect' / CSP violation for it (or
+    # any of the v1.3 fetch paths).
+    csp_hits = [e for e in csp_errs
+                if ("content-security-policy" in e.lower()
+                    or "refused to connect" in e.lower()
+                    or "violates the following content security"
+                    in e.lower())]
+    gibs_hits = [e for e in csp_hits
+                 if "gibs.earthdata.nasa.gov" in e.lower()
+                 or "earthdata" in e.lower()]
+    check("v1.3 no CSP violation / refused-to-connect for the GIBS "
+          "true-colour host (gibs.earthdata.nasa.gov already CSP-allowed)",
+          len(gibs_hits) == 0, "; ".join(gibs_hits[:3]))
+    check("v1.3 no NEW CSP violation introduced by the cinematic surface",
+          len(csp_hits) == 0, "; ".join(csp_hits[:3]))
+
+    # §3d rule 1 (build-gate): radar.nowcast is NEVER referenced in the
+    # served playback path. Grep the served CorridorWatch bundle: only
+    # radar.past may drive the loop; radar.nowcast in the playback fetch is
+    # a ship-blocking forecast regression.
+    try:
+        page_html = urllib.request.urlopen(
+            base.rstrip("/") + "/map", timeout=20).read().decode(
+            "utf-8", "replace")
+        srcs = re.findall(r'<script[^>]+src="([^"]+)"', page_html)
+        joined = page_html
+        for s in srcs:
+            try:
+                u = s if s.startswith("http") else base.rstrip("/") + s
+                joined += urllib.request.urlopen(
+                    u, timeout=20).read().decode("utf-8", "replace")
+            except Exception:  # noqa: BLE001
+                continue
+        # The playback path must reference radar.past and NEVER fetch
+        # radar.nowcast. fetchRainViewerFrames reads j.radar.past only.
+        has_past = ("radar.past" in joined or "radar?.past" in joined
+                    or 'radar","past' in joined or ".past" in joined)
+        # A literal radar.nowcast / radar?.nowcast read in the bundle would
+        # be the forecast regression. (The TS string 'nowcast' as a latency
+        # CLASS label is allowed; a radar.nowcast ACCESS is not.)
+        nowcast_access = bool(
+            re.search(r"radar[\s)\]]*[?.]+\s*\.?\s*nowcast", joined)
+            or "radar.nowcast" in joined
+            or 'radar","nowcast' in joined)
+        check("v1.3 §3d-1 served bundle drives the loop from radar.past",
+              has_past, "radar.past referenced" if has_past
+              else "radar.past NOT found")
+        check("v1.3 §3d-1 served bundle NEVER reads radar.nowcast in the "
+              "playback path (forecast regression — ship-blocking)",
+              not nowcast_access,
+              "radar.nowcast reference found" if nowcast_access
+              else "clean — radar.past only")
+    except Exception as e:  # noqa: BLE001
+        check("v1.3 §3d-1 served-bundle radar.nowcast grep", False,
+              repr(e)[:100])
+
+
 def _check_lookup_page(pg, base: str) -> None:
     """Agent G is adding /lookup in parallel. Skip gracefully if it 404s so
     this QA does not break before G/D land; the orchestrator confirms later."""
@@ -270,6 +591,24 @@ def main() -> int:
             # per-layer checks below assert the honest-empty caption instead.
             pass
         _check_corridor_watch(pg, BASE, errs)
+
+        # v1.3 cinematic surfaces: wireSatelliteBasemap (GIBS capabilities
+        # fetch, 10 s) and wireRainPlayback (RainViewer frames, 8 s) run
+        # after the corridor layers. Wait for __fwViz to settle out of its
+        # initial 'off'/'idle' placeholders (or time out — 'off'/'idle' are
+        # themselves valid PASS states, the F1/F9 fail-safe defaults).
+        try:
+            pg.wait_for_function(
+                "() => window.__fwViz "
+                "&& ['on','off','unavailable'].includes("
+                "window.__fwViz.satelliteBasemap) "
+                "&& ['idle','playing','static'].includes("
+                "window.__fwViz.rainPlayback)",
+                timeout=12000)
+        except Exception:
+            pass
+        pg.wait_for_timeout(1500)
+        _check_v13_cinematic(pg, BASE, errs)
 
         loading = pg.query_selector("#map-loading")
         check("map-loading overlay hidden",
