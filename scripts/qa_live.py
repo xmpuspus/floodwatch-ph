@@ -608,6 +608,7 @@ def _check_accountability_surface(pg, base: str) -> None:
     honest in-progress roadmap line stands and that is a PASS (honest-empty
     contract, same as the realtime layers)."""
     import json
+    import re
     import urllib.request
 
     pg.goto(base.rstrip("/") + "/", wait_until="networkidle", timeout=45000)
@@ -676,6 +677,27 @@ def _check_accountability_surface(pg, base: str) -> None:
           "warrants independent investigation" in body_txt.lower()
           and "flood control" in body_txt.lower(),
           body_txt[:110] or "<blank>")
+
+    # Contradictory-envelope guard: the lead must never assert Sentinel-1
+    # observation while stating zero passes ("observed flooding ... on 0
+    # dated pass"). The Sentinel-1 clause is only valid when the chosen
+    # province actually has an observed pass; otherwise the recurrence-only
+    # phrasing is used. This invariant must hold for every published dataset.
+    low = body_txt.lower()
+    contradiction = (
+        "flooding on 0" in low
+        or "flooding there on 0" in low
+        or "on 0 dated pass" in low
+        or "on 0 dated carina" in low
+    )
+    asserts_obs = "sentinel-1 observed flooding" in low
+    obs_zero = bool(
+        re.search(r"sentinel-1 observed flooding[^.]*?\bon 0\b", low)
+    )
+    check("accountability lead has no observed-flooding-on-zero "
+          "contradiction (contradictory-envelope invariant)",
+          not contradiction and not (asserts_obs and obs_zero),
+          body_txt[:140] or "<blank>")
 
 
 def main() -> int:
