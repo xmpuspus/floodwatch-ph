@@ -79,6 +79,42 @@ const { variant = "site" } = Astro.props;
     );
   }
 
+  function agePhrase(epochSec: number): string {
+    const m = Math.max(0, Math.round((Date.now() / 1000 - epochSec) / 60));
+    if (m < 60) return `updated ${m} min ago`;
+    const h = Math.floor(m / 60);
+    return `updated ${h} h ${m % 60} min ago`;
+  }
+
+  // The genuinely-freshest layer is the client-fetched RainViewer radar
+  // (PAGASA relay, ~10-min nowcast). Same CORS-open manifest the Corridor
+  // watch uses; already in the CSP; a fixed nationwide request with NO user
+  // input, so the lookup-stays-in-browser invariant is untouched. radar.past
+  // only (observation) -- never radar.nowcast (forecast).
+  async function getRainNow(): Promise<{
+    age: string;
+    utc: string;
+  } | null> {
+    try {
+      const r = await fetch(
+        "https://api.rainviewer.com/public/weather-maps.json",
+        { mode: "cors" },
+      );
+      if (!r.ok) return null;
+      const j = await r.json();
+      const past: any[] = j?.radar?.past ?? [];
+      if (!past.length) return null;
+      const t = Number(past[past.length - 1]?.time);
+      if (!Number.isFinite(t)) return null;
+      return {
+        age: agePhrase(t),
+        utc: new Date(t * 1000).toISOString().slice(0, 16).replace("T", " "),
+      };
+    } catch {
+      return null;
+    }
+  }
+
   (async () => {
     const root = $("fw-freshness") as HTMLElement | null;
     const lineEl = $("fw-fresh-line");
@@ -86,10 +122,24 @@ const { variant = "site" } = Astro.props;
     if (!root || !lineEl || !detEl) return;
     const variant = root.dataset.variant ?? "site";
 
-    const [s1, rain] = await Promise.all([
+    const [s1, rain, rainNow] = await Promise.all([
       getMeta("/data/flood_latest_meta.json"),
       getMeta("/data/current_risk.geojson"),
+      getRainNow(),
     ]);
+
+    // §5 freshness-clock rule: surface the FRESHEST observed signal first and
+    // timestamp it; never the word "live". The rain radar (minutes old) is
+    // the freshest; Sentinel-1 flood extent is the dated ground truth. Lead
+    // with rain when it resolved; fall back honestly when it did not (never
+    // fabricate freshness).
+    const freshLead =
+      rainNow !== null
+        ? `Freshest observation: rain radar over the corridor, ` +
+          `${rainNow.age} (${rainNow.utc} UTC, PAGASA via RainViewer). ` +
+          `Observed, not a forecast. Layers refresh independently, each ` +
+          `with its own as-of time; Sentinel-1 flood extent is dated.`
+        : null;
 
     const rainMeta = rain && rain._meta ? rain._meta : null;
     const s1Status: string = s1?.scan_status ?? "unknown";
@@ -129,7 +179,9 @@ const { variant = "site" } = Astro.props;
 
     if (variant === "now") {
       lineEl.textContent =
-        "This is the most recent OBSERVED satellite pass, not a live feed and not a forecast.";
+        freshLead ??
+        "This is observed satellite data, each layer shown with its own " +
+          "as-of time, not a live feed and not a forecast.";
       detEl.textContent = latestLine + " " + rainLine;
     } else if (variant === "carina") {
       lineEl.textContent =
@@ -140,12 +192,16 @@ const { variant = "site" } = Astro.props;
         "For the most recent observed pass and rainfall context, open the Now view. " +
         latestLine;
     } else {
-      // compact site-wide line for the home page
+      // compact site-wide line for the home page: lead with the freshest
+      // observed signal (rain radar, minutes old) when it resolved; honest
+      // dated framing otherwise. Never "live".
       lineEl.textContent =
-        "Nothing here is live. FloodWatch shows observed satellite data on dated passes, plus a 2024 historical demo, never a forecast.";
+        freshLead ??
+        "FloodWatch shows observed satellite data on dated passes, plus a " +
+          "2024 historical demo, never a forecast.";
       detEl.innerHTML =
         latestLine +
-        ' <a href="/map" class="no-underline text-accent-steel">Open the Now view and the 2024 demo</a>.';
+        ' <a href="/map" class="no-underline text-accent-steel">Open the Corridor watch and the 2024 demo</a>.';
     }
 
     // Escalate the visual state when no usable observation exists, so the
