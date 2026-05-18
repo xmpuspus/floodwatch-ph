@@ -18,11 +18,11 @@ const M = METRICS;
       Predicted to flood, but barely on record.
     </h1>
     <p class="text-lg text-ink-700 leading-relaxed mb-5 max-w-2xl">
-      {M.uncharted_count} Philippine provinces are predicted to flood by the
-      flood-prediction model (Track B), yet show few or no events in the past
-      flood records. That gap is step 1 of one accountability question: where
-      does it flood again and again, so public flood-control spending can be
-      held against it.
+      {M.uncharted_count} locations the flood-prediction model predicts will
+      flood show few or no events in the past flood records. Reported by
+      province (about 82 in the Philippines), that gap is step 1 of one
+      accountability question: where does it flood again and again, so public
+      flood-control spending can be held against it.
     </p>
     <div class="grid sm:grid-cols-3 gap-px bg-ink-300/40 border border-ink-300/40 max-w-2xl mb-6">
       <div class="bg-paper p-4">
@@ -34,10 +34,11 @@ const M = METRICS;
         </p>
       </div>
       <div class="bg-paper p-4">
-        <p class="text-[11px] uppercase tracking-wider text-ink-500 font-mono mb-1">the class others skip</p>
+        <p class="text-[11px] uppercase tracking-wider text-ink-500 font-mono mb-1">what others miss</p>
         <p class="text-sm text-ink-700 leading-relaxed">
-          The rain-driven city flooding Google Flood Hub says it does not
-          model. Observed after the fact, openly.
+          City flooding driven by heavy rain is the kind Google Flood Hub does
+          not model. FloodWatch maps it after the fact, from public satellite
+          data.
         </p>
       </div>
       <div class="bg-paper p-4">
@@ -100,12 +101,12 @@ const M = METRICS;
     <div class="bg-paper p-5">
       <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">predicted, barely on record</div>
       <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.uncharted_count}</div>
-      <div class="text-[10px] text-ink-500 mt-0.5">provinces predicted to flood, barely on record</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">locations predicted to flood, barely on record</div>
     </div>
     <div class="bg-paper p-5">
       <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">flood-prediction model F1</div>
       <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.trackB_f1}</div>
-      <div class="text-[10px] text-ink-500 mt-0.5">Track B, tested by holding out whole storms</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">accuracy score (0 to 1), tested on storms held out of training</div>
     </div>
     <div class="bg-paper p-5">
       <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">population exposed</div>
@@ -148,8 +149,8 @@ const M = METRICS;
     </p>
   </section>
 
-  <!-- Accountability surface: the destination thesis as an in-progress
-       roadmap line. Degrades gracefully when the wave B JSON is absent. -->
+  <!-- Accountability surface: live wave B aggregates render here; the
+       thesis line is the static fallback when the JSON is absent. -->
   <AccountabilitySurface variant="home" />
 
   <!-- D6: the observed-extent demo, demoted to a supporting section -->

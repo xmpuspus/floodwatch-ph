@@ -12,9 +12,9 @@
 //     by_type:    [ { project_type, n_projects, allocation_php, flagged_rate } ],
 //     by_tranche: [ { tranche, n_projects, allocation_php, flagged_rate } ] }
 //
-// The file does not exist until Agent-WBD lands wave B. Until then this
-// section degrades to the honest in-progress roadmap line (same null-guard
-// pattern the home page already uses for road_flood_exposure.geojson _meta).
+// The flood-control accountability JSON is live (v1.4-v1.5). If it is
+// momentarily unavailable this section degrades to a static line (same
+// null-guard pattern the home page uses for road_flood_exposure.geojson).
 // It never breaks the build (client fetch only, no build-time import) and it
 // never renders a list of named flagged projects -- only aggregates.
 //
@@ -27,8 +27,8 @@ interface Props {
 }
 const { variant = "home" } = Astro.props;
 
-// Verbatim destination thesis. NOT a backed claim until the JSON renders;
-// stated here as the in-progress roadmap line.
+// Verbatim thesis. The JSON-backed aggregates render under it; this string
+// is the static fallback when the data is momentarily unavailable.
 const THESIS = "Where flood-control money was spent, and where the water still came.";
 ---
 
@@ -37,7 +37,7 @@ const THESIS = "Where flood-control money was spent, and where the water still c
   class="fw-acct"
   data-variant={variant}
   data-thesis={THESIS}
-  aria-label="Flood-control accountability (in progress)"
+  aria-label="Flood-control accountability"
 >
   {variant === "home" && (
     <div class="max-w-prose mx-auto px-6 py-12 border-t border-ink-300/30">
@@ -51,10 +51,10 @@ const THESIS = "Where flood-control money was spent, and where the water still c
           above is step 1. Step 2 holds public flood-control spending against
           it: DPWH and BetterGovPH project records, cross-referenced with where
           Sentinel-1 still observed flooding and where the flood-prediction
-          model predicts the ground will flood. This is the destination, stated
-          as an in-progress roadmap line, not a backed claim. The spending layer
-          is a separate data build with its own legal-language gate. Nothing
-          below claims a finding the live data cannot support yet.
+          model predicts the ground will flood. The aggregates load here from
+          the published data. If they are momentarily unavailable this line
+          stands in their place; nothing here claims a finding the data does
+          not support.
         </p>
         <p class="text-sm text-ink-500 leading-relaxed">
           Conservative by design: aggregates only, no named project is ever
@@ -69,17 +69,17 @@ const THESIS = "Where flood-control money was spent, and where the water still c
     <section class="max-w-6xl mx-auto px-6 py-5">
       <div class="border border-ink-300/40 bg-paper p-5">
         <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">
-          flood-control accountability &middot; in progress
+          flood-control accountability
         </p>
         <h2 class="text-lg text-ink-900 mb-2 leading-snug">{THESIS}</h2>
         <div id="fw-acct-map-body">
           <p class="text-sm text-ink-700 leading-relaxed">
             The prediction-vs-record view is the satellite data the model
-            learns from. The next data build holds public flood-control spending
-            against it (DPWH and BetterGovPH records, cross-referenced with
-            observed Sentinel-1 flooding and the flood-prediction model).
-            Aggregates only when it lands, never a named project list, and
-            stated as "warrants independent investigation."
+            learns from. Public flood-control spending is held against it (DPWH
+            and BetterGovPH records, cross-referenced with observed Sentinel-1
+            flooding and the flood-prediction model). The aggregates load here
+            from the published data; aggregates only, never a named project
+            list, and stated as "warrants independent investigation."
           </p>
         </div>
       </div>
@@ -92,9 +92,10 @@ const THESIS = "Where flood-control money was spent, and where the water still c
       class="mt-4 border-l-2 border-ink-300/40 pl-3 text-[13px] text-ink-700 leading-relaxed"
     >
       <p>
-        Flood-control spending for this province is the next data build. When
-        it lands it will state one conservative sentence here from public
-        DPWH/BetterGovPH records, aggregates only, never a named project.
+        Public flood-control spending, held against the prediction-vs-record
+        gap, loads here from published DPWH/BetterGovPH records, aggregates
+        only, never a named project. If it is momentarily unavailable this
+        line stands in its place.
       </p>
     </div>
   )}
@@ -156,10 +157,10 @@ const THESIS = "Where flood-control money was spent, and where the water still c
 
   function pesoShort(n: number | undefined): string {
     if (n == null || !isFinite(n) || n <= 0) return "an amount on public record";
-    if (n >= 1e12) return "P" + (n / 1e12).toFixed(2) + "T";
-    if (n >= 1e9) return "P" + (n / 1e9).toFixed(1) + "B";
-    if (n >= 1e6) return "P" + (n / 1e6).toFixed(1) + "M";
-    return "P" + Math.round(n).toLocaleString();
+    if (n >= 1e12) return "₱" + (n / 1e12).toFixed(2) + "T";
+    if (n >= 1e9) return "₱" + (n / 1e9).toFixed(1) + "B";
+    if (n >= 1e6) return "₱" + (n / 1e6).toFixed(1) + "M";
+    return "₱" + Math.round(n).toLocaleString();
   }
 
   function intFmt(n: number | undefined): string {
