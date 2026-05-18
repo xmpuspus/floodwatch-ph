@@ -72,7 +72,7 @@ def _check_realtime_data(base: str) -> None:
                   True, "site shows truthful no-data message")
 
 
-# v1.2 Corridor watch: the three NEW client-fetched layers (RainViewer rain
+# v1.2 Expressway watch: the three NEW client-fetched layers (RainViewer rain
 # radar, Copernicus GFM SAR, NASA VIIRS NRT) report into
 # window.__fwCorridor = {rain, gfm, viics: 'ok'|'empty'|'fail'}. As with the
 # v1.1.0 scan_status HONEST_EMPTY contract, "empty" and "fail" are HONEST
@@ -99,7 +99,7 @@ _CLOCK_ID = {"rain": "cw-clock-rain", "gfm": "cw-clock-gfm",
 
 
 def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
-    """v1.2 Corridor watch surface checks (additive). After the North Star
+    """v1.2 Expressway watch surface checks (additive). After the North Star
     re-center the corridor lives on the tab-2 "Now" panel of /map (the civic
     hazard-gap view is the default); the caller has navigated, awaited
     __fwReady on the default panel, then opened the Now tab, so the client
@@ -111,9 +111,9 @@ def _check_corridor_watch(pg, base: str, csp_errs: list[str]) -> None:
     # visual (inside #now-root, adjacent to #now-expressway-grid).
     head = pg.query_selector("#cw-headline")
     gloss = pg.query_selector("#cw-gloss")
-    check("corridor headline+gloss render",
+    check("expressway-watch headline+gloss render",
           head is not None and gloss is not None
-          and "Corridor watch" in (head.inner_text() if head else "")
+          and "Expressway watch" in (head.inner_text() if head else "")
           and "not a forecast" in (gloss.inner_text().lower()
                                    if gloss else ""),
           (head.inner_text() if head else "no headline"))
@@ -769,7 +769,7 @@ def main() -> int:
             now_tab.click()
             pg.wait_for_timeout(2000)
 
-        # ---- v1.2 Corridor watch surface (now tab-2 'Now' panel) ----
+        # ---- v1.2 Expressway watch surface (now tab-2 'Now' panel) ----
         # Give the three client-fetched layers their full timeout budget
         # (RainViewer 8 s, GFM/VIIRS 10 s) to resolve to ok|empty|fail
         # before asserting the honest-empty captions.

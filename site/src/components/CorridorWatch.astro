@@ -37,7 +37,7 @@ const REBUILT_UTC =
 
 <div id="now-root" data-now-active="false" data-rebuilt-utc={REBUILT_UTC}>
   <!-- §1 D1-A headline + mandatory observation gloss (same visual block).
-       "Corridor watch" is never styled red, never pulsing, never a siren
+       "Expressway watch" is never styled red, never pulsing, never a siren
        icon; if the gloss cannot render the headline falls back to plain
        "Expressway observation log" (handled in the script). -->
   <section class="max-w-6xl mx-auto px-6 mb-4">
@@ -47,7 +47,7 @@ const REBUILT_UTC =
           expressway observation log
         </p>
         <h2 id="cw-headline" class="text-2xl text-ink-900 leading-tight font-semibold">
-          Corridor watch
+          Expressway watch
         </h2>
         <p id="cw-gloss" class="text-sm text-ink-700 mt-1.5 leading-relaxed">
           Rainfall and expressway context, source RainViewer / PAGASA, not
@@ -83,7 +83,7 @@ const REBUILT_UTC =
         <p class="text-[12px] text-ink-500 leading-relaxed mt-2.5">
           Observed, lagged by the Sentinel-1 revisit (~6-day revisit, ~24 h product latency). Not a
           forecast and not a routing instruction. Want to check a specific place
-          or corridor?
+          or route?
           <a href="/lookup" class="no-underline text-accent-steel">Use the evidence lookup</a>.
         </p>
       </div>
@@ -280,7 +280,7 @@ const REBUILT_UTC =
     <div class="relative">
       <div id="now-map" class="w-full h-[600px] rounded-md border border-ink-300/30 bg-ink-300/10">
         <div id="now-map-loading" class="absolute inset-0 flex items-center justify-center text-sm text-ink-500">
-          Corridor watch loads when you open it.
+          Expressway watch loads when you open it.
         </div>
       </div>
 
@@ -323,10 +323,10 @@ const REBUILT_UTC =
     </div>
 
     <aside class="border border-ink-300/40 bg-white text-sm p-5">
-      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">what corridor watch is</p>
+      <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">what expressway watch is</p>
       <p class="text-ink-700 leading-relaxed text-[13px]">
         An observation log of what the satellites and radar have observed over
-        Greater Metro Manila and the SLEX/NLEX corridor, organized by how fresh
+        Greater Metro Manila and the SLEX/NLEX expressways, organized by how fresh
         each observation is. Every layer is as-of-dated below. Nothing here is
         live and nothing here is a forecast.
       </p>
@@ -525,7 +525,7 @@ const REBUILT_UTC =
   }
 
   // ---- §1 headline fallback: if the gloss cannot render, the headline must
-  // fall back to plain "Expressway observation log", never "Corridor watch"
+  // fall back to plain "Expressway observation log", never "Expressway watch"
   // bare. (Defensive: the gloss is server-rendered, but if its node is gone
   // we never leave "watch" without its gloss.)
   function ensureGloss(): void {
@@ -1273,11 +1273,11 @@ const REBUILT_UTC =
     if (!started) {
       started = true;
       init().catch((err) => {
-        console.error("FloodWatch Corridor watch init error:", err);
+        console.error("FloodWatch Expressway watch init error:", err);
         const el = $("now-map");
         if (el)
           el.innerHTML =
-            '<div class="p-6 text-sm text-ink-500">Could not load the Corridor watch data. No query was sent anywhere.</div>';
+            '<div class="p-6 text-sm text-ink-500">Could not load the Expressway watch data. No query was sent anywhere.</div>';
       });
     } else if (map) {
       setTimeout(() => map.resize(), 60);

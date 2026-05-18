@@ -58,7 +58,7 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
       aria-selected="false"
       class="px-3 py-1.5 border border-ink-300/60 text-ink-700 font-mono text-xs uppercase tracking-wider hover:border-ink-900"
     >
-      a route / corridor
+      a route
     </button>
   </div>
 
@@ -98,10 +98,10 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
   <!-- ROUTE input -->
   <div id="panel-route" class="hidden">
     <p class="text-sm text-ink-700 mb-3 leading-relaxed">
-      Pick two points from the offline index to build a corridor (a band about
+      Pick two points from the offline index to build a route (a band about
       <strong>400 m</strong> either side of the straight line between them,
       sampled every ~350 m). National routing is a later refinement; this is the
-      SLEX/NLEX corridor case.
+      SLEX/NLEX expressways case.
     </p>
     <div class="grid sm:grid-cols-2 gap-3">
       <div>
@@ -140,7 +140,7 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
       class="mt-4 inline-flex items-center px-4 py-2 rounded-md bg-ink-900 text-white text-sm hover:bg-ink-700 disabled:opacity-40 disabled:cursor-not-allowed"
       disabled
     >
-      Show evidence along this corridor
+      Show evidence along this route
     </button>
   </div>
 
@@ -424,7 +424,7 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
     qInput.value = entry.name;
     if (!inScope(entry.lng, entry.lat)) {
       showEmpty(
-        `${entry.name} is outside the Greater Metro Manila + SLEX/NLEX corridor that v1.0 covers. National coverage is a later refinement. No lookup is sent anywhere.`,
+        `${entry.name} is outside the Greater Metro Manila + SLEX/NLEX expressways that v1.0 covers. National coverage is a later refinement. No lookup is sent anywhere.`,
       );
       return;
     }
@@ -477,7 +477,7 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
     if (!fromE || !toE) return;
     if (!inScope(fromE.lng, fromE.lat) || !inScope(toE.lng, toE.lat)) {
       showEmpty(
-        "One or both corridor points are outside the Greater Metro Manila + SLEX/NLEX corridor v1.0 covers. No lookup is sent anywhere.",
+        "One or both route points are outside the Greater Metro Manila + SLEX/NLEX expressways v1.0 covers. No lookup is sent anywhere.",
       );
       return;
     }

@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "name": "FloodWatch.PH offline place-name index, Greater Metro Manila + SLEX/NLEX corridor",
-    "scope": "NCR (17 cities/municipality) plus the SLEX/NLEX corridor provinces: Bulacan, Pampanga, Rizal, Laguna, Cavite, Bataan. National coverage is a later refinement.",
+    "name": "FloodWatch.PH offline place-name index, Greater Metro Manila + SLEX/NLEX expressways",
+    "scope": "NCR (17 cities/municipality) plus the provinces along SLEX and NLEX: Bulacan, Pampanga, Rizal, Laguna, Cavite, Bataan. National coverage is a later refinement.",
     "sources": "Coordinates compiled from public OpenStreetMap node/centroid data (ODbL) and Philippine Statistics Authority (PSA) city/municipality reference points. No proprietary geocoder. Static, bundled with the site, never fetched at query time.",
     "license": "OpenStreetMap contributors, ODbL. PSA reference points, public.",
     "as_of": "2026-05-16",
