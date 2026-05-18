@@ -53,7 +53,8 @@ const REBUILT_UTC =
           Rainfall and expressway context, source RainViewer / PAGASA, not
           produced by FloodWatch. The most recent observed passes, lagged. Not
           a live feed and not a forecast. This is secondary context, not the
-          product; the spine is the recurrence-vs-record gap.
+          product; the main question is the gap between what the model predicts
+          and what past records show.
         </p>
         <p class="text-sm text-ink-900 mt-3 leading-relaxed font-medium">
           Did the latest satellite pass see water on the expressways?
@@ -417,9 +418,9 @@ const REBUILT_UTC =
     const note = meta?.note;
     if (typeof note === "string" && note) return note;
     const s = meta?.scan_status;
-    if (s === "degenerate_threshold") return "no reliable water/land separation in the Otsu valley";
+    if (s === "degenerate_threshold") return "the radar could not cleanly separate water from land on this pass";
     if (s === "low_confidence") return "detected area exceeded the plausibility cap (likely speckle, not flood)";
-    if (s === "no_usable_pass") return "no Sentinel-1 acquisition with enough area coverage in the lookback window";
+    if (s === "no_usable_pass") return "no Sentinel-1 pass with enough area coverage in the lookback window";
     return "the satellite pass was not usable";
   }
 
@@ -566,8 +567,8 @@ const REBUILT_UTC =
     if (statusEl) {
       if (sarStatus === "ok" && Array.isArray(flood?.features) && flood.features.length > 0) {
         statusEl.textContent =
-          `Showing the observed Sentinel-1 SAR flood extent from the ${sarAsOf} pass ` +
-          `(${fMeta?.feature_count ?? flood.features.length} polygons). ` +
+          `Showing the mapped flood area from the ${sarAsOf} Sentinel-1 pass ` +
+          `(${fMeta?.feature_count ?? flood.features.length} mapped areas). ` +
           "This is the most recent observed pass, not live and not a forecast.";
         statusEl.className =
           "border-l-4 border-accent-flood bg-paper-alt px-4 py-3 text-sm text-ink-900 leading-relaxed";
@@ -596,8 +597,8 @@ const REBUILT_UTC =
     if (exLine) {
       if (sarStatus !== "ok") {
         exLine.textContent =
-          "The most recent Sentinel-1 pass was not usable, so expressway " +
-          "exposure could not be computed for this window. This is not a " +
+          "The most recent Sentinel-1 pass was not usable, so whether the " +
+          "expressways are flooded could not be computed for this window. This is not a " +
           "clear-conditions signal. Use MMDA Flood Control and PAGASA for live road conditions.";
       } else if (totalFlooded === 0) {
         exLine.textContent =
@@ -810,7 +811,7 @@ const REBUILT_UTC =
             .setHTML(
               `<div style="padding:8px 10px;font-size:12px;max-width:220px">
                  <strong>${p.road_name || "Road"}</strong><br/>
-                 exposure: ${p.exposure || "unknown"}<br/>
+                 status: ${p.exposure || "unknown"}<br/>
                  ${
                    p.exposure === "flooded"
                      ? `${Number(p.flooded_length_m || 0).toFixed(0)} m under observed water`
@@ -960,9 +961,9 @@ const REBUILT_UTC =
         // §2a verbatim, with the appended raster sentence (§2c rule 1): the
         // GFM extent renders as a filled titiler raster.
         `Faster observed SAR flood: Copernicus EMS Global Flood Monitoring, Sentinel-1 ` +
-          `pass ${fmtAcqUTC(gfm.acquiredUtc)}, delivered within about 8 hours of acquisition. ` +
+          `pass ${fmtAcqUTC(gfm.acquiredUtc)}, delivered within about 8 hours of the pass. ` +
           `20 m, all-weather radar. Observed, not a forecast; blank where no recent Sentinel-1 ` +
-          `pass exists. The shaded water is a radar backscatter-low detection on that pass, ` +
+          `pass exists. The shaded water is a radar detection on that pass, ` +
           `not a photograph of the flood.`,
         `Licence: Copernicus EMS / GFM Product User Manual, CC BY 4.0. The EODC STAC ` +
           `catalogue's \`license: proprietary\` field is a catalogue default, not the ` +
@@ -1010,7 +1011,7 @@ const REBUILT_UTC =
       "sentinel1",
       // §2b verbatim, with the appended raster sentence (§2c rule 1): the
       // Track-A extent is now rendered as a filled/textured water mass.
-      `Latest usable Sentinel-1 SAR pass: ${sarAsOf ?? "acquisition time unavailable"}. ` +
+      `Latest usable Sentinel-1 SAR pass: ${sarAsOf ?? "satellite pass date unavailable"}. ` +
         `Sentinel-1A + Sentinel-1C, ~6-day revisit, ~24 h product latency. Dated ground ` +
         `truth, not live, not a forecast. The shaded water is a SAR detection on that ` +
         `single pass, not a photograph and not a continuous view.`,

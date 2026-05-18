@@ -1,41 +1,41 @@
 ---
 import Base from "../layouts/Base.astro";
 ---
-<Base title="Privacy &amp; Responsible Use · FloodWatch.PH" pathname="/privacy" description="How FloodWatch.PH handles province-level flood data, the Philippines Data Privacy Act (RA 10173) posture, and takedown channel.">
+<Base title="Privacy &amp; Responsible Use · FloodWatch.PH" pathname="/privacy" description="How FloodWatch.PH handles province-level flood data, how it complies with RA 10173 (the Data Privacy Act), and how to request takedown.">
   <section class="max-w-prose mx-auto px-6 pt-10 pb-12">
     <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">privacy &amp; responsible use</p>
     <h1 class="text-3xl mb-5 leading-tight text-ink-900 tracking-tight">What FloodWatch.PH publishes, and what it doesn't.</h1>
     <p class="text-base text-ink-700 leading-relaxed mb-6">
-      FloodWatch.PH is a civic-tech research artifact. All published data is derived from publicly licensed satellite and environmental sources, aggregated to province counts only (FAO GAUL level-2, ~82 Philippine provinces; city and barangay resolution is a v1.1 refinement). This page describes the publication boundary, the legal posture under RA 10173 (Data Privacy Act of 2012), and how to request takedown.
+      FloodWatch.PH is an open research project. All published data comes from public, openly licensed satellite and environmental sources, summed up by province only (a city and barangay breakdown is a later refinement). This page describes what we publish and what we don't, how it complies with RA 10173 (the Data Privacy Act of 2012), and how to request takedown.
     </p>
 
     <h2 class="text-xl mt-8 mb-3 text-ink-900">What we publish</h2>
     <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1">
-      <li>Province flood exposure aggregates: population (WorldPop, rounded to nearest 10), built-up area in km&sup2; (Microsoft GlobalML footprints), observed historical events (Global Flood Database count), and peak flood share (max fraction of unit area flooded across the demo event dates). The on-official-hazard-map field is null in v1.0 (that overlay is a v1.1 refinement).</li>
-      <li>Flood polygon GeoJSONs at the observed open-water extent level. These are environmental polygons, not dwelling-level geometry.</li>
-      <li>Hazard-gap classification per province: under_observed_prone / charted / monitored / low.</li>
-      <li>Track B recurrence-prone sample-grid points. Points are on a <strong>300 m</strong> grid, not building centroids. No dwelling identifiers.</li>
-      <li>The trained classifier, the committed embeddings cache, and the full reproducibility chain.</li>
+      <li>Province totals for who and what is exposed (people and built-up land): population (population data (WorldPop), rounded to the nearest 10), built-up area in km&sup2; (building footprints (Microsoft)), the count of past floods on record (Global Flood Database), and the worst flood share (the largest fraction of the province under water across the demo dates). Whether each province is on an official hazard map is left blank in this version (that comparison is a later step).</li>
+      <li>The mapped flood area as map files at the level of open water seen by satellite. These are environmental shapes, not home-level outlines.</li>
+      <li>The prediction-vs-record bucket for each province.</li>
+      <li>Track B (the flood-prediction model) sample points on a <strong>300 m</strong> grid, not buildings. No home identifiers.</li>
+      <li>The trained model, the cached satellite fingerprints of the land, and the full chain anyone needs to re-run it and get the identical result.</li>
     </ul>
 
     <h2 class="text-xl mt-8 mb-3 text-ink-900">What we don't publish</h2>
     <ul class="list-disc list-outside ml-5 text-ink-700 leading-relaxed space-y-1">
-      <li>Per-household flood status geometry. No geometry that would let a third party determine whether a specific dwelling was flooded.</li>
-      <li>Owner names, resident names, phone numbers, tax-declaration data, or anything coupling a location to a natural person.</li>
-      <li>Any PII property key in any published GeoJSON. The CI gate <code>scripts/check_no_pii.py</code> asserts this on every release.</li>
-      <li>Any record of an area or route a user looks up. The lookup is offline and in-browser; FloodWatch receives nothing.</li>
-      <li>Any new outbound user data via the Expressway watch layers. The added map-tile sources receive only fixed nationwide tile coordinates, never your lookup query.</li>
+      <li>Any home-level flood-status shape. Nothing that would let someone tell whether a specific house was flooded.</li>
+      <li>Owner names, resident names, phone numbers, tax-declaration data, or anything tying a location to a person.</li>
+      <li>Any personal-data field in any published map file. An automated check asserts this on every release.</li>
+      <li>Any record of an area or route a user looks up. The lookup runs in your browser; FloodWatch receives nothing.</li>
+      <li>Any new outbound user data from the Expressway watch layers. The added map-tile sources receive only fixed nationwide tile coordinates, never your lookup query.</li>
     </ul>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
-      Population counts in <code>barangay_exposure.json</code> (filename kept for compatibility; v1.0 units are provinces) are rounded to the nearest 10. At province scale individual household data cannot be reverse-engineered.
+      Population counts in the data file (filename kept for compatibility; this version's units are provinces) are rounded to the nearest 10. At province scale, individual household data cannot be worked back out.
     </p>
 
-    <h2 class="text-xl mt-8 mb-3 text-ink-900">Data Privacy Act (RA 10173) posture</h2>
+    <h2 class="text-xl mt-8 mb-3 text-ink-900">How it complies with RA 10173 (the Data Privacy Act)</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      FloodWatch.PH publishes environmental data aggregated to province level (FAO GAUL level-2). Under §3(g) of RA 10173, personal information is "any information from which the identity of an individual is apparent or can be reasonably and directly ascertained." A satellite-derived flood polygon at province scale, or a built-up-area figure for a province, does not identify a natural person. We mitigate the "put together with other information" clause by withholding all sub-province geometry and per-dwelling status.
+      FloodWatch.PH publishes environmental data summed up by province. Under §3(g) of RA 10173, personal information is "any information from which the identity of an individual is apparent or can be reasonably and directly ascertained." A satellite flood map at province scale, or a built-up-area figure for a province, does not identify a person. We address the "put together with other information" clause by withholding all sub-province shapes and any per-home status.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      Environmental data has lower RA 10173 exposure than personal data. Flood extent and hazard-gap classifications are institutional findings about geographic areas, not personal records. The Privacy Impact Assessment at <a href="https://github.com/xmpuspus/floodwatch-ph/blob/main/docs/privacy-impact-assessment.md" class="text-accent-steel no-underline">docs/privacy-impact-assessment.md</a> documents this posture in detail.
+      Environmental data carries far less privacy risk than personal data. A flood map and a prediction-vs-record bucket are findings about places, not records about people. The Privacy Impact Assessment at <a href="https://github.com/xmpuspus/floodwatch-ph/blob/main/docs/privacy-impact-assessment.md" class="text-accent-steel no-underline">docs/privacy-impact-assessment.md</a> documents this in detail.
     </p>
 
     <h2 class="text-xl mt-8 mb-3 text-ink-900">Data Protection Officer</h2>
@@ -58,7 +58,7 @@ import Base from "../layouts/Base.astro";
 
     <h2 class="text-xl mt-8 mb-3 text-ink-900">Public-records framing</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      All data inputs derive from public records and public licensing: Copernicus Sentinel-1 (ESA/EC, open), Google AlphaEarth (CC-BY-4.0), Global Flood Database (Cloud to Street, CC-BY-4.0), MERIT Hydro (open), JRC Global Surface Water (open), WorldPop (CC-BY-4.0), Microsoft GlobalML Building Footprints (ODbL-equivalent), FAO GAUL level-2 province boundaries (public), OpenStreetMap (ODbL). Official hazard maps (Philippine government public records) are a v1.1 input, not used in v1.0.
+      All data inputs come from public records and public licensing: Copernicus Sentinel-1 (ESA/EC, open), Google AlphaEarth (CC-BY-4.0), Global Flood Database (Cloud to Street, CC-BY-4.0), MERIT Hydro (open), JRC Global Surface Water (open), population data (WorldPop) (CC-BY-4.0), building footprints (Microsoft) (ODbL-equivalent), province boundaries (public), OpenStreetMap (ODbL). Official hazard maps (Philippine government public records) are a later input, not used in this version.
     </p>
     <p class="text-base text-ink-700 leading-relaxed">
       FloodWatch.PH computes statistical indicators derived from these public sources. Patterns shown may have legitimate explanations. The dataset does not constitute an official hazard map, an engineering assessment, or a code-compliance record, and should not be cited as such.
@@ -69,7 +69,7 @@ import Base from "../layouts/Base.astro";
       No first-party cookies. No analytics scripts. No user accounts. No advertising. Vercel sets standard CDN cookies for cache routing; we do not read or use them. The site is a static build. The <code>vercel.json</code> Content-Security-Policy explicitly enumerates which endpoints the browser can reach: <code>'self'</code>, OSM tile servers for the basemap, and OSM attribution endpoints. No third-party geocoder, no analytics endpoints, no tracking.
     </p>
     <p class="text-base text-ink-700 leading-relaxed">
-      The "is this area flood-prone?" lookup runs <strong>entirely in your browser</strong> against a bundled offline place-name index (a static gazetteer shipped with the site). The text you type is matched locally and tested against the flood-evidence polygons with in-browser point-in-polygon. Your query is <strong>never transmitted to any server, never logged, and never republished</strong>. It is your own input about your own area of interest; under RA 10173 it is not collected or processed by FloodWatch because it never leaves your device.
+      The "is this area predicted to flood?" lookup runs <strong>entirely in your browser</strong> against a place-name list shipped with the site. The text you type is matched on your device and checked against the mapped flood area there too. Your query is <strong>never sent to any server, never logged, and never republished</strong>. It is your own input about your own area of interest; under RA 10173 it is not collected or processed by FloodWatch because it never leaves your device.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
       The rainfall and expressway context view loads a few map-tile layers directly from public meteorological and government sources. These requests carry no information about what you searched: every visitor's browser fetches the same fixed nationwide tiles, and the area lookup still runs entirely in your browser and is never transmitted.

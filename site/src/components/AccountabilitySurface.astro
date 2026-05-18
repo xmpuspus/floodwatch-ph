@@ -47,14 +47,14 @@ const THESIS = "Where flood-control money was spent, and where the water still c
       <h2 class="text-2xl mb-4 leading-tight text-ink-900">{THESIS}</h2>
       <div id="fw-acct-home-body">
         <p class="text-base text-ink-700 leading-relaxed mb-4">
-          The recurrence-vs-record gap above is step 1. Step 2 holds public
-          flood-control spending against it: DPWH and BetterGovPH project
-          records, cross-referenced with where Sentinel-1 still observed
-          flooding and where the recurrence model rates the ground prone. This
-          is the destination, stated as an in-progress roadmap line, not a
-          backed claim. The spending layer is a separate data build with its
-          own legal-language gate. Nothing below claims a finding the live data
-          cannot support yet.
+          The gap between what the model predicts and what past records show
+          above is step 1. Step 2 holds public flood-control spending against
+          it: DPWH and BetterGovPH project records, cross-referenced with where
+          Sentinel-1 still observed flooding and where the flood-prediction
+          model predicts the ground will flood. This is the destination, stated
+          as an in-progress roadmap line, not a backed claim. The spending layer
+          is a separate data build with its own legal-language gate. Nothing
+          below claims a finding the live data cannot support yet.
         </p>
         <p class="text-sm text-ink-500 leading-relaxed">
           Conservative by design: aggregates only, no named project is ever
@@ -74,11 +74,12 @@ const THESIS = "Where flood-control money was spent, and where the water still c
         <h2 class="text-lg text-ink-900 mb-2 leading-snug">{THESIS}</h2>
         <div id="fw-acct-map-body">
           <p class="text-sm text-ink-700 leading-relaxed">
-            The hazard-gap view is the observed substrate. The next data build
-            holds public flood-control spending against it (DPWH and BetterGovPH
-            records, cross-referenced with observed Sentinel-1 flooding and the
-            recurrence model). Aggregates only when it lands, never a named
-            project list, and stated as "warrants independent investigation."
+            The prediction-vs-record view is the satellite data the model
+            learns from. The next data build holds public flood-control spending
+            against it (DPWH and BetterGovPH records, cross-referenced with
+            observed Sentinel-1 flooding and the flood-prediction model).
+            Aggregates only when it lands, never a named project list, and
+            stated as "warrants independent investigation."
           </p>
         </div>
       </div>
@@ -221,14 +222,14 @@ const THESIS = "Where flood-control money was spent, and where the water still c
         const top = observed[0];
         lead = `${pesoShort(top.allocation_php)} was allocated to flood control in ${esc(
           top.province,
-        )}; the recurrence model rates it modeled-prone and Sentinel-1 observed flooding there on ${intFmt(
+        )}; the flood-prediction model predicts it will flood and Sentinel-1 observed flooding there on ${intFmt(
           top.observed_flood_passes,
         )} dated Carina-2024 pass${top.observed_flood_passes === 1 ? "" : "es"}. Per DPWH/BetterGovPH records; warrants independent investigation.`;
       } else {
         const top = [...prov].sort(byAlloc)[0];
         lead = `${pesoShort(top.allocation_php)} was allocated to flood control in ${esc(
           top.province,
-        )}, which the recurrence model rates modeled-prone. Per DPWH/BetterGovPH records; warrants independent investigation.`;
+        )}, which the flood-prediction model predicts will flood. Per DPWH/BetterGovPH records; warrants independent investigation.`;
       }
     }
     const tranche = (j.by_tranche ?? [])
@@ -245,13 +246,13 @@ const THESIS = "Where flood-control money was spent, and where the water still c
       .join("");
     return `
       <p class="text-base text-ink-700 leading-relaxed mb-4">
-        Public flood-control records now cross-reference the observed substrate.
-        Across ${intFmt(m.n_projects)} flood-control projects on public record
-        (${pesoShort(
+        Public flood-control records now cross-reference the satellite data the
+        model learns from. Across ${intFmt(m.n_projects)} flood-control projects
+        on public record (${pesoShort(
           m.total_allocation_php,
         )} total allocation), these are the aggregates where money was allocated
-        and where the recurrence model and Sentinel-1 still indicate flooding.
-        Aggregates only. No named project is singled out.
+        and where the flood-prediction model and Sentinel-1 still indicate
+        flooding. Aggregates only. No named project is singled out.
       </p>
       ${
         lead
@@ -280,9 +281,9 @@ const THESIS = "Where flood-control money was spent, and where the water still c
           prov,
         )} province aggregate${
           prov === 1 ? "" : "s"
-        } show money allocated where the recurrence model and Sentinel-1 still
-        indicate flooding. Aggregate counts only; no named project is listed
-        here. Each reads "warrants independent investigation."
+        } show money allocated where the flood-prediction model and Sentinel-1
+        still indicate flooding. Aggregate counts only; no named project is
+        listed here. Each reads "warrants independent investigation."
       </p>
       ${disclaimerBlock(m)}`;
   }

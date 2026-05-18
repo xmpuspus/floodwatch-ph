@@ -5,31 +5,31 @@ import AreaLookup from "../components/AreaLookup.astro";
 <Base
   title="area &amp; route flood-evidence lookup · FloodWatch.PH"
   pathname="/lookup"
-  description="Offline, in-browser lookup of dated flood evidence for a place or a route across Greater Metro Manila and the SLEX/NLEX expressways. Observed and modeled layers, each as-of-dated. Not a forecast, not a safety instruction. Your query never leaves your browser."
+  description="Look up dated flood evidence for a place or a route across Greater Metro Manila and the SLEX/NLEX expressways, right in your browser. Each layer is dated. Not a forecast, not safety advice. Your query never leaves your browser."
 >
   <section class="max-w-3xl mx-auto px-6 pt-8 pb-2">
     <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">
-      the recurrence-vs-record gap, as a tool
+      the gap between what the model predicts and what past records show, as a tool
     </p>
     <h1 class="text-3xl md:text-4xl mb-3 leading-tight text-ink-900">
-      Is this place modeled-prone but thinly recorded?
+      Is this place predicted to flood, but barely on record?
     </h1>
     <p class="text-ink-700 leading-relaxed">
       Type a place, barangay, landmark, or expressway interchange in Greater
       Metro Manila, or pick two points to test a route. FloodWatch states
-      the recurrence-vs-record gap as one conservative sentence, then shows the
-      dated evidence behind it: the modeled recurrence score, the historical
-      observed record, the most recent observed satellite pass, and rainfall
-      and expressway context. It is not a flood score and not a verdict. Each
-      row is stamped with its own date. National coverage beyond the
-      SLEX/NLEX expressways is a later refinement.
+      the gap between what the model predicts and what past records show as one
+      careful sentence, then shows the dated evidence behind it: what the
+      flood-prediction model expects, what past records show, the most recent
+      satellite pass, and rainfall and expressway context. It is not a flood
+      score and not a verdict. Each row carries its own date. Coverage beyond
+      the SLEX/NLEX expressways is a later refinement.
     </p>
     <p class="text-[13px] text-ink-500 mt-3 leading-relaxed">
-      FloodWatch is independent, open, and reproducible, and is complementary to
-      and never a replacement for PAGASA, Project NOAH, MMDA Flood Control, and
-      Google Flood Hub. It never forecasts. The whole lookup runs in your
-      browser against a bundled offline place index; your query is never
-      transmitted, logged, or republished.
+      FloodWatch is independent, open, and anyone can re-run it and get the
+      identical result. It works alongside PAGASA, Project NOAH, MMDA Flood
+      Control, and Google Flood Hub, and never replaces them. It never
+      forecasts. The whole lookup runs in your browser against a place list
+      shipped with the site; your query is never sent, logged, or republished.
     </p>
   </section>
 
@@ -37,13 +37,15 @@ import AreaLookup from "../components/AreaLookup.astro";
 
   <section class="max-w-3xl mx-auto px-6 py-6 text-xs text-ink-500 leading-relaxed">
     <p class="mb-2">
-      Evidence assembled in-browser from the same public layers the rest of the
-      site publishes: Track B recurrence (AlphaEarth 2017 embedding, 300 m
-      grid), the Global Flood Database historical record (2002-2017), the most
-      recent Sentinel-1 SAR pass (Copernicus, ~6-day revisit, ~24 h product latency, observed not
-      live), GPM IMERG rainfall accumulation context, and the OpenStreetMap
-      expressway network intersected with the latest observed extent. Place
-      coordinates are public OpenStreetMap / PSA reference points.
+      Evidence assembled in your browser from the same public layers the rest of
+      the site publishes: the flood-prediction model (Track B; a satellite
+      fingerprint of the land from 2017, on a 300 m grid), the Global Flood
+      Database record of past floods (2002-2017), the most recent Sentinel-1
+      radar (it sees through typhoon clouds) pass (Copernicus, about a 6-day
+      gap between passes, about 24 hours before the data is ready, seen by
+      satellite not live), recent rainfall totals for context, and the
+      OpenStreetMap expressway network overlaid with the latest flood map.
+      Place coordinates are public OpenStreetMap / PSA reference points.
     </p>
     <p class="mb-2 italic">
       Observed flood extent derived from public satellite data. Patterns may

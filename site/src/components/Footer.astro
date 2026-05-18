@@ -6,13 +6,13 @@ const year = new Date().getFullYear();
     <div>
       <p class="text-ink-700 font-medium">FloodWatch.PH</p>
       <p>
-        Open-source observed flood extent from public SAR satellite data. Sentinel-1 C-band, permanent-water-masked, event-disjoint validated. Track A: event flood extent. Track B: recurrence-prone classifier. Code MIT, data CC-BY-4.0. Not affiliated with PAGASA, NDRRMC, or UP NOAH.
+        Open-source observed flood extent from public satellite data. Sentinel-1 radar (it sees through typhoon clouds), rivers and lakes removed, tested by holding out whole storms. Track A: the single-storm flood map. Track B: the flood-prediction model. Code MIT, data CC-BY-4.0. Not affiliated with PAGASA, NDRRMC, or UP NOAH.
       </p>
     </div>
     <div>
       <p class="text-ink-700 font-medium">What this isn't</p>
       <p>
-        An official hazard map or engineering assessment. Observed flood extent from satellite is not a substitute for a formal flood risk study. The civic finding is the gap between observed recurrent flooding and official hazard-map coverage. Language stays conservative: "observed extent" and "warrants verification," not allegations.
+        An official hazard map or engineering assessment. Observed flood extent from satellite is not a substitute for a formal flood risk study. The civic finding is the gap between flooding that happens again and again and what official hazard maps cover. Language stays conservative: "observed extent" and "warrants verification," not allegations.
       </p>
     </div>
     <div>
@@ -31,7 +31,7 @@ const year = new Date().getFullYear();
     </div>
     <div class="md:col-span-4 text-xs text-ink-500 pt-4 border-t border-ink-300/20 leading-relaxed">
       <p class="mb-1">
-        Observed flood extent derived from public satellite data (Copernicus Sentinel-1, Google AlphaEarth, Global Flood Database, MERIT Hydro, JRC Global Surface Water, WorldPop, Microsoft GlobalML Footprints, FAO GAUL level-2 boundaries). FloodWatch.PH computes statistical indicators only. Patterns may have legitimate explanations; figures warrant independent verification. All exposure figures are province-level aggregates (FAO GAUL level-2, ~82 Philippine provinces; city and barangay resolution is a v1.1 refinement). No household geometry, no per-dwelling flood status, no PII property keys.
+        Observed flood extent derived from public satellite data (Copernicus Sentinel-1, Google AlphaEarth, Global Flood Database, public terrain and surface-water datasets, population data from WorldPop, building footprints from Microsoft, public province boundaries). FloodWatch.PH computes statistical indicators only. Patterns may have legitimate explanations; figures warrant independent verification. Who and what is exposed (people and built-up land) is summed by province (about 82 Philippine provinces; city and barangay resolution is a v1.1 refinement). No household geometry, no per-dwelling flood status, no PII property keys.
       </p>
       <p>
         &copy; {year} FloodWatch.PH. Cite as: FloodWatch.PH ({year}), https://github.com/xmpuspus/floodwatch-ph. CC-BY-4.0 on data.

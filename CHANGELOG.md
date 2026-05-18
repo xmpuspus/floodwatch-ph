@@ -4,6 +4,31 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.4.3] - 2026-05-18 - Plain language across the whole site
+
+The site described its own spine in words only a GIS or statistics person
+parses. A full plain-language pass replaced the jargon with how a normal
+person talks, identically everywhere:
+
+- "modeled-prone / under-observed / the recurrence-vs-record gap" became
+  "predicted to flood, but barely on record". The homepage H1 is now
+  "Predicted to flood, but barely on record."
+- "recurrence model" -> "the flood-prediction model"; "hazard gap layer" ->
+  "prediction-vs-record gap"; "acquisition date" -> "satellite pass date";
+  "the observed substrate" -> "the satellite data the model learns from";
+  "ungauged" -> "with no official measured record"; "exposure" -> "who and
+  what is exposed"; "FAO GAUL level-2" dropped inline (one methodology
+  footnote); "civic-tech research artifact" -> "an open research project".
+- The lookup result sentences, the map slider label and legend, and the
+  default site description were all rewritten in plain language.
+- Bare "IoU 0.054 / F1 0.065" removed from the home and map pages and
+  replaced with a plain validation sentence; the numbers live on the
+  methodology page only. Credibility anchors (Sentinel-1, DPWH, COA, PAGASA)
+  stay, glossed once on first use.
+- Code identifiers, data values, the accountability disclaimer, the
+  public-record block, and "warrants independent investigation" are
+  unchanged. qa_live updated to assert the new H1.
+
 ## [1.4.2] - 2026-05-18 - Plain English: no more "corridor"
 
 Nobody calls expressways "corridors". The "Corridor watch" surface is now
