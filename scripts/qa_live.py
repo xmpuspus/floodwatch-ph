@@ -420,8 +420,9 @@ def _check_v13_cinematic(pg, base: str, csp_errs: list[str]) -> None:
     raw_norm = " ".join(raw.split())
 
     # The spine H1 is server-rendered verbatim in the raw HTML (no JS).
-    home_h1 = "Where the model says it floods, but the record barely shows it."
-    check("re-center home H1 is the recurrence-vs-record spine line "
+    # v1.4.3 plain-language pass: the H1 is the plain core-term line.
+    home_h1 = "Predicted to flood, but barely on record."
+    check("re-center home H1 is the plain spine line "
           "(server-rendered, no JS)",
           home_h1 in raw_norm,
           "present" if home_h1 in raw_norm else "MISSING")

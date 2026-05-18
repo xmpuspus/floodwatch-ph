@@ -1,33 +1,33 @@
 ---
 import Base from "../layouts/Base.astro";
 ---
-<Base title="about · FloodWatch.PH" pathname="/me" description="About FloodWatch.PH: open-source observed flood extent from Sentinel-1 SAR, built by Xavier Puspus.">
+<Base title="about · FloodWatch.PH" pathname="/me" description="About FloodWatch.PH: an open research project measuring where floodwater reached during Philippine typhoons from Sentinel-1 radar, built by Xavier Puspus.">
   <section class="max-w-prose mx-auto px-6 pt-12 pb-12">
     <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">about</p>
     <h1 class="text-3xl md:text-4xl mb-5 leading-tight">FloodWatch.PH</h1>
 
     <p class="text-base text-ink-700 leading-relaxed mb-4">
-      FloodWatch.PH is an open-source project measuring observed flood extent during Philippine typhoons from Sentinel-1 C-band SAR satellite data, and identifying communities that are modeled flood-prone yet under-observed in the historical record.
+      FloodWatch.PH is an open research project. It measures where floodwater actually reached during Philippine typhoons, using Sentinel-1 radar (it sees through typhoon clouds) satellite data, and it finds communities that are predicted to flood, but barely on record.
     </p>
 
     <p class="text-base text-ink-700 leading-relaxed mb-4">
-      Built by <strong>Xavier Puspus</strong>. The same playbook as <a href="https://solar-map-ph.org" class="text-accent-steel no-underline">SolarMap.PH</a>: 100% public-licensed inputs, reproducible pipeline, bit-exact model hash, two separate tracks with two separate metrics reported honestly.
+      Built by <strong>Xavier Puspus</strong>. Same playbook as <a href="https://solar-map-ph.org" class="text-accent-steel no-underline">SolarMap.PH</a>: every input is public and openly licensed, the whole pipeline is reproducible, and anyone can re-run it and get the identical result. Two tracks with two separate jobs and two separate sets of numbers, reported honestly.
     </p>
 
-    <h2 class="text-xl mt-8 mb-3">The two-track architecture</h2>
+    <h2 class="text-xl mt-8 mb-3">Two tracks, two jobs</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      <strong>Track A</strong> is the event track: Sentinel-1 SAR flood extent for a specific typhoon, per acquisition date. Validated against GFD event 4300 (Koppu 2015). Applied to the ungauged Carina 2024 demo event. Parameter-free (Otsu threshold); no train/test leakage possible.
+      <strong>Track A (the single-storm flood map)</strong> shows where floodwater reached during one specific typhoon, dated by the day the satellite passed over. It was checked against an independent 2015 flood (Koppu) and then applied, without changes, to the Carina 2024 demo, which has no official measured record. It uses an automatic cutoff with no hand-tuned settings, so there is nothing to bias toward a test set.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      <strong>Track B</strong> is the recurrence model: Google AlphaEarth 64-dim satellite embeddings (2017 annual) plus a logistic regression head trained on 57 GFD Philippines events. Event-disjoint holdout: entire typhoon events held out, never random pixels. Platt-calibrated. Hash-verified.
+      <strong>Track B (the flood-prediction model)</strong> learns which places flood again and again. It uses a satellite fingerprint of the land (Google AlphaEarth, 2017) and a simple, well-understood classifier trained on 57 past Philippine floods. It is tested by holding out whole storms, never random points, and its score is calibrated so it reads like a real probability. Anyone can re-run it and get the identical result.
     </p>
 
-    <h2 class="text-xl mt-8 mb-3">Civic thesis</h2>
+    <h2 class="text-xl mt-8 mb-3">Why it exists</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      Philippine communities flood repeatedly, yet the historical observed record is uneven. FloodWatch.PH measures the v1.0 gap: provinces the recurrence model flags as flood-prone but that appear with few or no events in the historical observed record (Global Flood Database). Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces); city and barangay resolution is a v1.1 refinement. The cross-reference against the official UP NOAH / PAGASA / MGB hazard maps is also v1.1, deferred because those government layers are token-gated or SPA-only.
+      Philippine communities flood again and again, yet the official record of past floods is uneven. FloodWatch.PH measures that gap: provinces the model predicts will flood, but that show few or no floods in the past record (the Global Flood Database). Who and what is exposed (people and built-up land) and the gap between what the model predicts and what past records show are summed up by province; a city and barangay breakdown is a later refinement. Comparing against the official UP NOAH / PAGASA / MGB hazard maps is also a later step, held back because those government maps are locked behind logins or apps and cannot be read as data yet.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      Super Typhoon Carina (Gaemi) July 2024 had no promptly-public official flood-extent polygon. That absence is the civic vacuum the demo fills.
+      Super Typhoon Carina (Gaemi) in July 2024 had no official flood map released in time. That gap is exactly what the demo fills.
     </p>
 
     <h2 class="text-xl mt-8 mb-3">Links</h2>

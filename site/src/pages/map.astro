@@ -4,21 +4,19 @@ import MapView from "../components/MapView.astro";
 import NowView from "../components/NowView.astro";
 import FreshnessBanner from "../components/FreshnessBanner.astro";
 import AccountabilitySurface from "../components/AccountabilitySurface.astro";
-import { METRICS } from "../data/metrics";
-const M = METRICS;
 ---
-<Base title="flood map · FloodWatch.PH" pathname="/map" description="The default view is the observed flood extent and the province hazard-gap layer: where the recurrence model and the historical observed record diverge. A second tab carries rainfall and expressway context (source: RainViewer / PAGASA). Observed, not a forecast.">
+<Base title="flood map · FloodWatch.PH" pathname="/map" description="The default view is the mapped flood area and the province prediction-vs-record gap layer: where the flood-prediction model and the past flood records diverge. A second tab carries rainfall and expressway context (source: RainViewer / PAGASA). Observed, not a forecast.">
 
   <section class="max-w-6xl mx-auto px-6 pt-9 pb-3">
-    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">hazard gap &middot; observed flood extent</p>
+    <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">prediction-vs-record gap &middot; mapped flood area</p>
     <h1 class="text-3xl md:text-4xl mb-3 leading-tight text-ink-900">Where the model and the record diverge.</h1>
     <p class="text-ink-700 max-w-prose leading-relaxed">
-      The default view is the observed Sentinel-1 SAR flood extent for Super
-      Typhoon Carina (July to August 2024) with the province hazard-gap layer:
-      where modeled flood-proneness diverges from the historical observed
-      record. A second tab carries rainfall and expressway context from
-      RainViewer / PAGASA, which FloodWatch does not produce. Neither view is
-      live and neither is a forecast.
+      The default view is the mapped flood area from Sentinel-1 radar (it sees
+      through typhoon clouds) for Super Typhoon Carina (July to August 2024)
+      with the province prediction-vs-record gap layer: where what the model
+      predicts diverges from the past flood records. A second tab carries
+      rainfall and expressway context from RainViewer / PAGASA, which FloodWatch
+      does not produce. Neither view is live and neither is a forecast.
     </p>
   </section>
 
@@ -33,7 +31,7 @@ const M = METRICS;
         aria-controls="panel-carina"
         class="px-4 py-2 border border-ink-900 bg-ink-900 text-white font-mono text-xs uppercase tracking-wider"
       >
-        Hazard gap + observed extent
+        Prediction-vs-record gap + flood map
       </button>
       <button
         id="view-now"
@@ -56,17 +54,17 @@ const M = METRICS;
       </p>
       <p class="text-ink-700 max-w-prose leading-relaxed text-sm">
         Super Typhoon Carina (Gaemi) 2024, Metro Manila + Bulacan + Pampanga.
-        The slider steps through the Sentinel-1 acquisition dates, read at
-        runtime from the flood file, not hardcoded. Each frame is a real SAR
-        acquisition. Permanent rivers and lakes removed. Click any province for
-        exposure figures. The hazard-gap layer shows where modeled
-        flood-proneness diverges from the historical observed record. Exposure
-        and the modeled-vs-observed gap are aggregated to province (FAO GAUL
-        level-2, ~82 Philippine provinces); city and barangay resolution is a
-        v1.1 refinement.
+        The slider steps through the Sentinel-1 satellite pass dates, read at
+        runtime from the flood file, not hardcoded. Each frame is a real
+        satellite pass. Rivers and lakes removed. Click any province to see who
+        and what is exposed. The prediction-vs-record gap layer shows where
+        what the model predicts diverges from the past flood records. Who and
+        what is exposed and the gap between prediction and record are summed to
+        province (about 82 Philippine provinces); city and barangay resolution
+        is a v1.1 refinement.
       </p>
-      <p class="text-xs text-ink-500 mt-2">
-        Track A IoU vs GFD event 4300 (Koppu 2015 validation): <strong>{M.trackA_iou}</strong> &middot; F1: <strong>{M.trackA_f1}</strong>. The validated method is applied to the ungauged Carina 2024 demonstration.
+      <p class="text-xs text-ink-500 mt-2 leading-relaxed">
+        Validated against an independent 2015 flood map; the overlap is low and openly reported (see methodology). The validated method is applied to the Carina 2024 demonstration, an event with no official measured record.
       </p>
     </section>
     <MapView />
@@ -82,13 +80,13 @@ const M = METRICS;
 
   <section class="max-w-6xl mx-auto px-6 py-6 text-xs text-ink-500 leading-relaxed">
     <p class="mb-2">
-      Observed flood extent derived from public satellite data (Copernicus Sentinel-1 C-band SAR). Permanent-water mask applied: figures represent flood, not rivers or lakes. Exposure figures are province aggregates (WorldPop population, Microsoft GlobalML built-up area). No household geometry, no per-dwelling flood status, no PII.
+      Observed flood extent derived from public satellite data (Copernicus Sentinel-1 radar). Rivers and lakes removed: figures represent flooding, not rivers or lakes. Who and what is exposed (people and built-up land) is summed by province (population data from WorldPop, building footprints from Microsoft). No household geometry, no per-dwelling flood status, no PII.
     </p>
     <p class="mb-2 italic">
       Patterns may have legitimate explanations; figures warrant independent verification. Not an official hazard map. Not a forecast. Not engineering advice. Intended for civic transparency and LGU planning research.
     </p>
     <p>
-      Cite as: FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph. CC-BY-4.0 on data. SAR data: Copernicus/Sentinel-1, open. Province boundaries: FAO GAUL level-2, public.
+      Cite as: FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph. CC-BY-4.0 on data. Radar data: Copernicus/Sentinel-1, open. Province boundaries: public.
     </p>
   </section>
 

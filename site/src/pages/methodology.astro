@@ -3,37 +3,43 @@ import Base from "../layouts/Base.astro";
 import { METRICS } from "../data/metrics";
 const M = METRICS;
 ---
-<Base title="methodology · FloodWatch.PH" pathname="/methodology" description="Two-track methodology: Track A SAR event flood detection (Otsu + permanent-water mask) and Track B recurrence classifier (AlphaEarth embeddings, event-disjoint holdout). Metrics reported separately.">
+<Base title="methodology · FloodWatch.PH" pathname="/methodology" description="Two tracks: Track A maps where one storm's floodwater reached, from Sentinel-1 radar. Track B predicts which places flood again and again. Each is reported with its own numbers.">
   <article class="max-w-prose mx-auto px-6 pt-8 pb-12">
     <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">methodology &middot; v1 &middot; 2026</p>
-    <h1 class="text-3xl mb-2">Two tracks, two jobs, two metrics.</h1>
+    <h1 class="text-3xl mb-2">Two tracks, two jobs, two sets of numbers.</h1>
+    <p class="text-base text-ink-700 mb-4 leading-relaxed">
+      A flood is an event, not a fixed thing. One satellite photo cannot do the job: by the next clear photo the water is gone, and a regular camera satellite cannot see through the typhoon's own clouds anyway. So FloodWatch.PH uses two tracks with two different jobs.
+    </p>
+    <p class="text-base text-ink-700 mb-4 leading-relaxed">
+      <strong>Track A (the single-storm flood map)</strong> shows where floodwater reached during one specific typhoon. <strong>Track B (the flood-prediction model)</strong> learns which places flood again and again, across many seasons. They answer different questions, so each is reported with its own numbers. We never average the two.
+    </p>
     <p class="text-base text-ink-700 mb-8 leading-relaxed">
-      Flood is an event, not a fixture. A single satellite snapshot cannot work: the flood is gone by the next clear optical pass, and optical sensors are cloud-blocked by the very typhoon that causes the flood. FloodWatch.PH answers with two tracks that have different jobs and report their metrics separately. The README never averages them.
+      The rest of this page is the technical detail. It uses some precise terms, each explained in plain words the first time.
     </p>
 
     <p class="text-[11px] text-ink-500 mb-8 leading-relaxed italic border-l-2 border-ink-300/40 pl-4">
       Observed flood extent derived from public satellite data. Patterns may have legitimate explanations; figures warrant independent verification.
     </p>
 
-    <h2 class="text-xl mt-10 mb-3">Track A: event flood extent (the demo)</h2>
+    <h2 class="text-xl mt-10 mb-3">Track A (the single-storm flood map): the demo</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      <strong>Sensor:</strong> Sentinel-1 C-band SAR (<code>COPERNICUS/S1_GRD</code>), VV and VH polarization, IW mode, Copernicus open license. SAR penetrates typhoon cloud cover. It is the only sensor that sees the ground during a Philippine flood. Sentinel-2 optical is cloud-blocked on purpose during typhoons; omitting it from Track A is an intentional honesty decision, not a gap.
+      <strong>Sensor:</strong> Sentinel-1 radar (it sees through typhoon clouds) (<code>COPERNICUS/S1_GRD</code>), Copernicus open license. Because it is radar, not a camera, it sees the ground through the storm. It is the only sensor that sees the ground during a Philippine flood. A regular optical satellite (Sentinel-2) is blocked by the typhoon's own clouds; leaving it out of Track A is an honesty decision, not a gap.
     </p>
 
-    <h3 class="text-lg mt-6 mb-2">Per-timestep pipeline</h3>
+    <h3 class="text-lg mt-6 mb-2">How each date is processed</h3>
     <ol class="list-decimal pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
-      <li><strong>Pre-event baseline.</strong> Median composite of S1 GRD scenes from the dry weeks before the event window. For Carina 2024: baseline dates 2024-06-16 and 2024-06-28.</li>
-      <li><strong>Event scenes.</strong> Per-date S1 acquisitions during and after the event. For Carina 2024: 2024-07-10, 2024-07-22, 2024-07-30, 2024-08-03.</li>
-      <li><strong>Speckle filtering.</strong> Refined-Lee focal median applied to reduce SAR speckle noise before thresholding.</li>
-      <li><strong>dB conversion and change image.</strong> VH (and VV cross-check) converted to dB. Change image = during/post minus baseline. Open water appears as a strong negative VH response (SAR backscatter drops over smooth water).</li>
-      <li><strong>Otsu threshold.</strong> Automatic optimal threshold applied to the VH change image. No fitted parameters: Otsu computes the threshold directly from the histogram. This makes Track A parameter-free and immune to train/test leakage.</li>
-      <li><strong>Permanent-water mask subtracted.</strong> MERIT Hydro HAND threshold (<code>MERIT/Hydro/v1_0_1</code>) + JRC Global Surface Water occurrence &ge;50% (<code>JRC/GSW1_4/GlobalSurfaceWater</code>) + OSM <code>natural=water</code> / <code>waterway</code>. The published output reports flood, not rivers, lakes, or coastline. This is the integrity decision: a CI gate asserts every published flood GeoJSON carries <code>_meta.permanent_water_masked == true</code> and &lt;5% of flood area intersects JRC permanent water.</li>
-      <li><strong>Per-timestep flood polygon GeoJSON.</strong> One <code>FeatureCollection</code> per event. Features have <code>date</code> and <code>event</code> properties. The map time-slider filters by the selected date.</li>
+      <li><strong>Before-the-storm baseline.</strong> An average of Sentinel-1 scenes from the dry weeks before the storm. For Carina 2024: baseline dates 2024-06-16 and 2024-06-28.</li>
+      <li><strong>Storm dates.</strong> Sentinel-1 passes during and after the storm. For Carina 2024: 2024-07-10, 2024-07-22, 2024-07-30, 2024-08-03.</li>
+      <li><strong>Radar processing steps.</strong> Standard cleanup (Refined-Lee speckle filtering, an industry-standard step that smooths the grainy noise in radar images; then a decibel conversion) before the cutoff.</li>
+      <li><strong>Change image.</strong> The radar signal during and after the storm, minus the before-the-storm baseline. Smooth open water reflects almost no radar back to the satellite, so flooded ground stands out as a strong drop (the backscatter, the amount of radar bounced back, falls over flat water).</li>
+      <li><strong>Otsu threshold (an automatic cutoff with no hand-tuned settings).</strong> The cutoff between flooded and not-flooded is computed straight from the image's own brightness histogram. Nothing is hand-tuned, so there is nothing to bias the result toward a test set.</li>
+      <li><strong>Rivers and lakes removed.</strong> Permanent water is subtracted using public terrain and surface-water datasets (MERIT Hydro HAND, <code>MERIT/Hydro/v1_0_1</code>; JRC Global Surface Water occurrence &ge;50%, <code>JRC/GSW1_4/GlobalSurfaceWater</code>) plus OpenStreetMap water. The published map shows flood, not rivers, lakes, or coastline. An automated check asserts every published flood map carries <code>_meta.permanent_water_masked == true</code> and that less than 5% of the flood area overlaps permanent water.</li>
+      <li><strong>One flood map per date.</strong> The map's time slider filters by the date you pick.</li>
     </ol>
 
-    <h3 class="text-lg mt-6 mb-2">Track A validation</h3>
+    <h3 class="text-lg mt-6 mb-2">How Track A was checked</h3>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      The Global Flood Database ends 2017. Track A is IoU/F1-validated against the GFD <code>flooded</code> polygon for <strong>GFD event 4300, Tropical Storm Koppu (Lando), 2015-10-22, central Luzon</strong> (54 dead, severity 2), using the 2015-10-26 Sentinel-1 post-onset acquisition. The validated method is then applied without modification to the ungauged Carina 2024 demo event.
+      The Global Flood Database ends in 2017. Track A was checked against the independent flood map for <strong>GFD event 4300, Tropical Storm Koppu (Lando), 2015-10-22, central Luzon</strong> (54 dead, severity 2), using the 2015-10-26 Sentinel-1 pass just after the flood started. Two overlap scores are reported: IoU (how much our map and the reference map overlap, as a fraction of their combined area) and F1 (a combined score balancing how much we catch against how much we over-call). Both are low and openly reported. The same checked method is then applied, without changes, to the Carina 2024 demo, which has no official measured record.
     </p>
     <div class="bg-paper-alt border border-ink-300/40 p-4 mb-4 font-mono text-sm">
       <div class="grid grid-cols-2 gap-y-1 gap-x-6 text-xs">
@@ -48,28 +54,28 @@ const M = METRICS;
       </div>
     </div>
     <p class="text-xs text-ink-500 leading-relaxed italic mb-6">
-      Track A is parameter-free; Otsu has no fitted parameters. The event-disjoint holdout discipline (decision 1) governs Track B. Track A does not require a holdout split for the detection method itself.
+      Track A has no hand-tuned settings (the Otsu cutoff is computed from the image itself), so it cannot be biased toward a test set. The hold-out-whole-storms discipline (decision 1) applies to Track B; Track A's detection method does not need it.
     </p>
 
-    <h2 class="text-xl mt-10 mb-3">Track B: recurrence-prone classifier</h2>
+    <h2 class="text-xl mt-10 mb-3">Track B (the flood-prediction model)</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      Track B answers a different question: which places flood again and again, independent of any single event? This is the SolarMap analog: a trained classifier on a frozen embedding, reproducible and hash-verified.
+      Track B answers a different question: which places flood again and again, regardless of any single storm? Like SolarMap, it is a trained classifier on a fixed satellite fingerprint of the land. Anyone can re-run it and get the identical result.
     </p>
 
-    <h3 class="text-lg mt-6 mb-2">Architecture</h3>
+    <h3 class="text-lg mt-6 mb-2">How it is built</h3>
     <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
-      <li><strong>Embedding:</strong> Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>), natively 10 m, sampled here at <strong>300 m</strong> (mean-aggregated per cell; flood recurrence is an area property), 64-dim unit-norm vectors, annual 2017-2025, CC-BY-4.0. Fixed at the 2017 annual (contemporaneous with the GFD record end). Server-side Earth Engine reduction to a small client download; no bulk raw-imagery fetch.</li>
-      <li><strong>Head:</strong> <code>sklearn.linear_model.LogisticRegression</code> on the 64-dim embedding. Platt-sigmoid calibrated on the event-disjoint holdout. Bit-exact, approximately 30 seconds on any laptop, no GPU, deterministic, hash-verified.</li>
-      <li><strong>Labels:</strong> Positives = pixels inside GFD historical flood-event footprints (2002-2017, 57 Philippines events), permanent water removed. Negatives = land pixels never flooded across all GFD events.</li>
-      <li><strong>Committed cache:</strong> <code>model/embeddings/floodwatch_embeddings_v1.npz</code> (~1 MB). <code>make train</code> runs offline from this cache. No network required after the initial EE pull.</li>
+      <li><strong>Satellite fingerprint of the land:</strong> Google AlphaEarth Foundations "Satellite Embedding V1" (<code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>) is a compact numeric summary of what each patch of land looks like from space. Natively 10 m, sampled here at <strong>300 m</strong> (averaged per cell, because repeated flooding is an area property), one summary per year 2017-2025, CC-BY-4.0. Fixed at the 2017 summary (the same period the past-flood record ends). Computed on Google's servers and downloaded as a small file; no bulk raw imagery is pulled.</li>
+      <li><strong>The classifier:</strong> a simple, well-understood classifier (<code>sklearn.linear_model.LogisticRegression</code>) on that fingerprint. Its score is calibrated so it reads like a real probability. It trains in about 30 seconds on any laptop, no GPU, and anyone can re-run it and get the identical result.</li>
+      <li><strong>Training examples:</strong> "flooded" points are those inside past flood footprints (Global Flood Database, 2002-2017, 57 Philippine floods), with rivers and lakes removed. "Not flooded" points are land that never flooded across any of those floods.</li>
+      <li><strong>Cached data:</strong> <code>model/embeddings/floodwatch_embeddings_v1.npz</code> (~1 MB). <code>make train</code> runs offline from this cache. No network needed after the first pull.</li>
     </ul>
 
-    <h3 class="text-lg mt-6 mb-2">Event-disjoint holdout (decision 1)</h3>
+    <h3 class="text-lg mt-6 mb-2">Tested by holding out whole storms (decision 1)</h3>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      The single most important honesty decision. Holdout splits are by entire typhoon events, not random pixels. Random-pixel splits leak: adjacent pixels are near-duplicates, inflating IoU/F1. Holdout events are named in <code>model/holdout_events.json</code> and the split file hash is pinned in the Makefile. A CI gate asserts no holdout event leaks into any training fold.
+      The single most important honesty decision. The model is tested by holding out whole storms, never random points. Splitting on random points would cheat: two points next to each other look almost identical, so the model would effectively see the test answers and the scores would look better than they are. The held-out storms are named in <code>model/holdout_events.json</code> and the split is pinned in the Makefile. An automated check asserts no held-out storm leaks into training.
     </p>
 
-    <h3 class="text-lg mt-6 mb-2">Track B metrics (event-disjoint holdout)</h3>
+    <h3 class="text-lg mt-6 mb-2">Track B numbers (tested on held-out storms)</h3>
     <div class="bg-paper-alt border border-ink-300/40 p-4 mb-4 font-mono text-sm">
       <div class="grid grid-cols-2 gap-y-1 gap-x-6 text-xs">
         <span class="text-ink-500">Holdout type</span><span>Event-disjoint (entire typhoon events held out)</span>
@@ -81,59 +87,63 @@ const M = METRICS;
       </div>
     </div>
 
-    <h2 class="text-xl mt-10 mb-3">The civic layer: hazard gap (v1.0)</h2>
+    <h2 class="text-xl mt-10 mb-3">The civic layer: the prediction-vs-record gap (v1.0)</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      Exposure and the modeled-vs-observed gap are aggregated to <strong>province (FAO GAUL level-2, ~82 Philippine provinces)</strong>; city and barangay resolution is a v1.1 refinement (sub-province polygons are not a clean public asset). The data files keep the name <code>barangay_exposure.json</code> for compatibility but contain province units under a top-level <code>units</code> key.
+      Who and what is exposed (people and built-up land) and the gap between what the model predicts and what past records show are summed up by <strong>province</strong><a href="#fn-gaul" class="text-accent-steel no-underline">*</a>; a city and barangay breakdown is a later refinement (clean sub-province boundaries are not freely available). The data files keep the name <code>barangay_exposure.json</code> for compatibility but hold province units under a top-level <code>units</code> key.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      The v1.0 gap is the divergence between <em>modeled flood-proneness</em> (Track B mean recurrence score per province) and the <em>historical observed record</em> (Global Flood Database event footprints). Each province is classified <code>gap</code> = <code>under_observed_prone</code> | <code>charted</code> | <code>monitored</code> | <code>low</code>. The headline civic finding is the set of <code>under_observed_prone</code> units: modeled flood-prone but with few or no events in the historical observed record.
+      The v1.0 gap is the difference between what the flood-prediction model predicts (Track B's average score per province) and what past records show (Global Flood Database flood footprints). Each province is sorted into <code>gap</code> = <code>under_observed_prone</code> | <code>charted</code> | <code>monitored</code> | <code>low</code>. The headline finding is the set of <code>under_observed_prone</code> provinces: predicted to flood, but barely on record.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      v1.0 does <strong>not</strong> compare against the official UP NOAH / Project NOAH / PAGASA / MGB hazard maps. That cross-reference is an explicit <strong>v1.1</strong> refinement, deferred because those government layers are token-gated or served only through single-page apps and cannot currently be fetched as data. The <code>on_official_hazard_map</code> field is therefore null in v1.0.
+      v1.0 does <strong>not</strong> compare against the official UP NOAH / Project NOAH / PAGASA / MGB hazard maps. That comparison is a later step, held back because those government maps are locked behind logins or apps and cannot be read as data yet. The <code>on_official_hazard_map</code> field is therefore left blank in v1.0.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      Language stays conservative throughout. <code>under_observed_prone</code> means modeled-prone with a thin historical observed record given the data available; it is not an allegation of negligence. LGU disaster planners and researchers should verify with local records before acting on these figures.
+      The language stays careful throughout. <code>under_observed_prone</code> means predicted to flood with a thin past record given the data available; it is not an accusation of negligence. LGU disaster planners and researchers should verify with local records before acting on these figures.
     </p>
 
-    <h2 class="text-xl mt-10 mb-3">Permanent-water masking (decision 2)</h2>
+    <h2 class="text-xl mt-10 mb-3">Removing rivers and lakes (decision 2)</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      The product reports flood, not rivers, lakes, or sea. Three mask layers are combined:
+      The map shows flood, not rivers, lakes, or sea. Three layers are combined to remove permanent water:
     </p>
     <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-1 mb-4">
-      <li>MERIT Hydro HAND (Height Above Nearest Drainage) at a calibrated threshold from <code>MERIT/Hydro/v1_0_1</code>.</li>
-      <li>JRC Global Surface Water occurrence &ge;50% (<code>JRC/GSW1_4/GlobalSurfaceWater</code>) for permanent open water.</li>
-      <li>OSM <code>natural=water</code> and <code>waterway</code> polygons for named water bodies.</li>
+      <li>MERIT Hydro HAND (height above the nearest river or drain) at a calibrated cutoff, from <code>MERIT/Hydro/v1_0_1</code>.</li>
+      <li>JRC Global Surface Water, places that are open water &ge;50% of the time (<code>JRC/GSW1_4/GlobalSurfaceWater</code>).</li>
+      <li>OpenStreetMap named water bodies (<code>natural=water</code> and <code>waterway</code>).</li>
     </ul>
     <p class="text-base text-ink-700 leading-relaxed">
-      A CI gate asserts every published flood GeoJSON carries <code>_meta.permanent_water_masked == true</code> and that &lt;5% of the flood area intersects JRC permanent water.
+      An automated check asserts every published flood map carries <code>_meta.permanent_water_masked == true</code> and that less than 5% of the flood area overlaps permanent water.
     </p>
 
     <h2 class="text-xl mt-10 mb-3">Honest limitations</h2>
     <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-2 mb-4">
-      <li>SAR at 10-20m resolution captures open water extents but underestimates flood depth in urban canyons and under dense vegetation.</li>
-      <li>The Otsu threshold is computed per-timestep on the change image. Heavy rain on the pre-event baseline or sensor orbit differences may shift the threshold slightly.</li>
-      <li>Track B is trained on GFD events 2002-2017. Events since 2017 (Odette 2021, Paeng 2022, Carina 2024) are not in the training labels.</li>
-      <li>AlphaEarth embeddings are annual 2017 composite. Rapid land-cover change after 2017 is not reflected in the embedding used for training.</li>
-      <li>Exposure and the modeled-vs-observed gap are aggregated to province (FAO GAUL level-2, ~82 Philippine provinces). City and barangay resolution is a v1.1 refinement; sub-province variation is not resolved in v1.0.</li>
-      <li>The v1.0 gap is against the historical observed record (GFD), not the official hazard maps. A thin observed record is not confirmed safety; it may reflect gaps in historical observation. The official-hazard-map cross-reference is v1.1.</li>
-      <li>FloodWatch deliberately does not surface GloFAS or any riverine flood forecast. GloFAS is a riverine forecast product, and the floods that close SLEX/NLEX and inundate Metro Manila during a typhoon are overwhelmingly pluvial and compound-urban, the rainfall-driven class that riverine forecasting "covers only riverine floods, as opposed to flash/coastal floods" explicitly excludes (flash, coastal, urban, and pluvial floods are not covered). A forecast pixel on the expressway map would also blur the one distinction FloodWatch defends: it publishes observed extent after the water has been seen, and never forecasts. GloFAS is recorded here as a possible future external link, never a default layer and never parsed into any FloodWatch number.</li>
+      <li>At 10-20 m, the radar captures how far open water spread but underestimates flood depth between tall buildings and under dense trees.</li>
+      <li>The automatic cutoff is computed per date on the change image. Heavy rain on the before-the-storm baseline, or a different satellite orbit, can shift it slightly.</li>
+      <li>Track B is trained on past floods from 2002 to 2017. Floods since 2017 (Odette 2021, Paeng 2022, Carina 2024) are not in the training data.</li>
+      <li>The satellite fingerprint of the land is the 2017 summary. Fast land-cover change after 2017 is not reflected in it.</li>
+      <li>Who and what is exposed and the prediction-vs-record gap are summed up by province. A city and barangay breakdown is a later refinement; variation within a province is not resolved in v1.0.</li>
+      <li>The v1.0 gap is against the past record (GFD), not the official hazard maps. A thin past record is not confirmed safety; it may mean past floods went unrecorded. The official-hazard-map comparison is a later step.</li>
+      <li>FloodWatch deliberately does not surface GloFAS or any river-flood forecast. GloFAS forecasts river floods, but the floods that close SLEX/NLEX and swamp Metro Manila during a typhoon are overwhelmingly rain-driven city flooding, the class river forecasting explicitly does not cover (flash, coastal, urban, and rain-driven floods are out of scope). A forecast pixel on the expressway map would also blur the one line FloodWatch holds: it publishes flooding only after the water has been seen, and never forecasts. GloFAS is noted here as a possible future external link, never a default layer and never folded into any FloodWatch number.</li>
     </ul>
 
-    <h2 class="text-xl mt-10 mb-3">Reproducibility</h2>
+    <h2 class="text-xl mt-10 mb-3">Anyone can re-run it</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-3">
-      <code>make train</code> reproduces the Track B classifier bit-exact from the committed NPZ cache with no network access. <code>make hash-verify</code> asserts <code>recurrence_clf_v1.joblib</code> sha256 matches the canonical value pinned in the Makefile. Earth Engine pulls use server-side reduction to small client downloads only.
+      <code>make train</code> rebuilds the Track B classifier from the cached data with no network, and anyone gets the identical result. <code>make hash-verify</code> asserts <code>recurrence_clf_v1.joblib</code> matches the exact fingerprint pinned in the Makefile. Google's servers do the heavy work and only small files are downloaded.
     </p>
 
     <h2 class="text-xl mt-10 mb-3">Data sources</h2>
     <ul class="list-disc pl-5 text-base text-ink-700 leading-relaxed space-y-1">
-      <li>Sentinel-1 C-band SAR: <code>COPERNICUS/S1_GRD</code>, Copernicus open license.</li>
-      <li>AlphaEarth Foundations embedding: <code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>, CC-BY-4.0, produced by Google and Google DeepMind.</li>
+      <li>Sentinel-1 radar: <code>COPERNICUS/S1_GRD</code>, Copernicus open license.</li>
+      <li>AlphaEarth Foundations satellite fingerprint: <code>GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL</code>, CC-BY-4.0, produced by Google and Google DeepMind.</li>
       <li>Global Flood Database: <code>GLOBAL_FLOOD_DB/MODIS_EVENTS/V1</code>, Cloud to Street / Nature 2021, CC-BY-4.0.</li>
       <li>MERIT Hydro HAND: <code>MERIT/Hydro/v1_0_1</code>, open.</li>
       <li>JRC Global Surface Water: <code>JRC/GSW1_4/GlobalSurfaceWater</code>, open.</li>
-      <li>WorldPop population: CC-BY-4.0.</li>
-      <li>Microsoft GlobalML Building Footprints: ODbL-equivalent (built-up area aggregate).</li>
-      <li>FAO GAUL level-2 province boundaries (~82 Philippine provinces): FAO, public. (City and barangay boundaries are a v1.1 input.)</li>
+      <li>Population data (WorldPop): CC-BY-4.0.</li>
+      <li>Building footprints (Microsoft): ODbL-equivalent (built-up area total).</li>
+      <li>Province boundaries (~82 Philippine provinces): FAO, public. (City and barangay boundaries are a later input.)</li>
     </ul>
+
+    <p id="fn-gaul" class="text-[11px] text-ink-500 mt-8 pt-4 border-t border-ink-300/30 leading-relaxed">
+      * Province boundaries: FAO GAUL level-2, public.
+    </p>
   </article>
 </Base>

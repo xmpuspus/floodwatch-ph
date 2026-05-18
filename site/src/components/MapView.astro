@@ -17,11 +17,11 @@ const sliderDates: string[] = carina.event_dates;
     <summary class="cursor-pointer px-4 py-2.5 text-sm font-medium text-ink-900">How to read this map</summary>
     <div class="px-4 pb-4 pt-1 text-sm text-ink-700 leading-relaxed space-y-2 max-w-prose">
       <p>
-        The time slider steps through the Sentinel-1 SAR acquisition dates bracketing Super Typhoon Carina (Gaemi) in July-August 2024 over Metro Manila, Bulacan, and Pampanga. Each frame shows the observed open-water extent at that date, after permanent rivers and lakes are subtracted. The flood polygons grow from the pre-event date through peak inundation and into recession.
+        The time slider steps through the dates Sentinel-1 radar (it sees through typhoon clouds) passed over Metro Manila, Bulacan, and Pampanga during Super Typhoon Carina (Gaemi) in July to August 2024. Each frame shows the flooded area on that date, with rivers and lakes removed. The mapped flood area grows from before the storm to peak flooding, then shrinks as the water drains.
       </p>
       <p>
         <strong>Color encoding (province, FAO GAUL level-2):</strong>
-        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#d1495b"></span> red = modeled-prone but under-observed in the historical record;
+        <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#d1495b"></span> red = predicted to flood, but barely on record;
         <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#5b7fa6"></span> blue = charted in the historical record;
         <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#8aa0bc"></span> steel = monitored;
         <span class="inline-block w-3 h-3 align-middle rounded-sm" style="background:#aab4c2"></span> gray = low.
@@ -37,7 +37,7 @@ const sliderDates: string[] = carina.event_dates;
   <div class="bg-paper border border-ink-300/30 p-4">
     <div class="flex flex-wrap items-center gap-4 mb-3">
       <div>
-        <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">acquisition date</p>
+        <p class="text-[10px] uppercase tracking-wider text-ink-500 font-mono mb-1">satellite pass date</p>
         <p id="slider-date-display" class="font-mono tabular-nums text-xl text-ink-900">--</p>
       </div>
       <div class="flex-1 min-w-[200px]">
@@ -70,11 +70,11 @@ const sliderDates: string[] = carina.event_dates;
       </label>
       <label class="flex items-center gap-1.5 cursor-pointer">
         <input id="toggle-gap" type="checkbox" checked class="accent-accent-gap" />
-        <span class="text-ink-700">Hazard gap layer</span>
+        <span class="text-ink-700">Prediction-vs-record gap</span>
       </label>
       <label class="flex items-center gap-1.5 cursor-pointer">
         <input id="toggle-recurrence" type="checkbox" class="accent-ink-500" />
-        <span class="text-ink-700">Recurrence-prone overlay</span>
+        <span class="text-ink-700">Flood-prediction overlay</span>
       </label>
       <!-- §1d satellite backdrop, OFF by default, F1 fail-safe (disabled
            until the GIBS mosaic date resolves). Drawn at the BOTTOM of the
@@ -102,9 +102,9 @@ const sliderDates: string[] = carina.event_dates;
       <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700 mb-2">
         <span class="inline-block w-3 h-3 rounded-sm opacity-60" style="background:#1391d4"></span><span>observed open water (SAR)</span>
       </div>
-      <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">hazard gap (province)</div>
+      <div class="text-ink-500 uppercase tracking-wider text-[10px] mb-1 font-mono">prediction-vs-record gap (province)</div>
       <div class="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0.5 text-[10px] text-ink-700">
-        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#d1495b"></span><span>modeled-prone, under-observed</span>
+        <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#d1495b"></span><span>predicted to flood, barely on record</span>
         <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#5b7fa6"></span><span>charted in historical record</span>
         <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#8aa0bc"></span><span>monitored</span>
         <span class="inline-block w-3 h-3 rounded-sm opacity-70" style="background:#aab4c2"></span><span>low</span>

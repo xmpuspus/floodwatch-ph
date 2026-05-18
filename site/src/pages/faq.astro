@@ -1,52 +1,50 @@
 ---
 import Base from "../layouts/Base.astro";
-import { METRICS } from "../data/metrics";
-const M = METRICS;
 
 const sections = [
   {
     title: "What is FloodWatch.PH?",
-    body: "A civic-tech research artifact: an open, reproducible measurement of observed flood extent during Philippine typhoons, and a recurrence-prone classifier that flags communities that are modeled flood-prone yet under-observed in the historical record. Two tracks with two separate jobs, reported with separate metrics. Open-source (MIT for code, CC-BY-4.0 for data).",
+    body: "An open research project. It measures where floodwater actually reached during Philippine typhoons, and it runs a model that finds communities predicted to flood, but barely on record. Two tracks with two separate jobs, each reported with its own numbers. Open-source (MIT for code, CC-BY-4.0 for data).",
   },
   {
-    title: "Why Sentinel-1 SAR and not optical satellite imagery?",
-    body: "Optical sensors (Sentinel-2, Landsat, Planet) are cloud-blocked by the typhoon itself. Sentinel-1 C-band SAR radar penetrates cloud cover and sees the ground during the flood event. Using optical imagery for flood detection during a Philippine typhoon would produce mostly cloud-covered tiles. SAR is the only viable sensor for this application; saying so is part of the methodology honesty.",
+    title: "Why Sentinel-1 radar and not regular satellite photos?",
+    body: "Regular optical satellites (Sentinel-2, Landsat, Planet) cannot see through the typhoon's own clouds. Sentinel-1 radar (it sees through typhoon clouds) sees the ground even during the storm. Optical photos during a Philippine typhoon would be almost entirely cloud. Sentinel-1 is the only sensor that works here, and we say so plainly.",
   },
   {
-    title: "How accurate is the flood extent detection?",
-    body: `Track A is validated against the Global Flood Database ground-truth polygon for GFD event 4300 (Tropical Storm Koppu / Lando, 2015, central Luzon). IoU: <strong>${M.trackA_iou}</strong>, F1: <strong>${M.trackA_f1}</strong>. Track A uses Otsu thresholding, which has no fitted parameters, so there is no train/test leakage. The validated method is applied without modification to the ungauged Carina 2024 demo event.`,
+    title: "How accurate is the single-storm flood map?",
+    body: "Track A (the single-storm flood map) was checked against an independent 2015 flood map (Tropical Storm Koppu / Lando, central Luzon). The overlap with that independent map is low and openly reported (see methodology). It uses an automatic cutoff with no hand-tuned settings, so there is nothing to bias the result toward a test set. The same method is then applied, without changes, to the Carina 2024 demo, which has no official measured record.",
   },
   {
-    title: "How accurate is the recurrence model?",
-    body: `Track B uses an event-disjoint holdout: entire GFD typhoon events are held out, never random pixels (random-pixel splits inflate metrics because adjacent pixels are near-duplicates). On the event-disjoint holdout: F1: <strong>${M.trackB_f1}</strong>, Precision: <strong>${M.trackB_precision}</strong>, Recall: <strong>${M.trackB_recall}</strong>. A Platt sigmoid calibration curve is published at docs/figures/reliability_diagram.png.`,
+    title: "How accurate is the flood-prediction model?",
+    body: "Track B (the flood-prediction model) is tested by holding out whole storms, never random points (splitting on random points would inflate the score, because nearby points look almost identical). The precision and recall on that held-out test, and the full numbers, are on the <a class='text-accent-steel no-underline' href='/methodology'>methodology page</a>. A chart showing how well the score is calibrated is published with the project.",
   },
   {
-    title: "What is the hazard gap layer?",
-    body: "In v1.0 the hazard gap compares Track B modeled flood-proneness (mean recurrence score per province, FAO GAUL level-2, ~82 Philippine provinces) against the historical observed record (the Global Flood Database), NOT against the official hazard maps. Each province is classified gap = under_observed_prone, charted, monitored, or low. 'under_observed_prone' means modeled-prone but with few or no events in the historical observed record; it is not an allegation. The cross-reference against the official UP NOAH / PAGASA / MGB hazard maps is an explicit v1.1 refinement, deferred because those government layers are token-gated or served only through single-page apps and cannot be fetched as data. City and barangay resolution is also a v1.1 refinement. Language stays conservative throughout.",
+    title: "What is the prediction-vs-record gap?",
+    body: "It compares what the flood-prediction model (Track B) predicts for a province against what past records actually show (the Global Flood Database). It does not compare against the official hazard maps. Each province is sorted into one of four buckets. The headline one means predicted to flood, but barely on record: the model expects flooding, but there are few or no floods in the past record. That is not an accusation. Comparing against the official UP NOAH / PAGASA / MGB hazard maps is a later step, held back because those government maps are locked behind logins or apps and cannot be read as data yet. A city and barangay breakdown is also a later refinement. The language stays careful throughout.",
   },
   {
-    title: "Does this dataset expose personal information?",
-    body: "No. All exposure figures are province-level aggregates (FAO GAUL level-2, ~82 Philippine provinces; city and barangay resolution is a v1.1 refinement). Population counts are from WorldPop (rounded to the nearest 10). Built-up area is from Microsoft GlobalML footprints. No household geometry, no per-dwelling flood status, no PII property keys. The CI gate scripts/check_no_pii.py asserts this on every release. See <a class='text-accent-steel no-underline' href='/privacy'>/privacy</a> and the Privacy Impact Assessment.",
+    title: "Does this expose anyone's personal information?",
+    body: "No. Every figure for who and what is exposed (people and built-up land) is summed up by province only (a city and barangay breakdown is a later refinement). Population counts come from population data (WorldPop), rounded to the nearest 10. Built-up area comes from building footprints (Microsoft). No household-level shapes, no per-home flood status, no personal data of any kind. An automated check asserts this on every release. See <a class='text-accent-steel no-underline' href='/privacy'>/privacy</a> and the Privacy Impact Assessment.",
   },
   {
-    title: "Why is Carina 2024 used as the demo event if it has no official flood polygon?",
-    body: "That absence is the civic vacuum the demo fills. No promptly-public official flood-extent polygon was released for Carina 2024 (Super Typhoon Gaemi + enhanced southwest monsoon, July 2024, Metro Manila). The validated Track A method is applied to Carina so communities have a satellite-based reference even when official records lag. The validation event (Koppu 2015, GFD event 4300) has a GFD ground-truth polygon; the Carina application is ungauged and disclosed as such.",
+    title: "Why use Carina 2024 as the demo if it has no official flood map?",
+    body: "That gap is exactly what the demo fills. No official flood map was released in time for Carina 2024 (Super Typhoon Gaemi plus an enhanced southwest monsoon, July 2024, Metro Manila). The checked Track A method is applied to Carina so communities have a satellite-based reference even when official records lag. The check event (Koppu 2015) has an independent flood map to compare against; the Carina demo has no official measured record, and we say so.",
   },
   {
-    title: "What is the permanent-water mask and why does it matter?",
-    body: "SAR open-water detection picks up rivers, lakes, coastal water, and flood equally. The permanent-water mask (MERIT Hydro HAND + JRC Global Surface Water occurrence ≥50% + OSM water polygons) subtracts persistent water bodies before publishing flood polygons. The product reports flood, not background water. A CI gate asserts every published GeoJSON has had the mask applied and that less than 5% of flood area intersects JRC permanent water.",
+    title: "What does 'rivers and lakes removed' mean and why does it matter?",
+    body: "Radar sees rivers, lakes, the sea, and flood as the same thing: open water. Before we publish a flood map, we remove permanent water bodies (using public terrain and surface-water datasets plus OpenStreetMap water). What is left is flood, not the river that is always there. An automated check confirms the removal ran on every published map and that less than 5% of the mapped flood area overlaps permanent water.",
   },
   {
     title: "Can I use this data for journalism or research?",
-    body: "Yes, under CC-BY-4.0. Cite as: <code class='text-sm'>FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph</code>. Language in any citation or report should reflect the methodology: 'observed flood extent derived from Sentinel-1 SAR, permanent-water-masked' rather than 'confirmed flooded areas.' The methodology page has a summary suitable for a press piece.",
+    body: "Yes, under CC-BY-4.0. Cite as: <code class='text-sm'>FloodWatch.PH (2026), https://github.com/xmpuspus/floodwatch-ph</code>. In any report, describe it as 'flooding seen by Sentinel-1 radar, with rivers and lakes removed' rather than 'confirmed flooded areas.' The methodology page has a summary suitable for a press piece.",
   },
   {
     title: "Is this an official flood hazard map?",
-    body: "No. FloodWatch.PH produces satellite-derived observed flood extent and a statistical recurrence model. It is not an official hazard map and should not replace formal engineering risk assessments. The v1.0 civic value is the gap between modeled flood-proneness and the historical observed record; the official-hazard-map overlay is v1.1. LGU planners and disaster coordinators should verify with local records before acting on these figures.",
+    body: "No. FloodWatch.PH produces a satellite-based flood map and a statistical flood-prediction model. It is not an official hazard map and should not replace a formal engineering risk study. Its value is showing the gap between what the model predicts and what past records show; the official-hazard-map comparison is a later step. LGU planners and disaster coordinators should verify with local records before acting on these figures.",
   },
   {
     title: "Is FloodWatch.PH affiliated with PAGASA, NDRRMC, UP NOAH, or MGB?",
-    body: "No. FloodWatch.PH is an independent open-source project authored by Xavier Puspus. The official agencies are named only as the intended source for the v1.1 official-hazard-map overlay; that is the only relationship and that overlay is not in v1.0.",
+    body: "No. FloodWatch.PH is an independent open-source project by Xavier Puspus. Those agencies are named only as the intended source for the future official-hazard-map comparison; that is the only relationship, and that comparison is not in this version.",
   },
   {
     title: "How do I request takedown of a published feature?",
@@ -54,11 +52,11 @@ const sections = [
   },
   {
     title: "I found a bug or have a contribution.",
-    body: "Open an issue or PR on <a class='text-accent-steel no-underline' href='https://github.com/xmpuspus/floodwatch-ph'>github.com/xmpuspus/floodwatch-ph</a>. Highest-value contributions: verified flood extents not captured in our data, province boundary corrections, official hazard-map sources for the v1.1 overlay, and false-positive / false-negative reports on the hazard gap layer. See CONTRIBUTING.md.",
+    body: "Open an issue or PR on <a class='text-accent-steel no-underline' href='https://github.com/xmpuspus/floodwatch-ph'>github.com/xmpuspus/floodwatch-ph</a>. Most useful: verified floods we missed, province boundary corrections, official hazard-map sources for the future comparison, and cases where the prediction-vs-record gap looks wrong. See CONTRIBUTING.md.",
   },
 ];
 ---
-<Base title="FAQ · FloodWatch.PH" pathname="/faq" description="Frequently asked questions about FloodWatch.PH flood extent accuracy, privacy posture under RA 10173, the hazard gap layer, and the recurrence model.">
+<Base title="FAQ · FloodWatch.PH" pathname="/faq" description="Frequently asked questions about FloodWatch.PH: how accurate the flood map is, how it complies with RA 10173 (the Data Privacy Act), the prediction-vs-record gap, and the flood-prediction model.">
   <section class="max-w-prose mx-auto px-6 pt-10 pb-12">
     <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-3 font-mono">frequently asked</p>
     <h1 class="text-3xl mb-6 leading-tight text-ink-900 tracking-tight">Plain-language answers to the questions we hear most often.</h1>

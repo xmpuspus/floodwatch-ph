@@ -258,37 +258,37 @@ export function synthesizeGap(ev: EvidenceBundle): string {
 
   if (ev.recurrence.state === "unavailable" || ev.gfd.state === "unavailable") {
     return (
-      "The recurrence model or the historical record is unavailable for this " +
-      "location, so the modeled-vs-record gap cannot be stated here. The dated " +
+      "The flood-prediction model or the past flood records are unavailable for " +
+      "this place, so the gap between the two cannot be stated here. The dated " +
       "evidence rows below still apply."
     );
   }
   if (modeledProne && recordThin) {
     return (
-      "The recurrence model rates this location modeled-prone while the " +
-      "historical observed record (GFD, 2002-2017) is thin or empty here: " +
-      "this is the under-observed-prone gap. A thin record is not proof of " +
-      "safety; this warrants independent verification with local records."
+      "The flood-prediction model says this place floods often, while the past " +
+      "flood records (2002-2017) are thin or empty here: this is the " +
+      "predicted-to-flood-but-barely-on-record gap. A thin record is not proof " +
+      "of safety; check it against local records."
     );
   }
   if (modeledProne && recordHas) {
     return (
-      "The recurrence model rates this location modeled-prone and the " +
-      "historical observed record also shows flooding here, so the two agree. " +
-      "Modeled-prone and recorded, not under-observed."
+      "The flood-prediction model says this place floods often, and the past " +
+      "flood records also show flooding here, so the two agree. Predicted to " +
+      "flood and on record, not a gap."
     );
   }
   if (!modeledProne && recordHas) {
     return (
-      "The historical observed record shows flooding here, while the nearest " +
-      "recurrence sample is below the modeled-prone threshold. Recorded but " +
-      "not modeled-prone at this sample; verify with local records."
+      "The past flood records show flooding here, while the nearest model " +
+      "sample is below the level the model calls flood-prone. On record but " +
+      "not predicted to flood at this sample; check against local records."
     );
   }
   return (
-    "Neither the recurrence model nor the historical observed record flags " +
-    "this exact location as flood-prone. A thin record is not proof of " +
-    "safety; the dated evidence rows below describe what was observed."
+    "Neither the flood-prediction model nor the past flood records flag this " +
+    "exact place as flood-prone. A thin record is not proof of safety; the " +
+    "dated evidence rows below describe what was observed."
   );
 }
 
@@ -331,7 +331,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
   // 1. Track B modeled recurrence-prone (300 m grid, 2017 embedding).
   let recurrence: LayerResult;
   if (!d.recurrence?.features) {
-    recurrence = { state: "unavailable", asOf: "2017 embedding", detail: "Recurrence layer unavailable." };
+    recurrence = { state: "unavailable", asOf: "2017 model data", detail: "Flood-prediction layer unavailable." };
   } else {
     let bestScore = -1;
     let bestKm = Infinity;
@@ -347,13 +347,13 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
       recurrence = {
         state: "clear",
         asOf: "AlphaEarth 2017",
-        detail: "No modeled recurrence-prone sample point within ~2.5 km of this location.",
+        detail: "No flood-prediction sample point within about 2.5 km of this place.",
       };
     } else {
       const cls = bestScore >= 0.6 ? "modeled flood-prone" : bestScore >= 0.4 ? "modeled marginal" : "modeled low";
       recurrence = {
         state: bestScore >= 0.6 ? "intersects" : "near",
-        asOf: "AlphaEarth 2017 embedding",
+        asOf: "2017 model data (Google AlphaEarth)",
         detail: `Nearest Track B sample point (~${bestKm.toFixed(2)} km away): calibrated recurrence score ${bestScore.toFixed(2)}, ${cls}. 300 m grid; a high score is not a prediction.`,
       };
     }
@@ -399,7 +399,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
     if (status !== "ok") {
       const reason =
         status === "no_usable_pass"
-          ? `no usable Sentinel-1 acquisition in the last ${lmeta.lookback_days ?? "N"} days`
+          ? `no usable Sentinel-1 pass in the last ${lmeta.lookback_days ?? "N"} days`
           : status === "degenerate_threshold"
             ? `the most recent pass (${asOf}) had no reliable water signal`
             : `the most recent pass (${asOf}) was inconclusive`;
@@ -418,7 +418,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
         state: cls === "clear" ? "clear" : cls,
         asOf,
         detail: inPoly
-          ? `This location falls inside observed Sentinel-1 SAR open-water extent on the ${asOf} acquisition pass. Observed, NOT live, NOT a forecast (~6-day revisit, ~24 h product latency).`
+          ? `This place falls inside the flooded area Sentinel-1 radar saw on the ${asOf} satellite pass. Observed, NOT live, NOT a forecast (about a 6-day revisit, roughly 24 h product latency).`
           : cls === "near"
             ? `Nearest observed Sentinel-1 open-water polygon on the ${asOf} pass is ~${km.toFixed(1)} km away. Observed, NOT live.`
             : `No observed Sentinel-1 open water near this location on the most recent usable pass (${asOf}). This describes one dated pass only, not "no flooding".`,
@@ -447,7 +447,7 @@ async function evidenceForPoints(pts: Pt[]): Promise<EvidenceBundle> {
       rainfall = {
         state: "clear",
         asOf: rmeta.as_of ?? null,
-        detail: "No modeled-prone GPM rainfall sample point near this location.",
+        detail: "No nearby rainfall sample point for this place.",
       };
     } else {
       const r24 = Number(best.props?.rain_mm_24h ?? 0);

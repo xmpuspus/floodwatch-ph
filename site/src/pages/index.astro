@@ -4,37 +4,39 @@ import AccountabilitySurface from "../components/AccountabilitySurface.astro";
 import { METRICS } from "../data/metrics";
 const M = METRICS;
 ---
-<Base title="FloodWatch.PH - where the model says it floods, but the record barely shows it" pathname="/">
+<Base title="FloodWatch.PH - predicted to flood, but barely on record" pathname="/">
 
-  <!-- SPINE HERO. The recurrence-vs-record gap is the first thing, framed as
-       step 1 of the accountability question. Server-rendered static text,
-       present at first paint with no JavaScript. The numbers come from
+  <!-- SPINE HERO. The gap between prediction and record is the first thing,
+       framed as step 1 of the accountability question. Server-rendered static
+       text, present at first paint with no JavaScript. The numbers come from
        metrics.ts, never hardcoded prose. -->
   <section class="max-w-5xl mx-auto px-6 pt-12 pb-8">
     <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-4 font-mono">
-      FloodWatch.PH &middot; the recurrence-vs-record gap
+      FloodWatch.PH &middot; predicted to flood, but barely on record
     </p>
     <h1 class="text-4xl md:text-5xl leading-[1.07] mb-5 text-ink-900 font-semibold tracking-tight max-w-3xl">
-      Where the model says it floods, but the record barely shows it.
+      Predicted to flood, but barely on record.
     </h1>
     <p class="text-lg text-ink-700 leading-relaxed mb-5 max-w-2xl">
-      {M.uncharted_count} Philippine provinces are rated flood-prone by the
-      recurrence model yet show few or no events in the historical observed
-      record. That gap is step 1 of one accountability question: where does it
-      repeatedly flood, so public flood-control spending can be held against it.
+      {M.uncharted_count} Philippine provinces are predicted to flood by the
+      flood-prediction model (Track B), yet show few or no events in the past
+      flood records. That gap is step 1 of one accountability question: where
+      does it flood again and again, so public flood-control spending can be
+      held against it.
     </p>
     <div class="grid sm:grid-cols-3 gap-px bg-ink-300/40 border border-ink-300/40 max-w-2xl mb-6">
       <div class="bg-paper p-4">
         <p class="text-[11px] uppercase tracking-wider text-ink-500 font-mono mb-1">reproducible</p>
         <p class="text-sm text-ink-700 leading-relaxed">
-          One repo, bit-exact, hash-verified. The recurrence model retrains in
-          about 30 seconds on any laptop, no GPU.
+          One repo. Anyone can re-run it and get the identical result. The
+          flood-prediction model retrains in about 30 seconds on any laptop,
+          no GPU.
         </p>
       </div>
       <div class="bg-paper p-4">
         <p class="text-[11px] uppercase tracking-wider text-ink-500 font-mono mb-1">the class others skip</p>
         <p class="text-sm text-ink-700 leading-relaxed">
-          The pluvial and urban flooding Google Flood Hub says it does not
+          The rain-driven city flooding Google Flood Hub says it does not
           model. Observed after the fact, openly.
         </p>
       </div>
@@ -57,7 +59,7 @@ const M = METRICS;
         href="/map"
         class="inline-flex items-center px-5 py-2.5 text-sm font-medium no-underline border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white transition-colors"
       >
-        Open the hazard-gap map
+        Open the prediction-vs-record map
       </a>
     </div>
     <p class="text-sm text-ink-500 leading-relaxed mt-5 max-w-2xl">
@@ -69,21 +71,22 @@ const M = METRICS;
   <!-- The gap, stated as the civic finding -->
   <section class="max-w-prose mx-auto px-6 py-10 border-t border-ink-300/30">
     <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-3">the finding</p>
-    <h2 class="text-2xl mb-4 leading-tight text-ink-900">Modeled-prone, thinly recorded.</h2>
+    <h2 class="text-2xl mb-4 leading-tight text-ink-900">Predicted to flood, but barely on record.</h2>
     <p class="text-base text-ink-700 leading-relaxed mb-4">
-      Philippine communities flood repeatedly, yet the historical observed
-      record is uneven. FloodWatch.PH measures the v1.0 gap: provinces the
-      recurrence model (Track B) rates flood-prone but that appear with few or
-      no events in the historical observed record (the Global Flood Database).
+      Philippine communities flood again and again, yet the past flood records
+      are uneven. FloodWatch.PH measures the v1.0 gap: provinces the
+      flood-prediction model (Track B) predicts will flood but that appear with
+      few or no events in the past flood records (the Global Flood Database).
       The cross-reference against the official UP NOAH / PAGASA / MGB hazard
       maps is a v1.1 refinement, deferred because those government layers are
       token-gated or served only through single-page apps that cannot be
       fetched as data.
     </p>
     <p class="text-base text-ink-700 leading-relaxed mb-4">
-      Exposure and the modeled-vs-observed gap are aggregated to province (FAO
-      GAUL level-2, ~82 Philippine provinces); city and barangay resolution is
-      a v1.1 refinement.
+      Who and what is exposed (people and built-up land) and the gap between
+      what the model predicts and what past records show are summed to province
+      (about 82 Philippine provinces); city and barangay resolution is a v1.1
+      refinement.
     </p>
     <p class="text-base text-ink-700 leading-relaxed">
       Language throughout stays conservative. "Observed flood extent" and
@@ -95,24 +98,24 @@ const M = METRICS;
   <!-- Headline numbers -->
   <section class="max-w-5xl mx-auto px-6 py-10 grid gap-px bg-ink-300/40 md:grid-cols-4 border border-ink-300/40">
     <div class="bg-paper p-5">
-      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">under-observed prone</div>
+      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">predicted, barely on record</div>
       <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.uncharted_count}</div>
-      <div class="text-[10px] text-ink-500 mt-0.5">provinces modeled-prone, under-observed</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">provinces predicted to flood, barely on record</div>
     </div>
     <div class="bg-paper p-5">
-      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">recurrence model F1</div>
+      <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">flood-prediction model F1</div>
       <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.trackB_f1}</div>
-      <div class="text-[10px] text-ink-500 mt-0.5">Track B, event-disjoint holdout</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">Track B, tested by holding out whole storms</div>
     </div>
     <div class="bg-paper p-5">
       <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">population exposed</div>
       <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.pop_exposed}</div>
-      <div class="text-[10px] text-ink-500 mt-0.5">WorldPop province aggregate, Carina peak</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">population data (WorldPop) province total, Carina peak</div>
     </div>
     <div class="bg-paper p-5">
       <div class="text-[10px] uppercase tracking-wider text-ink-500 font-mono">classifier sha256</div>
       <div class="font-mono tabular-nums text-2xl text-ink-900 mt-0.5">{M.clf_sha256}</div>
-      <div class="text-[10px] text-ink-500 mt-0.5">bit-exact, hash-verified</div>
+      <div class="text-[10px] text-ink-500 mt-0.5">anyone can re-run it and get the identical result</div>
     </div>
   </section>
 
@@ -120,28 +123,28 @@ const M = METRICS;
   <section class="max-w-5xl mx-auto px-6 pb-10 mt-4">
     <div class="grid gap-px bg-ink-300/40 md:grid-cols-2 border border-ink-300/40">
       <div class="bg-paper p-6 md:p-8">
-        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">Track B &middot; recurrence model</p>
-        <h2 class="text-xl mb-2 text-ink-900">Which places flood repeatedly</h2>
+        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">Track B &middot; the flood-prediction model</p>
+        <h2 class="text-xl mb-2 text-ink-900">Which places flood again and again</h2>
         <p class="text-sm text-ink-500 mb-3 leading-relaxed">
-          Google AlphaEarth satellite embeddings (64-dim, 2017 annual) plus a logistic regression head trained on 57 Philippines GFD events (2002-2017). Event-disjoint holdout: entire typhoon events held out, never random pixels. Bit-exact, hash-verified, no GPU.
+          A satellite fingerprint of the land (Google AlphaEarth, 2017 annual) plus a simple, well-understood classifier trained on 57 Philippines GFD events (2002-2017). Tested by holding out whole storms, never random points. Anyone can re-run it and get the identical result, no GPU.
         </p>
         <p class="text-xs text-ink-500 font-mono">
-          Track B holdout F1: <span class="text-ink-900">{M.trackB_f1}</span> &middot; Precision: <span class="text-ink-900">{M.trackB_precision}</span> &middot; Recall: <span class="text-ink-900">{M.trackB_recall}</span>
+          Track B held-out F1: <span class="text-ink-900">{M.trackB_f1}</span> &middot; Precision: <span class="text-ink-900">{M.trackB_precision}</span> &middot; Recall: <span class="text-ink-900">{M.trackB_recall}</span>
         </p>
       </div>
       <div class="bg-paper p-6 md:p-8">
-        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">Track A &middot; event track</p>
-        <h2 class="text-xl mb-2 text-ink-900">Observed flood extent from SAR</h2>
+        <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">Track A &middot; the single-storm flood map</p>
+        <h2 class="text-xl mb-2 text-ink-900">The mapped flood area, from satellite</h2>
         <p class="text-sm text-ink-500 mb-3 leading-relaxed">
-          Sentinel-1 C-band SAR penetrates typhoon cloud cover. Each slider frame is a real acquisition date. Otsu threshold on the VH change image, permanent-water mask applied. Validated against the Global Flood Database (GFD) for Tropical Storm Koppu / Lando 2015 (event 4300).
+          Sentinel-1 radar (it sees through typhoon clouds). Each slider frame is a real satellite pass date. An automatic cutoff with no hand-tuned settings, rivers and lakes removed. Validated against the Global Flood Database (GFD) for Tropical Storm Koppu / Lando 2015 (event 4300).
         </p>
-        <p class="text-xs text-ink-500 font-mono">
-          Track A IoU vs GFD/CEMS (Koppu 2015): <span class="text-ink-900">{M.trackA_iou}</span> &middot; F1: <span class="text-ink-900">{M.trackA_f1}</span>
+        <p class="text-xs text-ink-500 leading-relaxed">
+          Validated against an independent 2015 flood map; the overlap is low and openly reported (see methodology).
         </p>
       </div>
     </div>
     <p class="text-xs text-ink-500 mt-2 leading-relaxed italic">
-      Track A and Track B metrics are reported separately. They measure different things. The README never averages them.
+      Track A and Track B results are reported separately. They measure different things. We never average the two.
     </p>
   </section>
 
@@ -154,24 +157,25 @@ const M = METRICS;
     <div class="grid md:grid-cols-[1.4fr_1fr] gap-10 items-start">
       <div>
         <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-3">supporting demonstration</p>
-        <h2 class="text-2xl mb-3 text-ink-900 leading-tight">The observed substrate: where the water actually went.</h2>
+        <h2 class="text-2xl mb-3 text-ink-900 leading-tight">The satellite data the model learns from: where the water actually went.</h2>
         <p class="text-base text-ink-700 leading-relaxed mb-3">
-          The validated method (Koppu 2015, GFD event 4300) applied to the
-          ungauged Super Typhoon Carina 2024 event, Metro Manila, 24 to 25 July
-          2024. Carina had no promptly-public official flood-extent polygon;
-          that absence is the civic vacuum this demonstration fills. A dated
-          historical observation, not current conditions and not a forecast.
+          The validated method (Koppu 2015, GFD event 4300) applied to Super
+          Typhoon Carina 2024, Metro Manila, 24 to 25 July 2024, an event with
+          no official measured record. Carina had no promptly-public official
+          flood map; that absence is the civic vacuum this demonstration fills.
+          A dated historical observation, not current conditions and not a
+          forecast.
         </p>
-        <a href="/map" class="text-sm font-medium text-accent-steel no-underline">Open the hazard-gap map and the 2024 demonstration &rarr;</a>
+        <a href="/map" class="text-sm font-medium text-accent-steel no-underline">Open the prediction-vs-record map and the 2024 demonstration &rarr;</a>
       </div>
       <aside class="border-l-2 border-ink-900 pl-5 text-sm text-ink-700 leading-relaxed">
         <p class="mb-2 font-mono text-xs text-ink-500 uppercase tracking-wider">what you get</p>
         <ul class="space-y-1.5 text-sm">
-          <li>Hazard gap: modeled-prone provinces under-observed in the historical record</li>
-          <li>Track B recurrence model: which land signatures predict repeat flooding</li>
-          <li>SAR-derived flood extent: time-slider across the Carina 2024 acquisition dates</li>
-          <li>Province exposure: population, built-up area, peak flood share</li>
-          <li>Permanent-water-masked: rivers and lakes removed, only flood reported</li>
+          <li>Prediction-vs-record gap: provinces predicted to flood, but barely on record</li>
+          <li>Track B (the flood-prediction model): which land predicts repeat flooding</li>
+          <li>Mapped flood area: time-slider across the Carina 2024 satellite pass dates</li>
+          <li>Who and what is exposed: population, built-up area, peak flood share by province</li>
+          <li>Rivers and lakes removed: only flooding is reported</li>
         </ul>
       </aside>
     </div>
@@ -249,7 +253,7 @@ const M = METRICS;
       <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">the spine, as a tool</p>
       <h2 class="text-xl mb-2 text-ink-900">Area &amp; route lookup</h2>
       <p class="text-sm text-ink-500 mb-4 leading-relaxed">
-        Type a place or pick two points. FloodWatch states one conservative sentence on the recurrence-vs-record gap there, plus the dated evidence rows. Runs entirely in your browser; your query is never transmitted.
+        Type a place or pick two points. FloodWatch states one conservative sentence on the gap between what the model predicts and what past records show there, plus the dated evidence rows. Runs entirely in your browser; your query is never transmitted.
       </p>
       <span class="text-sm font-medium text-accent-steel group-hover:text-ink-900">Open the lookup &rarr;</span>
     </a>
@@ -257,7 +261,7 @@ const M = METRICS;
       <p class="text-xs uppercase tracking-wider text-ink-500 font-mono mb-2">how it works</p>
       <h2 class="text-xl mb-2 text-ink-900">Methodology</h2>
       <p class="text-sm text-ink-500 mb-4 leading-relaxed">
-        Two-track architecture: Track B recurrence model (AlphaEarth embeddings + logistic regression, event-disjoint holdout), Track A SAR event detection (Otsu + permanent-water mask, parameter-free). Metrics reported separately, never averaged.
+        Two tracks: Track B (the flood-prediction model: a satellite fingerprint of the land plus a simple, well-understood classifier, tested by holding out whole storms), Track A (the single-storm flood map: an automatic cutoff with no hand-tuned settings, rivers and lakes removed). Results reported separately, we never average the two.
       </p>
       <span class="text-sm font-medium text-accent-steel group-hover:text-ink-900">Read methodology &rarr;</span>
     </a>

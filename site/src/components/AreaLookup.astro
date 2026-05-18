@@ -26,10 +26,10 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
   aria-labelledby="al-heading"
 >
   <p class="text-xs uppercase tracking-[0.2em] text-ink-500 mb-2 font-mono">
-    recurrence-vs-record gap &middot; Greater Metro Manila
+    prediction-vs-record gap &middot; Greater Metro Manila
   </p>
   <h2 id="al-heading" class="text-2xl md:text-3xl mb-3 leading-tight text-ink-900">
-    Modeled-prone, or thinly recorded, or both?
+    Predicted to flood, barely on record, or both?
   </h2>
 
   <!-- Guardrail header, exact approved copy (copy-audit crack e). -->
@@ -159,12 +159,13 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
 
       <!-- Evidence framing, exact approved copy. -->
       <p class="text-[13px] text-ink-700 leading-relaxed border-l-2 border-ink-300/40 pl-3 mb-4">
-        The dated evidence behind that sentence: (1) the Track B modeled
-        recurrence-prone score (300 m grid, 2017 embedding), (2) the historical
-        Global Flood Database record, and (3) observed Sentinel-1 SAR flood
-        extent on its dated acquisition passes, plus rainfall and expressway
-        context. These are a model and observations, each as-of-dated. A thin
-        record is not proof of safety; a high score is not a prediction.
+        The dated evidence behind that sentence: (1) the Track B flood-prediction
+        score (300 m grid, a satellite fingerprint of the land from 2017),
+        (2) the past Global Flood Database record, and (3) the mapped flood area
+        from Sentinel-1 radar (it sees through typhoon clouds) on its dated
+        satellite passes, plus rainfall and expressway context. These are a
+        model and observations, each as-of-dated. A thin record is not proof of
+        safety; a high score is not a prediction.
       </p>
 
       <div id="al-layers" class="divide-y divide-ink-300/30"></div>
@@ -299,28 +300,28 @@ import AccountabilitySurface from "./AccountabilitySurface.astro";
         : "";
     $("al-layers").innerHTML = [
       row(
-        "Modeled flood-recurrence",
-        "AlphaEarth embedding model, calibrated · 300 m grid",
+        "Predicted to flood (the model)",
+        "A satellite fingerprint of the land, calibrated so the score reads like a real probability · 300 m grid",
         ev.recurrence,
       ),
       row(
-        "Historical observed record",
+        "Past flood records",
         "Global Flood Database (GFD), 2002-2017 (coverage ends 2017)",
         ev.gfd,
       ),
       row(
-        "Most recent Sentinel-1 SAR pass",
+        "Most recent Sentinel-1 pass",
         "Observed, NOT live, ~6-day revisit, ~24 h product latency",
         ev.latest,
       ),
       row(
         "Rainfall context",
-        "GPM IMERG accumulation over prone areas, context only, not a forecast",
+        "Rain that has already fallen over predicted-flood areas, context only, not a forecast",
         ev.rainfall,
       ),
       row(
         "Nearby monitored expressways",
-        "OSM expressway/major-road network ∩ latest observed SAR extent",
+        "Expressway and major-road network crossed with the latest mapped flood area",
         ev.roads,
         segs,
       ),
