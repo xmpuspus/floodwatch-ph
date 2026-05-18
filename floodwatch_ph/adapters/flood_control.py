@@ -61,6 +61,15 @@ DPWH_COLUMNS: dict[str, list[str]] = {
     "category": ["category", "projectcomponentdescription", "infraproject", "typeofwork"],
     "region": ["region"],
     "province": ["province"],
+    "completion_date": [
+        "completiondate",
+        "completion_date",
+        "datecompleted",
+        "actualcompletion",
+        "actualdatecompleted",
+    ],
+    "start_date": ["startdate", "start_date", "datestarted", "noticetoproceed"],
+    "infra_year": ["infrayear", "infra_year", "fundingyear", "year"],
 }
 
 # Order matters: normalize_status returns the first canonical whose any
@@ -322,6 +331,18 @@ class FloodControlAdapter(BaseAdapter):
                         "geolocation_confidence": 1.0 if has_coords else 0.6,
                         "region": region,
                         "province": province,
+                        "completion_date": self._maybe_date(
+                            row.get(col_map.get("completion_date", ""))
+                        ),
+                        "start_date": self._maybe_date(
+                            row.get(col_map.get("start_date", ""))
+                        ),
+                        "infra_year": (
+                            str(row.get(col_map.get("infra_year", ""), "")).strip()[:4]
+                            or None
+                        )
+                        if "infra_year" in col_map
+                        else None,
                     }
                 )
             except Exception as exc:
@@ -403,6 +424,28 @@ class FloodControlAdapter(BaseAdapter):
         if isinstance(location_val, str):
             return "", location_val.strip()
         return "", ""
+
+    @staticmethod
+    def _maybe_date(val: Any) -> str | None:
+        """Coerce a date32 / Timestamp / string cell to an ISO YYYY-MM-DD
+        string, or None. ISO strings sort chronologically, which the temporal
+        join relies on for the post-completion comparison."""
+        if val is None:
+            return None
+        try:
+            if pd.isna(val):
+                return None
+        except (TypeError, ValueError):
+            pass
+        if hasattr(val, "strftime"):
+            try:
+                return val.strftime("%Y-%m-%d")
+            except (ValueError, OSError):
+                return None
+        s = str(val).strip()
+        if not s or s.lower().startswith(("nan", "nat", "none")):
+            return None
+        return s[:10] if len(s) >= 10 and s[4] == "-" and s[7] == "-" else None
 
     @staticmethod
     def _maybe_float(val: Any) -> float | None:

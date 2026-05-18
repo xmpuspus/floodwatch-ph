@@ -116,6 +116,15 @@ const THESIS = "Where flood-control money was spent, and where the water still c
     observed_flood_passes?: number;
     flagged_rate?: number;
     warrants_investigation?: boolean;
+    n_completed_then_flooded?: number;
+    allocation_completed_then_flooded_php?: number;
+    allocation_low_confidence_php?: number;
+    share_low_confidence?: number;
+    coa_flagged_findings_count?: number;
+    coa_findings?: string[];
+    coa_source_orgs?: string[];
+    satellite_checked_count?: number;
+    satellite_no_change_rate?: number;
   };
   type ByType = {
     project_type: string;
@@ -232,6 +241,91 @@ const THESIS = "Where flood-control money was spent, and where the water still c
         )}, which the flood-prediction model predicts will flood. Per DPWH/BetterGovPH records; warrants independent investigation.`;
       }
     }
+    // v1.5 signal lines. Each is shown only when its data is present, every
+    // figure read from the file, conservative civic language, no accusation.
+    const allp = j.by_province ?? [];
+    const sig: string[] = [];
+
+    const ctf = allp
+      .filter((p) => (p.n_completed_then_flooded ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.allocation_completed_then_flooded_php ?? 0) -
+          (a.allocation_completed_then_flooded_php ?? 0),
+      );
+    if (ctf.length > 0) {
+      const t = ctf[0];
+      sig.push(
+        `In ${esc(t.province)}, ${pesoShort(
+          t.allocation_completed_then_flooded_php,
+        )} of flood-control work DPWH records as completed before Super Typhoon Carina (July to August 2024) sits where Sentinel-1 still observed flooding during it. Per DPWH/BetterGovPH records; this is not a finding of project failure.`,
+      );
+    }
+
+    const coaP = allp
+      .filter((p) => (p.coa_flagged_findings_count ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.coa_flagged_findings_count ?? 0) -
+          (a.coa_flagged_findings_count ?? 0),
+      );
+    if (coaP.length > 0) {
+      const c = coaP[0];
+      const orgs = (c.coa_source_orgs ?? []).join(", ");
+      sig.push(
+        `${intFmt(
+          c.coa_flagged_findings_count,
+        )} flood-control findings in ${esc(
+          c.province,
+        )} were flagged for review${
+          orgs ? " by " + esc(orgs) : ""
+        } per individually cited public sources. FloodWatch does not independently verify and makes no accusation.`,
+      );
+    }
+
+    const totAlloc = allp.reduce((s, p) => s + (p.allocation_php ?? 0), 0);
+    const totLow = allp.reduce(
+      (s, p) => s + (p.allocation_low_confidence_php ?? 0),
+      0,
+    );
+    if (totAlloc > 0 && totLow > 0) {
+      sig.push(
+        `${((totLow / totAlloc) * 100).toFixed(1)}% of recorded flood-control allocation is at low coordinate confidence (resolved by province-text fallback, not a project coordinate), so those province figures are coarser.`,
+      );
+    }
+
+    const satN = allp.reduce(
+      (s, p) => s + (p.satellite_checked_count ?? 0),
+      0,
+    );
+    if (satN > 0) {
+      const noCh = allp.reduce(
+        (s, p) =>
+          s +
+          Math.round(
+            (p.satellite_no_change_rate ?? 0) *
+              (p.satellite_checked_count ?? 0),
+          ),
+        0,
+      );
+      sig.push(
+        `Sentinel-1 built-change corroboration: ${intFmt(
+          satN,
+        )} completed projects checked at their recorded coordinate, ${(
+          (noCh / satN) *
+          100
+        ).toFixed(
+          0,
+        )}% with no clear built change. Indicative only, not confirmation; absence of a change is not evidence of a ghost, because the recorded coordinate itself may be wrong.`,
+      );
+    }
+
+    const sigBlock = sig.length
+      ? `<ul class="text-[13px] text-ink-700 leading-relaxed mb-4 space-y-1.5 list-disc list-outside ml-5">${sig
+          .map((s) => `<li>${s}</li>`)
+          .join("")}</ul>`
+      : "";
+
     const tranche = (j.by_tranche ?? [])
       .map(
         (t) =>
@@ -259,6 +353,7 @@ const THESIS = "Where flood-control money was spent, and where the water still c
           ? `<p class="text-base text-ink-900 leading-relaxed mb-4 border-l-2 border-accent-coral/50 pl-3">${lead}</p>`
           : ""
       }
+      ${sigBlock}
       ${
         tranche
           ? `<div class="overflow-x-auto mb-2"><table class="w-full text-[13px] text-ink-700"><thead><tr class="text-left text-[11px] uppercase tracking-wider text-ink-500 font-mono"><th class="pb-1 pr-4">budget tranche</th><th class="pb-1 pr-4">projects</th><th class="pb-1">allocation</th></tr></thead><tbody>${tranche}</tbody></table></div>`
@@ -308,6 +403,11 @@ const THESIS = "Where flood-control money was spent, and where the water still c
       if (v === "home") {
         const body = root.querySelector("#fw-acct-home-body");
         if (body) body.innerHTML = renderHome(j);
+        // Homepage-present freshness marker. deploy_realias verifies the
+        // served homepage bundle carries a handle unique to the current
+        // build (the prior __fwCorridor handle lives only on /map).
+        (window as unknown as Record<string, unknown>).__fwAccountability =
+          j._meta?.generated_utc ?? true;
       } else if (v === "map") {
         const body = root.querySelector("#fw-acct-map-body");
         if (body) body.innerHTML = renderMap(j);

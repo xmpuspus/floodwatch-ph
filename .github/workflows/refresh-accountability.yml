@@ -1,0 +1,107 @@
+# Scheduled weekly refresh for the FloodWatch.PH flood-control accountability layer.
+#
+# Re-pulls the BetterGovPH DPWH flood-control snapshot from HuggingFace,
+# regenerates the two governed public JSON layers, runs the data gates, then
+# commits to main so Vercel's Git integration auto-deploys the build.
+#
+# Cadence rationale:
+#   The BetterGovPH DPWH dataset updates infrequently (project-level COA /
+#   DPWH releases, not a live feed). A weekly Monday pull is plenty fresh and
+#   keeps the commit log quiet on the (common) no-change weeks.
+#   workflow_dispatch allows on-demand refresh.
+#
+# Determinism:
+#   This target is deterministic from the committed parquet cache. Deleting
+#   the cache first forces the adapter to re-fetch from HuggingFace, then it
+#   re-writes the cache. No Earth Engine is involved here, so no service
+#   account key is materialised.
+#
+# Security:
+#   - cron + manual only. NO pull_request trigger (no fork-PR secret exposure).
+#   - minimal top-level permissions; the job adds contents:write only.
+#   - third-party actions are SHA-pinned, not @vN.
+
+name: refresh-accountability
+
+on:
+  schedule:
+    # 19:41 UTC Monday == ~03:41 PH time (off-peak, off-minute on purpose,
+    # and a distinct minute from the daily refresh workflow).
+    - cron: "41 19 * * 1"
+  workflow_dispatch:
+    inputs:
+      skip_deploy:
+        description: "Regenerate + gate only; do not commit/deploy"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-accountability-prod
+  cancel-in-progress: false
+
+jobs:
+  refresh-accountability:
+    name: re-pull BetterGovPH + gate + commit data (Vercel Git auto-deploys)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write   # push regenerated data to main; Vercel auto-deploys
+    steps:
+      - name: Checkout (pinned)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            pipeline/requirements.txt
+
+      - name: Install pinned deps (root + pipeline)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r pipeline/requirements.txt
+
+      - name: Re-pull BetterGovPH snapshot + regenerate accountability layers
+        run: |
+          # Drop the committed cache so the adapter re-fetches the snapshot
+          # from HuggingFace, then re-writes the cache. make flood-control
+          # regenerates flood_control_accountability.json + flood_control_by_id.json.
+          rm -f pipeline/_dpwh_flood_control_cache.parquet
+          make flood-control
+
+      - name: Gate — no PII
+        run: python scripts/check_no_pii.py
+
+      - name: Gate — accountability governance (disclaimer)
+        run: python scripts/check_accountability_governance.py
+
+      - name: Gate — 337 collision
+        run: python scripts/check_337_collision.py
+
+      - name: Pre-deploy GATE (verify_release, gates only)
+        run: python scripts/verify_release.py --gates-only
+
+      # Native Vercel Git deploy: commit the regenerated accountability data
+      # to main and let Vercel's GitHub integration build + deploy it (no
+      # token, no alias-set). A no-change week is a clean no-op exit 0
+      # (BetterGovPH updates infrequently — honest, expected).
+      - name: Commit regenerated data to main (Vercel Git auto-deploys)
+        if: ${{ inputs.skip_deploy != true }}
+        run: |
+          git config user.name "floodwatch-refresh[bot]"
+          git config user.email "215369057+floodwatch-refresh@users.noreply.github.com"
+          git add site/public/data/flood_control_accountability.json site/public/data/flood_control_by_id.json pipeline/_dpwh_flood_control_cache.parquet
+          if git diff --cached --quiet; then
+            echo "No data changes this run — nothing to deploy (expected on a no-change week)."
+            exit 0
+          fi
+          git commit -m "accountability refresh: re-pulled BetterGovPH snapshot $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push origin HEAD:main
+          echo "Pushed regenerated data to main; Vercel Git integration deploys the production build."

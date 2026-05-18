@@ -27,7 +27,7 @@ FC_BYID := $(DATA)/flood_control_by_id.json
 
 .PHONY: all embeddings labels train hash hash-verify calibrate event exposure \
         demo verify test plots freeze-hash clean help \
-        flood-control governance-verify
+        flood-control governance-verify satellite-verify
 
 help:
 	@echo "FloodWatch.PH targets:"
@@ -40,6 +40,7 @@ help:
 	@echo "  make exposure    Barangay exposure + official-hazard-gap join"
 	@echo "  make demo        Print calibrated bundle + holdout IoU/F1 summary"
 	@echo "  make flood-control     Rebuild the governed accountability JSON from the committed parquet cache (deterministic, no net)"
+	@echo "  make satellite-verify  EE: coarse S1 VH built-change corroboration for completed flood-control projects (network)"
 	@echo "  make governance-verify Assert the accountability disclaimer + 337/jargon gates pass"
 	@echo "  make verify      Full release gate runner (perm-water, event-disjoint, PII, mirror, hash)"
 	@echo "  make test        pytest suite (no network)"
@@ -100,6 +101,12 @@ exposure:
 	$(PY) $(PIPE)/exposure.py --event carina_2024
 	$(PY) $(PIPE)/hazard_gap.py
 
+# Coarse Sentinel-1 VH built-change corroboration for completed flood-control
+# projects (network, EE). Idempotent and resumable: re-running with no new ids
+# is a no-op. See README; not part of the deterministic offline CI.
+satellite-verify:
+	$(PY) $(PIPE)/satellite_verify.py
+
 demo: $(CAL)
 	@$(PY) -c "import json;c=json.load(open('$(CAL)'));print('FloodWatch.PH recurrence_clf_v1');[print(' ',k,'=',v) for k,v in c.get('summary',{}).items()]"
 
@@ -116,7 +123,9 @@ plots:
 # model-job touch-in-dependency-order comment).
 $(FC_ACCT) $(FC_BYID): $(FC_CACHE) $(PIPE)/flood_control.py \
 		floodwatch_ph/accountability/governance.py \
-		floodwatch_ph/adapters/flood_control.py
+		floodwatch_ph/adapters/flood_control.py \
+		$(PIPE)/coa_extract.py $(PIPE)/_coa_flagged.json \
+		$(PIPE)/_satellite_verify_cache.json
 	@touch $(FC_CACHE)
 	$(PY) $(PIPE)/flood_control.py
 

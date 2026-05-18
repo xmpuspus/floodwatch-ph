@@ -137,6 +137,17 @@ Flooding is an event; rooftop solar is a fixture. A single high-resolution snaps
 
 This dataset only matters because the policy context is contested. Philippine communities flood repeatedly while the official hazard maps and the NDRRMC post-event damage assessments do not agree with each other or with what satellites observed. v1.0 ships the fully-public-chain civic layer: the gap between modeled flood-proneness (Track B) and the historical observed flood record (GFD), per province, with "under-observed prone" flagged where the model says prone but the historical record barely captured it. The cross-reference against the official UP NOAH / PAGASA / MGB hazard maps is the v1.1 extension, deferred for a documented reason: those government layers are token-gated ArcGIS or single-page-app only, the well-known Philippine civic-data access failure mode. Conservative language is used throughout and every analytics surface carries the public-records disclaimer.
 
+### Flood-control accountability (v1.4, deepened in v1.5)
+
+v1.4 cross-referenced DPWH flood-control project locations from the BetterGovPH CC0 dataset (36,711 projects, PHP 1.74 trillion allocated, computed from the source) against FloodWatch's own Sentinel-1 observed flood extent and recurrence model, aggregate-only by province, project type and budget tranche, with an un-strippable disclaimer and named project detail only by direct id lookup. v1.5 keeps the same subset (project count and allocation unchanged) and adds four read paths over it:
+
+- **Spent then still flooded.** Projects DPWH records as completed before a dated Sentinel-1 pass that still observed water at the recorded location. The only dated observed extent is Carina 2024, so this is bounded to that event. It is not a finding of project failure.
+- **Confidence honesty.** Per province, the share of allocation resolved only by province-text fallback because the project carried no usable coordinate, so a coarser figure is stated, not hidden.
+- **COA cross-reference.** Public COA/Ombudsman findings, curated and every row individually cited (`pipeline/_coa_flagged.json`, gated by `scripts/check_coa_cited.py`). The province count is the signal; a per-project tag is set only on a confident description match. FloodWatch does not independently verify and makes no accusation.
+- **Satellite corroboration.** Coarse Sentinel-1 VH built-change corroboration at the recorded coordinate (`pipeline/satellite_verify.py`, committed `pipeline/_satellite_verify_cache.json`, `make satellite-verify`), a resumable sample that grows with the weekly refresh. Absence of a change signal is not evidence of a missing project, since the recorded coordinate itself may be wrong.
+
+A weekly `.github/workflows/refresh-accountability.yml` re-pulls the BetterGovPH snapshot, runs the governance gates and deploys via Vercel Git on merge to main. The freshness marker on the accountability surface is now `__fwAccountability`, set on the homepage.
+
 ## Project layout
 
 ```

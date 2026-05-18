@@ -89,6 +89,8 @@ jobs:
         run: python scripts/check_accountability_governance.py
       - name: 337 / ghost collision gate
         run: python scripts/check_337_collision.py
+      - name: COA cross-reference citation gate (every row sourced, no accusation)
+        run: python scripts/check_coa_cited.py
       - name: AI-fingerprint copy gate (no-ai-jargon.md)
         run: python scripts/check_ai_fingerprints.py
       - name: Full release gate runner (gates 1-9)

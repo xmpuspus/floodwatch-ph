@@ -4,6 +4,56 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-05-18 - Accountability deepening
+
+v1.5 deepens the v1.4.x flood-control accountability layer without changing
+the population: still 36,711 flood-control projects and PHP 1,740,510,212,408
+allocated, computed from the BetterGovPH CC0 snapshot, not estimated. Four
+read paths are added over the same subset.
+
+- Temporal "spent then still flooded". A project is counted only when DPWH
+  records it completed and a dated Sentinel-1 pass after that recorded
+  completion date still observed water at the recorded location. The only
+  dated observed extent is Carina 2024, so the figure is bounded to that
+  event; in this snapshot 1 project (PHP 46,501,239) meets it. It is not a
+  finding of project failure. New by-province
+  `n_completed_then_flooded`, `allocation_completed_then_flooded_php`,
+  `post_completion_flagged_rate` and by-id `completion_date`,
+  `post_completion_observed_passes`.
+- Confidence honesty. The share of a province's allocation resolved only by
+  province-text fallback because the project carried no usable coordinate is
+  now stated, not hidden: PHP 80,687,557,662 of allocation (4.6 percent of
+  the national total) is province-text only. New by-province
+  `allocation_low_confidence_php`, `share_low_confidence`.
+- COA cross-reference. Public COA/Ombudsman findings, compiled and every row
+  individually cited (`pipeline/coa_extract.py` -> `pipeline/_coa_flagged.json`,
+  gated by `scripts/check_coa_cited.py`); 8 cited findings, all in Bulacan in
+  this snapshot. `contract_id` is null in the compiled set, so the province
+  count is the signal and a per-project tag is set only on a confident
+  description match. FloodWatch does not independently verify and makes no
+  accusation. New by-province `coa_flagged_findings_count`, `coa_findings`,
+  `coa_source_orgs` and by-id `coa_flagged`, `coa_finding`, `coa_source`.
+- Satellite corroboration. Coarse Sentinel-1 VH built-change corroboration at
+  the recorded coordinate (`pipeline/satellite_verify.py`, committed
+  `pipeline/_satellite_verify_cache.json`, `make satellite-verify`); 8
+  projects checked in this snapshot. Coverage is a resumable sample that grows
+  with the weekly refresh. Absence of a change signal is not evidence of a
+  missing project because the recorded coordinate itself may be wrong (the
+  MYPS problem). New by-province `satellite_checked_count`,
+  `satellite_no_change_rate` and by-id `satellite_checked`,
+  `built_change_signal`.
+- `_meta` gains `temporal_rule`, `confidence_rule`, `coa_rule`, `coa_source`,
+  `satellite_rule`, `satellite_method`, each the verbatim caveat string the
+  UI renders for its surface.
+- Auto-refresh. A new weekly `.github/workflows/refresh-accountability.yml`
+  re-pulls the BetterGovPH snapshot, runs the governance gates and deploys
+  via Vercel Git auto-deploy on merge to main.
+- Deploy marker fix. The freshness marker in `scripts/deploy_realias.py`
+  moved from `__fwCorridor` (set only on /map) to `__fwAccountability`, set
+  on the homepage by AccountabilitySurface, so live verification checks the
+  accountability surface that now leads. v1.5 ships via Vercel Git
+  auto-deploy on merge to main.
+
 ## [1.4.3] - 2026-05-18 - Plain language across the whole site
 
 The site described its own spine in words only a GIS or statistics person

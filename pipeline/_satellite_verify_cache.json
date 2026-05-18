@@ -1,0 +1,3523 @@
+{
+  "_meta": {
+    "buffer_m": 120,
+    "disclaimer": "Indicative corroboration of a built change at the recorded coordinate, not confirmation; absence of signal is NOT evidence of a ghost because the recorded coordinate itself may be wrong (the MYPS problem). Not a finding of fraud or project failure.",
+    "ee_available": false,
+    "ee_collection": "COPERNICUS/S1_GRD",
+    "generated_utc": "2026-05-18T12:54:14Z",
+    "method": "despeckled mean VH (dB) over a ~120 m disc at the recorded point: post-completion-window mean minus pre-start-window mean; Sentinel-1 IW GRD, VH polarisation, both orbit passes",
+    "n_checked": 700,
+    "post_window_days": 180,
+    "pre_window_days": 180,
+    "thresholds": {
+      "strong_db": 3.0,
+      "vh_valid_db": [
+        -30.0,
+        0.0
+      ],
+      "weak_db": 1.5
+    }
+  },
+  "by_id": {
+    "14K00302": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.025
+    },
+    "14K00303": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.249
+    },
+    "14K00304": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.782
+    },
+    "14K00305": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.436
+    },
+    "15AD0161": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.663
+    },
+    "15AD0192": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.207
+    },
+    "15AD0209": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.156
+    },
+    "15AF0128": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.049
+    },
+    "15AF0129": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.521
+    },
+    "15AF0130": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.493
+    },
+    "15AG0149": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": null
+    },
+    "15AI0379": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.017
+    },
+    "15AI0386": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.372
+    },
+    "15AI0387": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.386
+    },
+    "15AI0389": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.04
+    },
+    "15AI0391": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.213
+    },
+    "15AI0394": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.236
+    },
+    "15AI0398": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.358
+    },
+    "15AI0399": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.107
+    },
+    "15AI0400": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.345
+    },
+    "15AI0401": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.816
+    },
+    "15AI0402": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.154
+    },
+    "15AI0403": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.417
+    },
+    "15B00029": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.596
+    },
+    "15B00070": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.368
+    },
+    "15BB0123": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -2.318
+    },
+    "15BB0124": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.231
+    },
+    "15BB0125": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.369
+    },
+    "15BC0124": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.401
+    },
+    "15BC0125": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.134
+    },
+    "15BC0126": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.188
+    },
+    "15BC0127": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": null
+    },
+    "15BC0129": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.358
+    },
+    "15BC0143": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.175
+    },
+    "15BC0159": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.23
+    },
+    "15BC0170": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.569
+    },
+    "15BC0181": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.636
+    },
+    "15BD0147": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.416
+    },
+    "15BD0148": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.782
+    },
+    "15BF0131": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.435
+    },
+    "15BF0132": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.007
+    },
+    "15BF0142": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.875
+    },
+    "15BF0143": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.047
+    },
+    "15BF0150": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.163
+    },
+    "15BH0205": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.646
+    },
+    "15BH0206": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.515
+    },
+    "15BH0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.263
+    },
+    "15BH0208": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.636
+    },
+    "15BI0119": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.234
+    },
+    "15C00091": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.197
+    },
+    "15CA0081": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.033
+    },
+    "15CA0082": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.11
+    },
+    "15CA0087": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.592
+    },
+    "15CA0093": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.2
+    },
+    "15CB0061": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.666
+    },
+    "15CB0069": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.337
+    },
+    "15CC0301": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.069
+    },
+    "15CC0302": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.079
+    },
+    "15CC0328": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.266
+    },
+    "15CC0329": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.473
+    },
+    "15CC0330": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.536
+    },
+    "15CC0331": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.486
+    },
+    "15CC0332": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.04
+    },
+    "15CD0206": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.338
+    },
+    "15CD0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.004
+    },
+    "15CD0208": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.033
+    },
+    "15CD0209": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.097
+    },
+    "15CD0236": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.025
+    },
+    "15CD0237": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.259
+    },
+    "15CD0238": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": null
+    },
+    "15CD0239": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": null
+    },
+    "15CD0240": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.197
+    },
+    "15CD0241": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.391
+    },
+    "15CD0242": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.092
+    },
+    "15CD0243": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.43
+    },
+    "15CD0245": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.008
+    },
+    "15CD0246": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.008
+    },
+    "15CD0247": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.267
+    },
+    "15CD0248": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.233
+    },
+    "15CD0249": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.616
+    },
+    "15CD0250": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.225
+    },
+    "15CD0251": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.616
+    },
+    "15CD0252": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.106
+    },
+    "15CD0253": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.487
+    },
+    "15CE0168": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.327
+    },
+    "15CE0170": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.291
+    },
+    "15CE0171": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.016
+    },
+    "15CE0172": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.242
+    },
+    "15CF0185": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.385
+    },
+    "15CH0097": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.565
+    },
+    "15CH0100": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.348
+    },
+    "15CH0141": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.169
+    },
+    "15CH0142": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.506
+    },
+    "15CI0131": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.062
+    },
+    "15CI0132": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.395
+    },
+    "15CI0133": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.71
+    },
+    "15CI0134": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.267
+    },
+    "15CJ0151": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.362
+    },
+    "15CJ0152": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.296
+    },
+    "15CJ0153": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.189
+    },
+    "15CJ0154": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.11
+    },
+    "15CJ0155": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.518
+    },
+    "15CJ0156": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.875
+    },
+    "15CJ0158": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.198
+    },
+    "15CJ0159": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.266
+    },
+    "15CJ0160": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.197
+    },
+    "15CJ0174": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.322
+    },
+    "15CJ0175": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.464
+    },
+    "15CJ0176": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.112
+    },
+    "15CJ0177": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.24
+    },
+    "15CJ0178": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.227
+    },
+    "15CJ0179": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.359
+    },
+    "15CJ0180": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.57
+    },
+    "15CJ0181": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.16
+    },
+    "15CK0118": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.841
+    },
+    "15CL0063": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.216
+    },
+    "15CL0064": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.56
+    },
+    "15CL0073": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.847
+    },
+    "15CL0074": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.758
+    },
+    "15CL0075": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.709
+    },
+    "15CL0076": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.162
+    },
+    "15CL0079": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.338
+    },
+    "15CL0084": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.602
+    },
+    "15CM0058": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.481
+    },
+    "15CM0059": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.065
+    },
+    "15D00059": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.686
+    },
+    "15D00062": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.757
+    },
+    "15D00063": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.349
+    },
+    "15D00069": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.395
+    },
+    "15D00077": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.184
+    },
+    "15D00081": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.168
+    },
+    "15D00083": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.336
+    },
+    "15DB0117": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.717
+    },
+    "15DB0174": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.183
+    },
+    "15DD0241": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.322
+    },
+    "15DD0248": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.686
+    },
+    "15DE0125": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.181
+    },
+    "15DF0162": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.247
+    },
+    "15DF0183": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.23
+    },
+    "15DF0184": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.473
+    },
+    "15DF0185": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.005
+    },
+    "15DF0191": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.902
+    },
+    "15DF0192": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.1
+    },
+    "15DF0193": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.837
+    },
+    "15DF0194": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.211
+    },
+    "15DF0195": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.07
+    },
+    "15DF0197": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.298
+    },
+    "15DF0198": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.624
+    },
+    "15DG0101": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.084
+    },
+    "15DG0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.017
+    },
+    "15DG0114": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.321
+    },
+    "15DG0116": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.051
+    },
+    "15DG0120": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.269
+    },
+    "15DG0122": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.252
+    },
+    "15DG0123": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.626
+    },
+    "15DG0124": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.672
+    },
+    "15DG0135": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.514
+    },
+    "15DG0137": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.266
+    },
+    "15DG0138": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.072
+    },
+    "15DI0138": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.101
+    },
+    "15DI0190": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.233
+    },
+    "15DI0191": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.12
+    },
+    "15DI0195": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.021
+    },
+    "15DI0211": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.001
+    },
+    "15DI0216": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.067
+    },
+    "15DI0225": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.138
+    },
+    "15DJ0092": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.165
+    },
+    "15DJ0106": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.895
+    },
+    "15DJ0107": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.363
+    },
+    "15DK0168": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.137
+    },
+    "15DK0169": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.41
+    },
+    "15DN0139": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.479
+    },
+    "15DN0141": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.608
+    },
+    "15DN0151": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.718
+    },
+    "15DN0160": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.461
+    },
+    "15DN0172": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.193
+    },
+    "15DN0177": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.077
+    },
+    "15DN0186": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.575
+    },
+    "15DN0188": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.132
+    },
+    "15DN0190": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.247
+    },
+    "15DO0087": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.171
+    },
+    "15DO0126": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.932
+    },
+    "15DO0127": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.368
+    },
+    "15EA0091": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.111
+    },
+    "15EA0092": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.369
+    },
+    "15EA0093": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.29
+    },
+    "15EA0094": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.414
+    },
+    "15EI0119": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.068
+    },
+    "15FC0220": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.523
+    },
+    "15FC0221": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.779
+    },
+    "15FC0263": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.807
+    },
+    "15FC0275": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.993
+    },
+    "15FC0276": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.883
+    },
+    "15FC0277": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.048
+    },
+    "15FC0292": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.293
+    },
+    "15FF0087": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.564
+    },
+    "15FI0128": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.462
+    },
+    "15FI0129": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.454
+    },
+    "15FL0078": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.032
+    },
+    "15FL0086": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.17
+    },
+    "15FL0091": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.711
+    },
+    "15FL0094": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.345
+    },
+    "15FL0095": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.479
+    },
+    "15FL0105": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.455
+    },
+    "15FL0110": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.606
+    },
+    "15FM0035": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.006
+    },
+    "15FM0036": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.025
+    },
+    "15FM0037": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.416
+    },
+    "15GA0176": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.288
+    },
+    "15GA0180": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.386
+    },
+    "15GA0191": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.408
+    },
+    "15GA0194": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.304
+    },
+    "15GA0199": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.551
+    },
+    "15GA0202": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.363
+    },
+    "15GA0203": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.521
+    },
+    "15GB0238": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.0
+    },
+    "15GC0097": {
+      "built_change_signal": "weak",
+      "satellite_checked": true,
+      "vh_delta_db": 2.72
+    },
+    "15GD0099": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.275
+    },
+    "15GD0104": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.421
+    },
+    "15GD0105": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.49
+    },
+    "15GD0107": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.014
+    },
+    "15GD0108": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.105
+    },
+    "15GN0133": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.128
+    },
+    "15HC0190": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.415
+    },
+    "15HC0199": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.117
+    },
+    "15HC0200": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.034
+    },
+    "15HC0201": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.08
+    },
+    "15HC0202": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.696
+    },
+    "15HC0203": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.159
+    },
+    "15HC0204": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.637
+    },
+    "15HC0205": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.117
+    },
+    "15HC0206": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.249
+    },
+    "15HC0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.21
+    },
+    "15HC0208": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.43
+    },
+    "15HC0209": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.504
+    },
+    "15HE0167": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.225
+    },
+    "15HF0136": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.107
+    },
+    "15HG0179": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.143
+    },
+    "15HM0097": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.774
+    },
+    "15HM0098": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.884
+    },
+    "15HM0102": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.335
+    },
+    "15HM0103": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.509
+    },
+    "15HM0104": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.142
+    },
+    "15HM0105": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.148
+    },
+    "15HM0106": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.252
+    },
+    "15HM0107": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.045
+    },
+    "15HN0161": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.229
+    },
+    "15I00069": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.537
+    },
+    "15IC0065": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.059
+    },
+    "15ID0219": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.114
+    },
+    "15IG0190": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.02
+    },
+    "15IG0217": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.153
+    },
+    "15II0134": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.888
+    },
+    "15II0140": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.714
+    },
+    "15II0165": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.571
+    },
+    "15JB0091": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.636
+    },
+    "15JB0092": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.368
+    },
+    "15JB0093": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.192
+    },
+    "15JC0087": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.129
+    },
+    "15JC0088": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.184
+    },
+    "15JD0079": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.179
+    },
+    "15JD0080": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.743
+    },
+    "15JD0096": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.458
+    },
+    "15JF0070": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.623
+    },
+    "15JF0071": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.36
+    },
+    "15JG0082": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.195
+    },
+    "15K00130": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.009
+    },
+    "15K00131": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.192
+    },
+    "15K00138": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.368
+    },
+    "15K00180": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.539
+    },
+    "15K00181": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.054
+    },
+    "15K00222": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.235
+    },
+    "15K00223": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.068
+    },
+    "15K00298": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.206
+    },
+    "15K00309": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.267
+    },
+    "15K00366": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.621
+    },
+    "15K00367": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.682
+    },
+    "15K00368": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.27
+    },
+    "15KA0135": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.124
+    },
+    "15KB0077": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.218
+    },
+    "15KC0093": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.746
+    },
+    "15KE0057": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.142
+    },
+    "15KE0058": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.494
+    },
+    "15KE0059": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.328
+    },
+    "15KE0060": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.111
+    },
+    "15KE0061": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.032
+    },
+    "15KE0062": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.534
+    },
+    "15KE0065": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.18
+    },
+    "15KE0078": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.105
+    },
+    "15KE0080": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.143
+    },
+    "15KE0083": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.22
+    },
+    "15KF0103": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.136
+    },
+    "15KF0104": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.229
+    },
+    "15KG0074": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.6
+    },
+    "15KK0111": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.095
+    },
+    "15KK0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.444
+    },
+    "15KK0149": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.452
+    },
+    "15KK0154": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.452
+    },
+    "15KK0155": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.119
+    },
+    "15LB0190": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.055
+    },
+    "15LB0197": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.136
+    },
+    "15LB0198": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.346
+    },
+    "15LB0200": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.168
+    },
+    "15LB0202": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.137
+    },
+    "15LB0203": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.218
+    },
+    "15LB0206": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.384
+    },
+    "15LB0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.487
+    },
+    "15LB0209": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.572
+    },
+    "15LB0211": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.527
+    },
+    "15LC0200": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.665
+    },
+    "15LC0203": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.238
+    },
+    "15LC0204": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.307
+    },
+    "15LC0205": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.17
+    },
+    "15LC0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.334
+    },
+    "15LC0208": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.13
+    },
+    "15LC0249": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.226
+    },
+    "15LD0102": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.09
+    },
+    "15LD0103": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.376
+    },
+    "15LD0104": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.007
+    },
+    "15LD0105": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.639
+    },
+    "15LF0065": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.379
+    },
+    "15LF0066": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.603
+    },
+    "15LF0067": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.442
+    },
+    "15LF0068": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.458
+    },
+    "15LF0073": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.062
+    },
+    "15LF0080": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.752
+    },
+    "15LH0223": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.047
+    },
+    "15MD0279": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.399
+    },
+    "15MD0280": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.289
+    },
+    "15MD0281": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.552
+    },
+    "15MD0288": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.656
+    },
+    "15ME0251": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.344
+    },
+    "15N00054": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.059
+    },
+    "15N00119": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.368
+    },
+    "15NB0125": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.742
+    },
+    "15NG0039": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.305
+    },
+    "15NG0040": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.399
+    },
+    "15NH0124": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.278
+    },
+    "15OA0100": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.129
+    },
+    "15OA0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.339
+    },
+    "15OB0318": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.309
+    },
+    "15OB0319": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.266
+    },
+    "15OB0320": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.209
+    },
+    "15OB0321": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.167
+    },
+    "15OB0322": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.082
+    },
+    "15OB0323": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.656
+    },
+    "15OB0324": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.628
+    },
+    "15OB0325": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.333
+    },
+    "15OB0326": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.468
+    },
+    "15OB0327": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.757
+    },
+    "15OB0328": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.283
+    },
+    "15OB0329": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.22
+    },
+    "15OB0330": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.533
+    },
+    "15OB0331": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.391
+    },
+    "15OB0332": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.391
+    },
+    "15OB0333": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.684
+    },
+    "15OB0334": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.395
+    },
+    "15OB0336": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.214
+    },
+    "15OB0353": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.405
+    },
+    "15OB0354": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.16
+    },
+    "15OB0356": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.154
+    },
+    "15OB0358": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.061
+    },
+    "15OB0359": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.024
+    },
+    "15OB0370": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.804
+    },
+    "15OB0371": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.024
+    },
+    "15OB0372": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.399
+    },
+    "15OB0373": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.311
+    },
+    "15OB0374": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.192
+    },
+    "15OB0375": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.236
+    },
+    "15OB0377": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.258
+    },
+    "15OB0378": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.148
+    },
+    "15OB0379": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.225
+    },
+    "15OB0383": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.493
+    },
+    "15OB0428": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.025
+    },
+    "15OB0450": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.099
+    },
+    "15OB0451": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.081
+    },
+    "15OB0452": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.45
+    },
+    "15OB0453": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.437
+    },
+    "15OB0455": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.765
+    },
+    "15OB0461": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.077
+    },
+    "15OB0462": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.258
+    },
+    "15OB0471": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.273
+    },
+    "15OB0473": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.007
+    },
+    "15OB0474": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.43
+    },
+    "15OB0475": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.321
+    },
+    "15OB0477": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.304
+    },
+    "15OB0478": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.263
+    },
+    "15OB0479": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.761
+    },
+    "15OB0480": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.145
+    },
+    "15OB0481": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.565
+    },
+    "15OB0482": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.749
+    },
+    "15OB0484": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.174
+    },
+    "15OB0486": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.056
+    },
+    "15OB0487": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.062
+    },
+    "15OB0495": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.024
+    },
+    "15OB0496": {
+      "built_change_signal": "weak",
+      "satellite_checked": true,
+      "vh_delta_db": 2.351
+    },
+    "15OB0497": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.146
+    },
+    "15OB0498": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.026
+    },
+    "15OB0499": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.349
+    },
+    "15OB0500": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.131
+    },
+    "15OB0502": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.146
+    },
+    "15OB0525": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.088
+    },
+    "15OB0526": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.246
+    },
+    "15OB0529": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.49
+    },
+    "15OB0530": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.543
+    },
+    "15OB0531": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.02
+    },
+    "15OB0533": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.042
+    },
+    "15OB0534": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.166
+    },
+    "15OD0105": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.681
+    },
+    "15OD0106": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.103
+    },
+    "15OD0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.621
+    },
+    "15OD0116": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.481
+    },
+    "15OD0119": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.097
+    },
+    "15OD0121": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.364
+    },
+    "15OD0122": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.004
+    },
+    "15OD0124": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.233
+    },
+    "15OD0129": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.137
+    },
+    "15OD0130": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.395
+    },
+    "15OD0131": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.553
+    },
+    "15OD0132": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.343
+    },
+    "15OD0133": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.836
+    },
+    "15OD0135": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.358
+    },
+    "15OD0136": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.51
+    },
+    "15OD0137": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.252
+    },
+    "15OD0138": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.347
+    },
+    "15OD0139": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.002
+    },
+    "15OD0140": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.345
+    },
+    "15OD0141": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.745
+    },
+    "15OD0142": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.787
+    },
+    "15OD0143": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -2.965
+    },
+    "15OD0144": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.267
+    },
+    "15OD0145": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.142
+    },
+    "15OD0146": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.873
+    },
+    "15OD0152": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.246
+    },
+    "15OD0153": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.452
+    },
+    "15OD0168": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -2.248
+    },
+    "15OD0169": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.003
+    },
+    "15OD0171": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.019
+    },
+    "15OD0172": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.944
+    },
+    "15OD0173": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.642
+    },
+    "15OD0205": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.059
+    },
+    "15OD0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.882
+    },
+    "15OD0208": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.87
+    },
+    "15OD0209": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.67
+    },
+    "15OD0210": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.598
+    },
+    "15OD0211": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.062
+    },
+    "15OD0212": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.775
+    },
+    "15OD0213": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.014
+    },
+    "15OD0215": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.305
+    },
+    "15OD0216": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.601
+    },
+    "15OE0141": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.089
+    },
+    "15OE0142": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.281
+    },
+    "15OE0143": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.784
+    },
+    "15OE0144": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.281
+    },
+    "15OE0147": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.148
+    },
+    "15OE0152": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.901
+    },
+    "15OE0153": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.189
+    },
+    "15OE0160": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.133
+    },
+    "15OE0161": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.034
+    },
+    "15OE0162": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.326
+    },
+    "15OE0166": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.206
+    },
+    "15OE0168": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.139
+    },
+    "15OE0171": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.082
+    },
+    "15OE0172": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.163
+    },
+    "15OE0175": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.174
+    },
+    "15OE0176": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.058
+    },
+    "15OE0177": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.579
+    },
+    "15OE0178": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.004
+    },
+    "15OE0179": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.245
+    },
+    "15OE0180": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.158
+    },
+    "15OE0181": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.056
+    },
+    "15OE0182": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.121
+    },
+    "15OE0187": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.901
+    },
+    "15OE0189": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.2
+    },
+    "15OE0193": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.415
+    },
+    "15OE0196": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.402
+    },
+    "15OF0202": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.509
+    },
+    "15OF0206": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.021
+    },
+    "15OF0207": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.515
+    },
+    "15OF0220": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.852
+    },
+    "15OF0249": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.546
+    },
+    "15OF0250": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.112
+    },
+    "15OF0255": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.007
+    },
+    "15OF0257": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.228
+    },
+    "15OG0137": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.085
+    },
+    "15OG0140": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.568
+    },
+    "15OH0156": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.914
+    },
+    "15OH0201": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.152
+    },
+    "15OI0132": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.136
+    },
+    "15OI0160": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.303
+    },
+    "15P00072": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.183
+    },
+    "15P00078": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.017
+    },
+    "15PA0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.826
+    },
+    "15PA0113": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.288
+    },
+    "15PD0034": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.293
+    },
+    "15PD0038": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.38
+    },
+    "15PD0049": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.279
+    },
+    "15PD0061": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.075
+    },
+    "15PD0079": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.103
+    },
+    "16A00053": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.023
+    },
+    "16A00117": {
+      "built_change_signal": "strong",
+      "satellite_checked": true,
+      "vh_delta_db": 3.047
+    },
+    "16AA0001": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.414
+    },
+    "16AA0002": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.509
+    },
+    "16AA0003": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.569
+    },
+    "16AA0036": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.278
+    },
+    "16AA0040": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.636
+    },
+    "16AA0050": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.301
+    },
+    "16AA0051": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.04
+    },
+    "16AA0053": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.369
+    },
+    "16AA0066": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.193
+    },
+    "16AA0077": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.059
+    },
+    "16AA0100": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.056
+    },
+    "16AA0101": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.379
+    },
+    "16AA0110": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.574
+    },
+    "16AA0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.453
+    },
+    "16AA0113": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.529
+    },
+    "16AA0117": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.312
+    },
+    "16AA0128": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.498
+    },
+    "16AA0129": {
+      "built_change_signal": "weak",
+      "satellite_checked": true,
+      "vh_delta_db": 1.769
+    },
+    "16AA0130": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.178
+    },
+    "16AA0134": {
+      "built_change_signal": "weak",
+      "satellite_checked": true,
+      "vh_delta_db": 2.729
+    },
+    "16AB0007": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.485
+    },
+    "16AB0012": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.452
+    },
+    "16AB0013": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.265
+    },
+    "16AB0014": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.927
+    },
+    "16AB0015": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.416
+    },
+    "16AB0018": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.501
+    },
+    "16AB0019": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.643
+    },
+    "16AB0024": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.12
+    },
+    "16AB0025": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.575
+    },
+    "16AB0027": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.215
+    },
+    "16AB0029": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.264
+    },
+    "16AB0030": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.428
+    },
+    "16AB0031": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.01
+    },
+    "16AB0033": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.487
+    },
+    "16AB0035": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.13
+    },
+    "16AB0037": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.089
+    },
+    "16AB0043": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.281
+    },
+    "16AB0049": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.018
+    },
+    "16AB0050": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.663
+    },
+    "16AB0074": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.202
+    },
+    "16AB0075": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.321
+    },
+    "16AB0076": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.151
+    },
+    "16AB0077": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.032
+    },
+    "16AB0081": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.58
+    },
+    "16AB0082": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.475
+    },
+    "16AB0084": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.22
+    },
+    "16AB0085": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.174
+    },
+    "16AB0086": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.337
+    },
+    "16AB0106": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.165
+    },
+    "16AB0172": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.153
+    },
+    "16AC0012": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.512
+    },
+    "16AC0013": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.182
+    },
+    "16AC0022": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.082
+    },
+    "16AC0035": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.375
+    },
+    "16AC0036": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.27
+    },
+    "16AC0037": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.626
+    },
+    "16AC0040": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.24
+    },
+    "16AC0046": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.233
+    },
+    "16AD0001": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.345
+    },
+    "16AD0009": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.44
+    },
+    "16AD0107": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.595
+    },
+    "16AD0137": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.253
+    },
+    "16AD0138": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.139
+    },
+    "16AD0139": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.467
+    },
+    "16AD0140": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.804
+    },
+    "16AD0142": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.763
+    },
+    "16AD0143": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.106
+    },
+    "16AD0157": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.294
+    },
+    "16AD0158": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.709
+    },
+    "16AD0161": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.768
+    },
+    "16AD0163": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.308
+    },
+    "16AD0165": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.473
+    },
+    "16AD0169": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.702
+    },
+    "16AD0170": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.645
+    },
+    "16AD0174": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.602
+    },
+    "16AD0177": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.679
+    },
+    "16AD0178": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.382
+    },
+    "16AD0179": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.361
+    },
+    "16AE0019": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.161
+    },
+    "16AE0037": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.928
+    },
+    "16AE0038": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.078
+    },
+    "16AE0039": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.002
+    },
+    "16AE0040": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.336
+    },
+    "16AE0055": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.041
+    },
+    "16AE0070": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.63
+    },
+    "16AE0071": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.004
+    },
+    "16AE0082": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.387
+    },
+    "16AE0110": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.054
+    },
+    "16AE0111": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.292
+    },
+    "16AF0010": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.442
+    },
+    "16AG0101": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.903
+    },
+    "16AH0001": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.449
+    },
+    "16AH0002": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.063
+    },
+    "16AH0003": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.027
+    },
+    "16AH0004": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.711
+    },
+    "16AH0007": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.14
+    },
+    "16AH0008": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.152
+    },
+    "16AH0016": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.213
+    },
+    "16AH0024": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.115
+    },
+    "16AH0025": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.395
+    },
+    "16AH0030": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.13
+    },
+    "16AH0032": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.378
+    },
+    "16AH0033": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.285
+    },
+    "16AH0034": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.104
+    },
+    "16AH0035": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.619
+    },
+    "16AH0036": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.164
+    },
+    "16AH0041": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.127
+    },
+    "16AH0046": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.357
+    },
+    "16AH0053": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.274
+    },
+    "16AH0061": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.647
+    },
+    "16AH0065": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.685
+    },
+    "16AH0097": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.008
+    },
+    "16AH0098": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.949
+    },
+    "16AH0138": {
+      "built_change_signal": "weak",
+      "satellite_checked": true,
+      "vh_delta_db": 1.542
+    },
+    "16AH0139": {
+      "built_change_signal": "weak",
+      "satellite_checked": true,
+      "vh_delta_db": 2.156
+    },
+    "16AH0142": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.203
+    },
+    "16AH0177": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.831
+    },
+    "16AI0227": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.328
+    },
+    "16AI0248": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.045
+    },
+    "16AI0249": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.202
+    },
+    "16AI0250": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.033
+    },
+    "16AJ0010": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.02
+    },
+    "16AJ0019": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.685
+    },
+    "16AJ0020": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.029
+    },
+    "16AJ0021": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.047
+    },
+    "16AJ0022": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.797
+    },
+    "16AJ0024": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.773
+    },
+    "16AJ0025": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.689
+    },
+    "16AJ0027": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.219
+    },
+    "16AJ0028": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.222
+    },
+    "16AJ0030": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.671
+    },
+    "16AJ0036": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.285
+    },
+    "16AJ0037": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.238
+    },
+    "16AJ0041": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.012
+    },
+    "16AJ0042": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.019
+    },
+    "16AJ0043": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.083
+    },
+    "16AJ0044": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.333
+    },
+    "16AJ0049": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.083
+    },
+    "16AJ0071": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.04
+    },
+    "16AJ0072": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.547
+    },
+    "16AJ0093": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.005
+    },
+    "16AJ0094": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.278
+    },
+    "16AJ0096": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.058
+    },
+    "16AJ0097": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.793
+    },
+    "16BB0007": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.33
+    },
+    "16BB0043": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.648
+    },
+    "16BB0099": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.424
+    },
+    "16BB0101": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.084
+    },
+    "16BB0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.32
+    },
+    "16BC0011": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.275
+    },
+    "16BC0073": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -3.4
+    },
+    "16BC0074": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.396
+    },
+    "16BD0001": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.582
+    },
+    "16BD0003": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.618
+    },
+    "16BD0005": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.579
+    },
+    "16BD0069": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.39
+    },
+    "16BE0039": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.569
+    },
+    "16BH0097": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.654
+    },
+    "16BH0098": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.187
+    },
+    "16BH0099": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.126
+    },
+    "16BH0100": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.633
+    },
+    "16BH0101": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.561
+    },
+    "16BH0102": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.517
+    },
+    "16BI0036": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.858
+    },
+    "16BJ0023": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.502
+    },
+    "16BJ0024": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.218
+    },
+    "16BJ0027": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 1.162
+    },
+    "16BJ0074": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.446
+    },
+    "16BJ0076": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.986
+    },
+    "16BJ0077": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.396
+    },
+    "16C00002": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.161
+    },
+    "16C00010": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.391
+    },
+    "16C00018": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.742
+    },
+    "16C00019": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -6.775
+    },
+    "16C00020": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.128
+    },
+    "16C00021": {
+      "built_change_signal": "strong",
+      "satellite_checked": true,
+      "vh_delta_db": 3.29
+    },
+    "16C00022": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.342
+    },
+    "16C00034": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.082
+    },
+    "16C00042": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.125
+    },
+    "16C00062": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.082
+    },
+    "16C00085": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -1.332
+    },
+    "16CA0004": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.954
+    },
+    "16CA0042": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.41
+    },
+    "16CC0047": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.421
+    },
+    "16CD0049": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.276
+    },
+    "16CD0108": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.623
+    },
+    "16CD0109": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.73
+    },
+    "16CD0110": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.33
+    },
+    "16CD0111": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.297
+    },
+    "16CD0112": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.306
+    },
+    "16CD0113": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.615
+    },
+    "16CD0114": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.363
+    },
+    "16CD0115": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.347
+    },
+    "16CD0116": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.392
+    },
+    "16CD0117": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.318
+    },
+    "16CD0118": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.827
+    },
+    "16CD0119": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.604
+    },
+    "16CD0120": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": 0.072
+    },
+    "16CD0121": {
+      "built_change_signal": "none",
+      "satellite_checked": true,
+      "vh_delta_db": -0.092
+    }
+  }
+}

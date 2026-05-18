@@ -190,8 +190,10 @@ def _verify_live(domain: str, dry: bool) -> tuple[bool, str]:
         return False, f"alias HTTP {code}"
     # Stale-cache detection (v1.1.0 incident): a marker unique to the current
     # code must be in the actually-served bundle, not just HTTP 200 / a
-    # readiness flag that predates the change.
-    fresh_ok, fresh_detail = _verify_bundle_fresh(base, ("__fwCorridor",))
+    # readiness flag that predates the change. __fwCorridor lives only on the
+    # /map bundle, so checking it against the homepage always failed; the v1.5
+    # AccountabilitySurface sets __fwAccountability on the homepage itself.
+    fresh_ok, fresh_detail = _verify_bundle_fresh(base, ("__fwAccountability",))
     print(f"  bundle freshness: {fresh_detail}")
     if not fresh_ok:
         return False, fresh_detail

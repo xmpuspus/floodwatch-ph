@@ -1,0 +1,91 @@
+{
+  "_meta": {
+    "source": "Public COA/Ombudsman releases and reputable PH news (Wikipedia-cited COA filings, GMA News). See tmp/v1.5-coa-qa/run-notes.md for the per-row source map.",
+    "method": "compiled from public COA/Ombudsman releases + reputable news, every row cited",
+    "generated_utc": "2026-05-18T12:12:24Z",
+    "n_rows": 8,
+    "disclaimer": "COA/Ombudsman findings per the cited public sources; FloodWatch does not independently verify and makes no accusation."
+  },
+  "rows": [
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "angat_river_flood_control_structure_santo_cristo_pulilan",
+      "coa_finding": "flagged_review",
+      "source_url": "https://en.wikipedia.org/wiki/Flood_control_projects_scandal_in_the_Philippines",
+      "source_org": "COA",
+      "source_published": "2025-09-26",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "riverbank_protection_structure_package_bulihan_plaridel",
+      "coa_finding": "flagged_review",
+      "source_url": "https://en.wikipedia.org/wiki/Flood_control_projects_scandal_in_the_Philippines",
+      "source_org": "COA",
+      "source_published": "2025-09-26",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "bocaue_river_slope_protection_bambang_bocaue",
+      "coa_finding": "flagged_review",
+      "source_url": "https://en.wikipedia.org/wiki/Flood_control_projects_scandal_in_the_Philippines",
+      "source_org": "COA",
+      "source_published": "2025-09-26",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "bocaue_river_slope_protection_turo_bocaue",
+      "coa_finding": "flagged_review",
+      "source_url": "https://en.wikipedia.org/wiki/Flood_control_projects_scandal_in_the_Philippines",
+      "source_org": "COA",
+      "source_published": "2025-09-26",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "angat_river_control_structure_sipat_plaridel",
+      "coa_finding": "site_mismatch",
+      "source_url": "https://www.gmanetwork.com/news/topstories/nation/959619/coa-dpwh-bulacan-flood-control-projects-p390-million/story/",
+      "source_org": "GMA",
+      "source_published": "2025-09-18",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "slope_protection_waterways_bunsuran_pandi",
+      "coa_finding": "site_mismatch",
+      "source_url": "https://www.gmanetwork.com/news/topstories/nation/959619/coa-dpwh-bulacan-flood-control-projects-p390-million/story/",
+      "source_org": "GMA",
+      "source_published": "2025-09-18",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "bocaue_river_slope_protection_1_bambang_bocaue",
+      "coa_finding": "pre_existing",
+      "source_url": "https://www.gmanetwork.com/news/topstories/nation/959619/coa-dpwh-bulacan-flood-control-projects-p390-million/story/",
+      "source_org": "GMA",
+      "source_published": "2025-09-18",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    },
+    {
+      "contract_id": null,
+      "province": "Bulacan",
+      "description_key": "bocaue_river_slope_protection_2_bambang_bocaue",
+      "coa_finding": "pre_existing",
+      "source_url": "https://www.gmanetwork.com/news/topstories/nation/959619/coa-dpwh-bulacan-flood-control-projects-p390-million/story/",
+      "source_org": "GMA",
+      "source_published": "2025-09-18",
+      "extracted_utc": "2026-05-18T12:12:24Z"
+    }
+  ]
+}
