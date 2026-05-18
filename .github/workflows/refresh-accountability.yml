@@ -71,10 +71,14 @@ jobs:
       - name: Re-pull BetterGovPH snapshot + regenerate accountability layers
         run: |
           # Drop the committed cache so the adapter re-fetches the snapshot
-          # from HuggingFace, then re-writes the cache. make flood-control
-          # regenerates flood_control_accountability.json + flood_control_by_id.json.
+          # from HuggingFace, then re-writes the cache. Call the pipeline
+          # directly, NOT `make flood-control`: the Makefile lists the cache
+          # parquet as a prerequisite with no build rule, so once it is
+          # deleted make aborts with "No rule to make target". The adapter's
+          # fetch() re-downloads from HuggingFace when the cache is absent,
+          # then flood_control.py regenerates both accountability JSON files.
           rm -f pipeline/_dpwh_flood_control_cache.parquet
-          make flood-control
+          python3 pipeline/flood_control.py
 
       - name: Gate — no PII
         run: python scripts/check_no_pii.py
