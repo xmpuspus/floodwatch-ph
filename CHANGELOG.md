@@ -4,6 +4,18 @@ All notable changes to FloodWatch.PH are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-05-18 - Plain English: no more "corridor"
+
+Nobody calls expressways "corridors". The "Corridor watch" surface is now
+"Expressway watch", and the two-point lookup is "a route", not "a corridor".
+Every user-visible "corridor" in the site copy (the /map watch headline and
+gloss, the lookup tab and prompts, the gazetteer scope, the privacy and
+methodology pages) is replaced with how a person actually talks: "expressways"
+for SLEX/NLEX, "route" for the band between two picked points. Internal code
+symbols are unchanged; "corridor" stays only in the GIS algorithm comments
+where it is the literal technical term for a buffered band around a line.
+qa_live updated to assert the new headline.
+
 ## [1.4.1] - 2026-05-17 - Coherent accountability lead sentence
 
 The home flood-control accountability section picked the highest-allocation

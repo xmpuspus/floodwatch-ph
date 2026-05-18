@@ -24,7 +24,7 @@ import Base from "../layouts/Base.astro";
       <li>Owner names, resident names, phone numbers, tax-declaration data, or anything coupling a location to a natural person.</li>
       <li>Any PII property key in any published GeoJSON. The CI gate <code>scripts/check_no_pii.py</code> asserts this on every release.</li>
       <li>Any record of an area or route a user looks up. The lookup is offline and in-browser; FloodWatch receives nothing.</li>
-      <li>Any new outbound user data via the Corridor watch layers. The added map-tile sources receive only fixed nationwide tile coordinates, never your lookup query.</li>
+      <li>Any new outbound user data via the Expressway watch layers. The added map-tile sources receive only fixed nationwide tile coordinates, never your lookup query.</li>
     </ul>
     <p class="text-base text-ink-700 leading-relaxed mt-3">
       Population counts in <code>barangay_exposure.json</code> (filename kept for compatibility; v1.0 units are provinces) are rounded to the nearest 10. At province scale individual household data cannot be reverse-engineered.
