@@ -1,8 +1,15 @@
-"""Record the REAL /map time-slider demo as the README hero GIF.
+"""Record the REAL site as the README hero GIF, current product (v1.5).
 
-Serves the production site build, drives the actual MapLibre time slider with
-Playwright while capturing video, then ffmpeg-optimises to a looping GIF.
-This is a real recording of the running site, never a mock-up.
+Serves the production site build and drives it with Playwright while
+capturing frames, then ffmpeg-optimises to a looping GIF. A real recording
+of the running site, never a mock-up. Three honest beats matching what the
+site now leads with after the North Star re-center:
+
+  1. The thesis: the home hero ("Predicted to flood, but barely on record")
+     then the flood-control accountability surface (the v1.5 aggregate
+     read paths).
+  2. The tool: the /lookup area evidence card for a real place.
+  3. The validated method: the /map Carina 2024 Sentinel-1 time series.
 
 Usage: python scripts/record_hero.py
 Prereqs: site built (`cd site && pnpm build`), playwright + chromium,
@@ -79,47 +86,37 @@ def main() -> int:
             b = p.chromium.launch()
             pg = b.new_context(viewport={"width": 1320, "height": 900}).new_page()
 
-            # Beat 1: the Corridor watch (default /map) — the tiered
-            # observation log of what the satellites and radar have observed
-            # over the expressways, headline + gloss stating it is observed
-            # and dated, not live and not a forecast.
-            pg.goto(f"http://127.0.0.1:{PORT}/map", wait_until="networkidle")
-            pg.wait_for_selector("canvas.maplibregl-canvas", timeout=30000)
+            # Beat 1: the thesis. The home hero states the gap in one line;
+            # then the flood-control accountability surface (the v1.5
+            # aggregate read paths) is the current product identity.
+            pg.goto(f"http://127.0.0.1:{PORT}/", wait_until="networkidle")
+            pg.wait_for_timeout(1500)
+            pg.evaluate("window.scrollTo(0, 0)")
+            pg.wait_for_timeout(600)
+            grab(pg, 12, 320)  # the hero + the three trust cards
+            # The accountability JSON loads client-side and replaces the
+            # roadmap line with the real aggregates; wait for that swap.
             try:
                 pg.wait_for_function(
-                    "() => window.__fwReady === true", timeout=20000)
+                    "() => { const e=document.querySelector("
+                    "'#fw-acct-home-body'); return e && "
+                    "e.textContent.includes('flood-control'); }",
+                    timeout=15000)
             except Exception:  # noqa: BLE001
                 pass
-            pg.wait_for_timeout(6000)  # tiles + overlays first paint settle
-            focus(pg, "#now-map")
-            grab(pg, 16, 300)
+            focus(pg, "#fw-acct-home")
+            grab(pg, 16, 320)
 
-            # Beat 1b: realtime conditions — enable the RainViewer rain
-            # heartbeat layer and let the per-layer freshness clocks tick.
-            # Honest: the layer renders its own as-of time (or the
-            # honest-empty state); nothing claims "live".
-            rt = pg.query_selector("#cw-toggle-rain")
-            if rt and not rt.is_checked():
-                rt.click()
-            pg.wait_for_timeout(3800)  # rain tiles fetch + 30s-clock first tick
-            focus(pg, "#now-map")
-            grab(pg, 16, 300)
-            # Note: the NASA GIBS satellite backdrop is an honest opt-in site
-            # feature (dated, fail-safe), but true-colour over Metro Manila on
-            # a given date is often dark/low-content — a poor hero subject, so
-            # it is deliberately not a hero beat. The SAR raster + rain beats
-            # above already carry the v1.3 cinematic look.
-
-            # Beat 2: the area/route lookup — type a gazetteer place, pick a
-            # suggestion, show the layered as-of-dated evidence card.
+            # Beat 2: the tool. The /lookup area evidence card for a real
+            # place: one conservative gap sentence then the dated rows.
             pg.goto(f"http://127.0.0.1:{PORT}/lookup",
                     wait_until="networkidle")
             pg.wait_for_timeout(1500)
             q = pg.query_selector("#al-q")
             if q:
                 q.click()
-                q.type("SLEX Alabang", delay=70)
-                pg.wait_for_timeout(900)
+                q.type("Quezon City", delay=70)
+                pg.wait_for_timeout(1000)
                 first = pg.query_selector("#al-suggest li")
                 if first:
                     first.click()
@@ -130,12 +127,14 @@ def main() -> int:
                                          timeout=8000)
                 except Exception:  # noqa: BLE001
                     pass
-                pg.wait_for_timeout(1200)
+                pg.wait_for_timeout(1400)
                 focus(pg, "#al-result")
-            grab(pg, 14, 320)
+            grab(pg, 16, 320)
 
-            # Beat 3: the Carina 2024 validated-method time series. Hazard-gap
-            # context off so the animating water is the unambiguous subject.
+            # Beat 3: the validated method. The /map Carina 2024 Sentinel-1
+            # time series animating; gap context off so the water is the
+            # unambiguous subject.
+            map_beat_start = fi
             pg.goto(f"http://127.0.0.1:{PORT}/map", wait_until="networkidle")
             ct = pg.query_selector("#view-carina")
             if ct:
@@ -148,7 +147,7 @@ def main() -> int:
                         timeout=30000)
                 except Exception:  # noqa: BLE001
                     pass
-                pg.wait_for_timeout(3500)
+                pg.wait_for_timeout(4000)  # tiles + overlays first paint
                 gap = pg.query_selector("#toggle-gap")
                 if gap and gap.is_checked():
                     gap.click()
@@ -159,9 +158,10 @@ def main() -> int:
             focus(pg, "#map")
             grab(pg, 44, 260)
             b.close()
-        # sanity: a Now-view frame must not be mostly black (tiles failed)
+        # sanity: the Carina map beat must not be mostly black (tiles failed)
         from PIL import Image
-        mid = Image.open(frames_dir / "f008.png").convert("L")
+        probe = frames_dir / f"f{map_beat_start + 20:03d}.png"
+        mid = Image.open(probe).convert("L")
         px = list(mid.getdata())
         dark = sum(1 for v in px if v < 28) / len(px)
         if dark > 0.6:
