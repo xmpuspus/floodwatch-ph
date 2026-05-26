@@ -13,26 +13,26 @@
   ],
   "dates": [
     {
-      "date": "2026-05-20",
-      "flood_area_km2": 27.59,
-      "otsu_threshold_db": -22.746,
-      "n_polygons": 28
+      "date": "2026-05-25",
+      "flood_area_km2": 16.3,
+      "otsu_threshold_db": -23.246,
+      "n_polygons": 13
     }
   ],
   "scan_status": "ok",
   "observed_not_forecast": true,
-  "generated_at": "2026-05-25T20:01:09Z",
-  "as_of": "2026-05-20",
+  "generated_at": "2026-05-26T20:27:57Z",
+  "as_of": "2026-05-25",
   "lookback_days": 14,
   "baseline_days": 60,
   "s1_scene_ids": [
-    "S1D_IW_GRDH_1SDV_20260520T214544_20260520T214609_002873_004E64_CD5B",
-    "S1D_IW_GRDH_1SDV_20260520T214609_20260520T214634_002873_004E64_156F"
+    "S1A_IW_GRDH_1SDV_20260525T214631_20260525T214656_064679_0825E9_3502",
+    "S1A_IW_GRDH_1SDV_20260525T214656_20260525T214721_064679_0825E9_B407"
   ],
-  "feature_count": 28,
+  "feature_count": 13,
   "method": "S1 VH: Otsu-on-VH + got-darker-vs-dry-baseline change gate + permanent-water + slope + HAND-style flood-plausible-terrain mask (identical to event/flood_extent.py), run on the latest usable S1 pass",
   "disclaimer": "Observed flood extent derived from public Sentinel-1 SAR. This is the most recent satellite pass (S1 revisit ~6\u201312 days), not a forecast and not live. Patterns may have legitimate explanations; figures warrant independent verification.",
-  "otsu_threshold_db": -22.746,
+  "otsu_threshold_db": -23.246,
   "orbit_pass": "DESCENDING",
   "relative_orbit": 32,
   "aoi_coverage": 0.9963
