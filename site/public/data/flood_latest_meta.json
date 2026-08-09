@@ -21,7 +21,7 @@
   ],
   "scan_status": "ok",
   "observed_not_forecast": true,
-  "generated_at": "2026-08-08T19:00:52Z",
+  "generated_at": "2026-08-09T19:03:12Z",
   "as_of": "2026-08-02",
   "lookback_days": 14,
   "baseline_days": 60,
